@@ -10,11 +10,11 @@ After downloading it, put the XPS report in the same folder as the EXE. Rename t
 This will create a "mastersizer_output" directory with the following files:
 - output_curve_data.xlsx: diameter, volume fraction and cumulative volume fraction data in a Excel file;
 - output_curves.svg: Plots of volume fraction and cumulative volume fraction data;
-[![RRB fitted model](https://raw.githubusercontent.com/marcusbfs/msanalyzer/output_example/output_curves.png)](https://raw.githubusercontent.com/marcusbfs/msanalyzer/output_example/output_curves.png)
+[![RRB fitted model](https://raw.githubusercontent.com/marcusbfs/msanalyzer/master/output_example/output_curves.png)](https://raw.githubusercontent.com/marcusbfs/msanalyzer/master/output_example/output_curves.png)
 - output_curve_data.txt: diameter, volume fraction and cumulative volume fraction data in a TXT file;
 - output_RRB_model_parameters.txt: RRB model parameters fitted to input data;
 - output_RRB_model.svg: Cumulative volume fraction plot of data and RRB fitted model.
-[![RRB fitted model](https://raw.githubusercontent.com/marcusbfs/msanalyzer/output_example/output_RRB_model.png)](https://raw.githubusercontent.com/marcusbfs/msanalyzer/output_example/output_RRB_model.png)
+[![RRB fitted model](https://raw.githubusercontent.com/marcusbfs/msanalyzer/master/output_example/output_RRB_model.png)](https://raw.githubusercontent.com/marcusbfs/msanalyzer/master/output_example/output_RRB_model.png)
 
 The program can also be used from command line with several options. Insided CMD or PowerShell, use
 
