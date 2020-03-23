@@ -1,0 +1,9 @@
+numpy
+matplotlib
+black
+scipy
+fitz
+pandas
+pyinstaller
+pymupdf
+openpyxl
