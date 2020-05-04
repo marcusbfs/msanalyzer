@@ -4,6 +4,7 @@ import warnings
 warnings.filterwarnings("ignore", "(?s).*MATPLOTLIBDATA.*", category=UserWarning)
 from typing import List
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import scipy.optimize
 import pandas as pd
@@ -31,8 +32,12 @@ class MasterSizerReport:
         self.__diff_of_cumulative_y_vals: np.array = None
         self.__Dp__RRB: float = 0.0
         self.__n__RRB: float = 0.0
+        self.__Dp_std_dev__RRB: float = 0.0
+        self.__n_std_dev__RRB: float = 0.0
+        self.__r_squared__RRB: float = 0.0
+        self.__std_error_of_the_regression__RRB: float = 0.0
         self.__ms_input: MasterSizerInput = MasterSizerInput()
-        self.__version: str = "1.0.0"
+        self.__version: str = "1.1.0"
         self.__input_xps_file: str = ""
         self.__meantype: DiameterMeanType = DiameterMeanType.geometric
         self.__headers: List[str] = [
@@ -40,6 +45,7 @@ class MasterSizerReport:
             "volume fraction [-]",
             "cumulative volume fraction [-]",
         ]
+        self.__log_scale: bool = False
 
     # Public
     def setDataFiles(
@@ -48,6 +54,9 @@ class MasterSizerReport:
 
         self.__ms_input.setDataFiles(x_filename, y_filename, isCommaSeparator)
         self.__updateXY_data()
+
+    def setLogScale(self, logscale: bool = True) -> None:
+        self.__log_scale = logscale
 
     def setXPSfile(self, xps_filename: str) -> None:
         self.__input_xps_file = xps_filename
@@ -141,7 +150,6 @@ class MasterSizerReport:
         # plot
         fig, ax1 = plt.subplots()
         ax2 = plt.twinx()
-        ax1.set_xlabel(u"diameter [$\mu m$]")
         ax1.set_ylabel(u"volume fraction (dX) [-]")
         ax2.set_ylabel(u"Cumulative distribution (X) [-]")
         ax2.grid()
@@ -169,8 +177,11 @@ class MasterSizerReport:
             label="X",
         )
 
-        # ax2.semilogx(self.getXmeanValues())
-        # ax1.semilogx(self.getXmeanValues())
+        if self.__log_scale:
+            ax1.set_xlabel(u"log scale - diameter [$\mu m$]")
+            self.__format_LogScale_Xaxis(ax1)
+        else:
+            ax1.set_xlabel(u"diameter [$\mu m$]")
 
         # ax1.legend()
         # ax2.legend()
@@ -183,7 +194,6 @@ class MasterSizerReport:
         # plot
         fig, ax = plt.subplots()
 
-        ax.set_xlabel(u"diameter [$\mu m$]")
         ax.set_ylabel(u"Cumulative distribution (X) [-]")
         ax.grid()
 
@@ -203,6 +213,12 @@ class MasterSizerReport:
         )
 
         ax.legend()
+
+        if self.__log_scale:
+            ax.set_xlabel(u"log scale - diameter [$\mu m$]")
+            self.__format_LogScale_Xaxis(ax)
+        else:
+            ax.set_xlabel(u"diameter [$\mu m$]")
 
         filename = base_filename + ".svg"
         plt.savefig(filename, dpi=1200)
@@ -226,8 +242,21 @@ class MasterSizerReport:
         content += "=========\n\n"
         content += "X(d) = 1 - exp(-(d/D')^n)\n\n"
         content += "Parameters: \n"
-        content += "            D' = {:10.10f}\n".format(self.__Dp__RRB)
-        content += "            n  = {:10.10f}\n".format(self.__n__RRB)
+        content += "            D' = {:10.10f}   std. dev. = {:10.10f}\n".format(
+            self.__Dp__RRB, self.__Dp_std_dev__RRB
+        )
+        content += "            n  = {:10.10f}   std. dev. = {:10.10f}\n".format(
+            self.__n__RRB, self.__n_std_dev__RRB
+        )
+        content += "\n"
+        content += "Standard error of the regression (S) = {:10.10f}\n".format(
+            self.__std_error_of_the_regression__RRB
+        )
+        content += "NOTE: S must be <= 2.5 to produce a sufficiently narrow 95% prediction interval.\n"
+        content += "\n"
+        content += "R-squared = {:10.10f}\n".format(self.__r_squared__RRB)
+        content += "NOTE: R-squared is not trustworthy for nonlinear regression\n"
+        content += "\n"
         with open(data_filename + ".txt", "w") as of:
             of.write(content)
         return
@@ -279,6 +308,15 @@ class MasterSizerReport:
 
     # Private
 
+    def __format_LogScale_Xaxis(self, xaxis: matplotlib.axes.Axes) -> None:
+        from matplotlib.ticker import ScalarFormatter
+
+        xaxis.set_xscale("log")
+        xaxis.set_xlabel(u"log scale - diameter [$\mu m$]")
+        for axis in [xaxis.xaxis, xaxis.yaxis]:
+            axis.set_major_formatter(ScalarFormatter())
+        return
+
     def __updateXY_data(self) -> None:
         self.__x_data = self.__ms_input.getx()
         self.__y_data = self.__ms_input.gety()
@@ -299,11 +337,29 @@ class MasterSizerReport:
             if self.__cumulative_y_vals[i] >= 0.632:
                 p0[0] = self.__x_data_mean[i]
                 break
+        # calculate using scipy
         self.__popt, self.__pcov = scipy.optimize.curve_fit(
             self.__RRBModel, self.__x_data_mean, self.__cumulative_y_vals, p0=p0
         )
+        # set outputs parameters and errors infos
         self.__Dp__RRB = self.__popt[0]
         self.__n__RRB = self.__popt[1]
+
+        # calculate R squared (it is not apropriate to nonlinear regression, but some people love it)
+        self.__r_squared__RRB = 1.0 - np.sum(
+            (self.__cumulative_y_vals - self.evalRRB(self.__x_data_mean)) ** 2
+        ) / np.sum((self.__cumulative_y_vals - np.mean(self.__cumulative_y_vals)) ** 2)
+
+        # std dev for each parameters
+        std_devs = np.sqrt(np.diag(self.__pcov))
+        self.__Dp_std_dev__RRB = std_devs[0]
+        self.__n_std_dev__RRB = std_devs[1]
+
+        # Standard Error of the Regression
+        self.__std_error_of_the_regression__RRB = np.mean(
+            np.abs(self.__cumulative_y_vals - self.evalRRB(self.__x_data_mean))
+        )
+
         return
 
     def __RRBModel(self, d, dp, n) -> float:

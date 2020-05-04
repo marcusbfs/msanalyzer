@@ -5,7 +5,7 @@ set z7folder="C:\Program Files\7-Zip\"
 set z7exe=%z7folder%"7z.exe"
 set shortcut_creator=create_shortcut.bat
 
-pyinstaller dir_msanalyzer.spec -y
+pyinstaller msanalyzer.py -y
 
 copy create_shortcut.bat dist /y
 copy ms_input.xps dist /y

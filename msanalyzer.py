@@ -83,6 +83,15 @@ def main():
         help="Number of zeros to be left on the end of data. Default value is 1",
     )
 
+    parser.add_argument(
+        "-s",
+        "--log-scale",
+        dest="log_scale",
+        default=False,
+        help="Plot using log scale.",
+        action="store_true",
+    )
+
     parser.add_argument("-v", "--version", action="version", version=version_message)
 
     args = parser.parse_args()
@@ -101,6 +110,7 @@ def main():
     reporter.setDiameterMeanType(meanType)
     reporter.cutFirstZeroPoints(number_of_zero_first, tol=1e-8)
     reporter.cutLastZeroPoints(number_of_zero_last, tol=1e-8)
+    reporter.setLogScale(logscale=args.log_scale)
 
     # calcualte
     reporter.evaluateData()
