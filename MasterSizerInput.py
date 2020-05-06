@@ -27,16 +27,17 @@ class MasterSizerInput:
     def setXPSfile(self, input_xps: str) -> None:
 
         if not os.path.exists(input_xps):
-            print('File "' + input_xps + '" doesnt not exist')
+            logger.critical('File "{}" does not exist'.format(input_xps))
+            print('File "' + input_xps + '" does not exist')
             raise (FileNotFoundError)
 
-        logger.info('Extracting data from "{}"'.format(input_xps))
         doc = fitz.open(input_xps)
         page = doc.loadPage(0)
         self.__text = page.getText()
         doc.close()
 
         self.__extractData()
+        logger.info('Data extracted from "{}"'.format(input_xps))
 
     def setDataFiles(
         self, x_filename: str, y_filename: str, isCommaSeparator: bool = False
@@ -101,5 +102,5 @@ class MasterSizerInput:
             logger.error("len of x and y vectors are mismatched")
             assert len(self.__x_values) == len(self.__y_values) + 1
 
-        logger.info("X values: {}".format(len(self.__x_values)))
-        logger.info("Y values: {}".format(len(self.__y_values)))
+        logger.info("Length of x: {}".format(len(self.__x_values)))
+        logger.info("Length of y: {}".format(len(self.__y_values)))

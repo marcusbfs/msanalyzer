@@ -14,6 +14,7 @@ import pandas as pd
 from MasterSizerInput import MasterSizerInput
 
 logger = logging.getLogger(__name__)
+__version__: str = "1.2.0"
 
 
 @unique
@@ -41,7 +42,7 @@ class MasterSizerReport:
         self.__r_squared__RRB: float = 0.0
         self.__std_error_of_the_regression__RRB: float = 0.0
         self.__ms_input: MasterSizerInput = MasterSizerInput()
-        self.__version: str = "1.2.0"
+        self.__version: str = __version__
         self.__input_xps_file: str = ""
         self.__meantype: DiameterMeanType = DiameterMeanType.geometric
         self.__headers: List[str] = [
@@ -50,8 +51,6 @@ class MasterSizerReport:
             "cumulative volume fraction [-]",
         ]
         self.__log_scale: bool = False
-        # logger object
-        logger = logging.getLogger(__name__)
 
     # Public
     def setDataFiles(
@@ -63,11 +62,11 @@ class MasterSizerReport:
 
     def setLogScale(self, logscale: bool = True) -> None:
         self.__log_scale = logscale
-        logger.info("Log scale: {}".format(logscale))
+        logger.info("Log scale setted to {}".format(logscale))
 
     def setXPSfile(self, xps_filename: str) -> None:
         self.__input_xps_file = xps_filename
-        logger.info('XPS file: "{}"'.format(xps_filename))
+        logger.info('XPS file setted to "{}"'.format(xps_filename))
         self.__ms_input.setXPSfile(xps_filename)
         self.__updateXY_data()
 
@@ -109,12 +108,16 @@ class MasterSizerReport:
         self.__x_data = self.__x_data[:-number_of_points].copy()
         self.__y_data = self.__y_data[:-number_of_points].copy()
         self.__number_of_points = len(self.__y_data)
+        logger.info("Cutted the last {} null points".format(number_of_points))
+        logger.info("New length of x: {}".format(len(self.__x_data)))
         # self.evaluateData()
 
     def cutFirstNPoints(self, number_of_points: int) -> None:
         self.__x_data = self.__x_data[number_of_points:].copy()
         self.__y_data = self.__y_data[number_of_points:].copy()
         self.__number_of_points = len(self.__y_data)
+        logger.info("Cutted the first {} null points".format(number_of_points))
+        logger.info("New length of x: {}".format(len(self.__x_data)))
         # self.evaluateData()
 
     def cutLastZeroPoints(
@@ -197,7 +200,7 @@ class MasterSizerReport:
 
         filename = base_filename + ".svg"
         plt.savefig(filename, dpi=1200)
-        logger.info('Saved curves fig. to "{}"'.format(filename))
+        logger.info('Saved curves to "{}"'.format(filename))
         # end of plot
 
     def saveRRBFig(self, base_filename: str) -> None:
@@ -247,26 +250,26 @@ class MasterSizerReport:
             fmt="%15.10f",
             header=header,
         )
-        logger.info("Saved curves data to {}".format(data_filename))
+        logger.info('Saved curves data to "{}"'.format(data_filename))
 
     def saveRRBdata(self, data_filename: str) -> None:
         content = "RRB model\n"
         content += "=========\n\n"
         content += "X(d) = 1 - exp(-(d/D')^n)\n\n"
         content += "Parameters: \n"
-        content += "            D' = {:10.10f}   std. dev. = {:10.10f}\n".format(
+        content += "            D' = {:.10f}   std. dev. = {:.10f}\n".format(
             self.__Dp__RRB, self.__Dp_std_dev__RRB
         )
-        content += "            n  = {:10.10f}   std. dev. = {:10.10f}\n".format(
+        content += "            n  = {:.10f}   std. dev. = {:.10f}\n".format(
             self.__n__RRB, self.__n_std_dev__RRB
         )
         content += "\n"
-        content += "Standard error of the regression (S) = {:10.10f}\n".format(
+        content += "Standard error of the regression (S) = {:.10f}\n".format(
             self.__std_error_of_the_regression__RRB
         )
         content += "NOTE: S must be <= 2.5 to produce a sufficiently narrow 95% prediction interval.\n"
         content += "\n"
-        content += "R-squared = {:10.10f}\n".format(self.__r_squared__RRB)
+        content += "R-squared = {:.10f}\n".format(self.__r_squared__RRB)
         content += "NOTE: R-squared is not trustworthy for nonlinear regression\n"
         content += "\n"
         with open(data_filename + ".txt", "w") as of:
@@ -309,11 +312,6 @@ class MasterSizerReport:
     def setGeometricMean(self) -> None:
         self.__x_data_mean = self.__x_data_geomean
 
-    def setLoggerLevel(self, level: int) -> None:
-        logger.setLevel(level)
-        for handler in logger.handlers:
-            handler.setLevel(level)
-
     def setArithmeticMean(self) -> None:
         self.__x_data_mean = self.__x_data_aritmeticmean
 
@@ -323,7 +321,7 @@ class MasterSizerReport:
             self.setGeometricMean()
         elif DiameterMeanType.arithmetic == typed:
             self.setArithmeticMean()
-        logger.info("Diameter mean type: {}".format(typed))
+        logger.info("Diameter mean type setted to {}".format(typed))
 
     # Private
 
@@ -356,7 +354,7 @@ class MasterSizerReport:
                 p0[0] = self.__x_data_mean[i]
                 break
         logger.info(
-            "Initial guesses are D' = {:10.7f} and n = {:10.7f}".format(p0[0], p0[1])
+            "Initial guesses are D' = {:.7f} and n = {:.7f}".format(p0[0], p0[1])
         )
         return p0
 
@@ -381,7 +379,7 @@ class MasterSizerReport:
         self.__Dp_std_dev__RRB = std_devs[0]
         self.__n_std_dev__RRB = std_devs[1]
         logger.info(
-            "Estimated parameters: D' = {:10.7f} +- {:10.7f} and n = {:10.7f} +- {:10.7f}".format(
+            "Estimated parameters: D' = {:.7f} +- {:.7f} and n = {:.7f} +- {:.7f}".format(
                 self.__Dp__RRB,
                 self.__Dp_std_dev__RRB,
                 self.__n__RRB,
@@ -393,14 +391,14 @@ class MasterSizerReport:
         self.__r_squared__RRB = 1.0 - np.sum(
             (self.__cumulative_y_vals - self.evalRRB(self.__x_data_mean)) ** 2
         ) / np.sum((self.__cumulative_y_vals - np.mean(self.__cumulative_y_vals)) ** 2)
-        logger.info("R-squared = {:10.10f}".format(self.__r_squared__RRB))
+        logger.info("R-squared = {:.10f}".format(self.__r_squared__RRB))
 
         # Standard Error of the Regression
         self.__std_error_of_the_regression__RRB = np.mean(
             np.abs(self.__cumulative_y_vals - self.evalRRB(self.__x_data_mean))
         )
-        logger.info("S = {:10.10f}".format(self.__std_error_of_the_regression__RRB))
-        logger.info("Finished estimating parameters")
+        logger.info("S = {:.10f}".format(self.__std_error_of_the_regression__RRB))
+        logger.info("Finished estimating RRB parameters")
 
         return
 
@@ -409,3 +407,7 @@ class MasterSizerReport:
 
     def __isFloatEqual(self, x: float, y: float, tol: float = 1e-10) -> bool:
         return np.abs(x - y) < tol
+
+
+def getVersion() -> str:
+    return __version__

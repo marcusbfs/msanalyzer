@@ -1,16 +1,19 @@
 import os
+import logging
 import argparse
+import time
+
+logger = logging.getLogger("msanalyzer")
 
 import MasterSizerReport as msreport
 
-
 def main():
 
-    reporter = msreport.MasterSizerReport()
+    start_time = time.time()
 
     version_message = (
         "MasterSizerReport "
-        + reporter.getVersion()
+        + msreport.getVersion()
         + os.linesep
         + os.linesep
         + "Author: Marcus Bruno Fernandes Silva"
@@ -71,7 +74,7 @@ def main():
         dest="first_zeros",
         nargs=1,
         default=[1],
-        help="Number of zeros to be left on the beginning of data. Default value is 1",
+        help="number of zeros to be left on the beginning of data. Default value is 1",
     )
 
     parser.add_argument(
@@ -80,7 +83,7 @@ def main():
         dest="last_zeros",
         nargs=1,
         default=[1],
-        help="Number of zeros to be left on the end of data. Default value is 1",
+        help="number of zeros to be left on the end of data. Default value is 1",
     )
 
     parser.add_argument(
@@ -88,7 +91,7 @@ def main():
         "--log-scale",
         dest="log_scale",
         default=False,
-        help="Plot using log scale",
+        help="plot using log scale",
         action="store_true",
     )
 
@@ -96,7 +99,7 @@ def main():
         "--info",
         dest="info",
         default=False,
-        help="Print aditional information",
+        help="print aditional information",
         action="store_true",
     )
 
@@ -108,11 +111,19 @@ def main():
     # calculate results
 
     # set logging level
-    if args.info:
-        import logging
 
+    if args.info:
         level = logging.INFO
-        logging.basicConfig(level=level)
+    else:
+        level = logging.WARNING
+
+    logging.basicConfig(level=level,
+        format='%(asctime)s - %(name)s: %(message)s')
+
+    logger.info("Arguments passed: {}".format(args))
+
+    reporter = msreport.MasterSizerReport()
+    logger.info("Created reporter object")
 
     xps_file = args.xps
     meanType = list_of_diameterchoices[args.meantype[0]]
@@ -126,12 +137,15 @@ def main():
     reporter.cutFirstZeroPoints(number_of_zero_first, tol=1e-8)
     reporter.cutLastZeroPoints(number_of_zero_last, tol=1e-8)
     reporter.setLogScale(logscale=args.log_scale)
+    logger.info("Reporter object setted up")
 
     # calcualte
     reporter.evaluateData()
+    logger.info("Data evaluated")
 
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
+        logger.info('Directory "{}" created'.format(output_dir))
 
     #  [('W ignore', None, 'OPTION')],
 
@@ -147,6 +161,8 @@ def main():
     reporter.saveData(curves_data)
     reporter.saveRRBdata(rrb_data)
     reporter.saveExcel(excel_data)
+    logger.info("Results saved")
 
+    logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))
 
 main()
