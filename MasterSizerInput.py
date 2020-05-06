@@ -1,7 +1,11 @@
-import numpy as np
 import os
+import logging
+
+import numpy as np
 
 import fitz
+
+logger = logging.getLogger(__name__)
 
 
 class MasterSizerInput:
@@ -26,6 +30,7 @@ class MasterSizerInput:
             print('File "' + input_xps + '" doesnt not exist')
             raise (FileNotFoundError)
 
+        logger.info('Extracting data from "{}"'.format(input_xps))
         doc = fitz.open(input_xps)
         page = doc.loadPage(0)
         self.__text = page.getText()
@@ -92,4 +97,9 @@ class MasterSizerInput:
 
         self.__x_values = np.array(self.__x_values)
         self.__y_values = np.array(self.__y_values) / 100.0
-        assert len(self.__x_values) == len(self.__y_values) + 1
+        if len(self.__x_values) != len(self.__y_values) + 1:
+            logger.error("len of x and y vectors are mismatched")
+            assert len(self.__x_values) == len(self.__y_values) + 1
+
+        logger.info("X values: {}".format(len(self.__x_values)))
+        logger.info("Y values: {}".format(len(self.__y_values)))

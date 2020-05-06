@@ -1,12 +1,12 @@
 import os
 import argparse
 
-from MasterSizerReport import MasterSizerReport, DiameterMeanType
+import MasterSizerReport as msreport
 
 
 def main():
 
-    reporter = MasterSizerReport()
+    reporter = msreport.MasterSizerReport()
 
     version_message = (
         "MasterSizerReport "
@@ -30,8 +30,8 @@ def main():
     )
 
     list_of_diameterchoices = {
-        "geo": DiameterMeanType.geometric,
-        "ari": DiameterMeanType.arithmetic,
+        "geo": msreport.DiameterMeanType.geometric,
+        "ari": msreport.DiameterMeanType.arithmetic,
     }
 
     choices_keys = list(list_of_diameterchoices.keys())
@@ -88,7 +88,15 @@ def main():
         "--log-scale",
         dest="log_scale",
         default=False,
-        help="Plot using log scale.",
+        help="Plot using log scale",
+        action="store_true",
+    )
+
+    parser.add_argument(
+        "--info",
+        dest="info",
+        default=False,
+        help="Print aditional information",
         action="store_true",
     )
 
@@ -98,6 +106,13 @@ def main():
     # end of args parser
 
     # calculate results
+
+    # set logging level
+    if args.info:
+        import logging
+
+        level = logging.INFO
+        logging.basicConfig(level=level)
 
     xps_file = args.xps
     meanType = list_of_diameterchoices[args.meantype[0]]
