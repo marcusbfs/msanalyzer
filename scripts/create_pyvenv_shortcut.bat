@@ -1,14 +1,13 @@
 rem @echo off
 
-set sname=msanalyzer.bat
+REM Common variables
+call "%~dp0variables.bat"
 
-set p=%cd%
-set exe=%p%\msanalyzer_venv\Scripts\python.exe
-set main_py=%p%\msanalyzer.py
+set sname=cesp.bat
+set python_exe="%venv_dir%\Scripts\python.exe"
 
 (
-
     echo @echo off
-    echo "%exe%" "%main_py%" %%*
+    echo %python_exe% %main_py_file% %%*
 
 ) > %sname%

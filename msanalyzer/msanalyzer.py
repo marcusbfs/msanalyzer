@@ -7,6 +7,7 @@ logger = logging.getLogger("msanalyzer")
 
 import MasterSizerReport as msreport
 
+
 def main():
 
     start_time = time.time()
@@ -117,8 +118,7 @@ def main():
     else:
         level = logging.WARNING
 
-    logging.basicConfig(level=level,
-        format='%(asctime)s - %(name)s: %(message)s')
+    logging.basicConfig(level=level, format="%(asctime)s - %(name)s: %(message)s")
 
     logger.info("Arguments passed: {}".format(args))
 
@@ -164,5 +164,6 @@ def main():
     logger.info("Results saved")
 
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))
+
 
 main()
