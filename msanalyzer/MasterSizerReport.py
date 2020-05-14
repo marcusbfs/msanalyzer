@@ -1,4 +1,5 @@
 from enum import Enum, unique
+import os
 import warnings
 
 warnings.filterwarnings("ignore", "(?s).*MATPLOTLIBDATA.*", category=UserWarning)
@@ -8,13 +9,16 @@ from typing import List
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-import scipy.optimize
 import pandas as pd
 
 from MasterSizerInput import MasterSizerInput
 
+from RRBSizeDistributionModel import RRB
+from SizeDistributionBaseModel import SizeDistributionBaseModel
+from SizeDistributionModelsFactory import getPSDModelsList
+
 logger = logging.getLogger(__name__)
-__version__: str = "1.2.0"
+__version__: str = "2.0.0"
 
 
 @unique
@@ -35,12 +39,6 @@ class MasterSizerReport:
         self.__x_data_mean: np.array = None
         self.__cumulative_y_vals: np.array = None
         self.__diff_of_cumulative_y_vals: np.array = None
-        self.__Dp__RRB: float = 0.0
-        self.__n__RRB: float = 0.0
-        self.__Dp_std_dev__RRB: float = 0.0
-        self.__n_std_dev__RRB: float = 0.0
-        self.__r_squared__RRB: float = 0.0
-        self.__std_error_of_the_regression__RRB: float = 0.0
         self.__ms_input: MasterSizerInput = MasterSizerInput()
         self.__version: str = __version__
         self.__input_xps_file: str = ""
@@ -51,6 +49,7 @@ class MasterSizerReport:
             "cumulative volume fraction [-]",
         ]
         self.__log_scale: bool = False
+        self.__models : List[SizeDistributionBaseModel] = getPSDModelsList()
 
     # Public
     def setDataFiles(
@@ -74,8 +73,6 @@ class MasterSizerReport:
         self.__x_data = x_vals
         self.__y_data = y_vals
         assert len(self.__x_data) == len(self.__y_data) + 1
-
-        # self.evaluateData()
 
     def genCumulativeSizeDistribution(self) -> None:
         self.__cumulative_y_vals = np.zeros(self.__number_of_points)
@@ -101,8 +98,10 @@ class MasterSizerReport:
         self.setDiameterMeanType(self.__meantype)
 
         self.genCumulativeSizeDistribution()
+
         self.genDiffCumulativeSizeDistribution()
-        self.__evaluateRRBParameters()
+        for model in self.__models:
+            model.evaluate(self.__x_data_mean, self.__cumulative_y_vals)
 
     def cutLastNPoints(self, number_of_points: int) -> None:
         self.__x_data = self.__x_data[:-number_of_points].copy()
@@ -110,7 +109,6 @@ class MasterSizerReport:
         self.__number_of_points = len(self.__y_data)
         logger.info("Cutted the last {} null points".format(number_of_points))
         logger.info("New length of x: {}".format(len(self.__x_data)))
-        # self.evaluateData()
 
     def cutFirstNPoints(self, number_of_points: int) -> None:
         self.__x_data = self.__x_data[number_of_points:].copy()
@@ -118,7 +116,6 @@ class MasterSizerReport:
         self.__number_of_points = len(self.__y_data)
         logger.info("Cutted the first {} null points".format(number_of_points))
         logger.info("New length of x: {}".format(len(self.__x_data)))
-        # self.evaluateData()
 
     def cutLastZeroPoints(
         self, number_of_lefting_zeros: int, tol: float = 1e-10
@@ -148,17 +145,17 @@ class MasterSizerReport:
         if total_zeros >= number_of_lefting_zeros:
             self.cutFirstNPoints(total_zeros - number_of_lefting_zeros - 1)
 
-    def saveExcel(self, base_filename: str) -> None:
+    def saveExcel(self, output_dir : str, base_filename: str) -> None:
         data = np.transpose(
             [self.__x_data_mean, self.__y_data, self.__cumulative_y_vals]
         )
         df = pd.DataFrame(data, columns=self.__headers)
-        filename = base_filename + ".xlsx"
+        filename = os.path.join(output_dir, base_filename + ".xlsx")
         df.to_excel(filename, index=False)
         logger.info('Exported data to excel file: "{}"'.format(filename))
         return
 
-    def saveFig(self, base_filename: str) -> None:
+    def saveFig(self, output_dir : str,  base_filename: str) -> None:
         # plot
         fig, ax1 = plt.subplots()
         ax2 = plt.twinx()
@@ -198,87 +195,71 @@ class MasterSizerReport:
         # ax1.legend()
         # ax2.legend()
 
-        filename = base_filename + ".svg"
+        filename = os.path.join(output_dir, base_filename + ".svg")
         plt.savefig(filename, dpi=1200)
         logger.info('Saved curves to "{}"'.format(filename))
         # end of plot
 
-    def saveRRBFig(self, base_filename: str) -> None:
-        # plot
-        fig, ax = plt.subplots()
+    def saveModelsFig(self, output_dir : str, base_filename: str) -> None:
 
-        ax.set_ylabel(u"Cumulative distribution (X) [-]")
-        ax.grid()
+        for model in self.__models:
+            # plot
+            fig, ax = plt.subplots()
 
-        ax.plot(
-            self.__x_data_mean,
-            self.evalRRB(self.__x_data_mean),
-            label="RRB Model",
-            linestyle="--",
-            color="red",
-        )
-        ax.scatter(
-            self.__x_data_mean,
-            self.__cumulative_y_vals,
-            label="Data",
-            facecolors="none",
-            edgecolors="black",
-        )
+            ax.set_ylabel(u"Cumulative distribution (X) [-]")
+            ax.grid()
 
-        ax.legend()
+            ax.plot(
+                self.__x_data_mean,
+                model.compute(self.__x_data_mean),
+                label="{} Model".format(model.getModelName()),
+                linestyle="--",
+                color="red",
+            )
+            ax.scatter(
+                self.__x_data_mean,
+                self.__cumulative_y_vals,
+                label="Data",
+                facecolors="none",
+                edgecolors="black",
+            )
 
-        if self.__log_scale:
-            ax.set_xlabel(u"log scale - diameter [$\mu m$]")
-            self.__format_LogScale_Xaxis(ax)
-        else:
-            ax.set_xlabel(u"diameter [$\mu m$]")
+            ax.legend()
 
-        filename = base_filename + ".svg"
-        plt.savefig(filename, dpi=1200)
-        logger.info('Saved RRB curve to "{}"'.format(filename))
-        # end of plot
+            if self.__log_scale:
+                ax.set_xlabel(u"log scale - diameter [$\mu m$]")
+                self.__format_LogScale_Xaxis(ax)
+            else:
+                ax.set_xlabel(u"diameter [$\mu m$]")
 
-    def saveData(self, data_filename: str) -> None:
+            filename = os.path.join(output_dir, model.getModelName() + "_" +base_filename + ".svg")
+            plt.savefig(filename, dpi=1200)
+            logger.info('Saved {} curve to "{}"'.format(model.getModelName(), filename))
+            # end of plot
+
+    def saveData(self, output_dir : str, data_filename: str) -> None:
+        output_file = os.path.join(output_dir, data_filename)
         header = "%10s\t%10s\t%10s" % (
             self.__headers[0],
             self.__headers[1],
             self.__headers[2],
         )
         np.savetxt(
-            data_filename,
+            output_file,
             np.transpose([self.__x_data_mean, self.__y_data, self.__cumulative_y_vals]),
             fmt="%15.10f",
             header=header,
         )
-        logger.info('Saved curves data to "{}"'.format(data_filename))
+        logger.info('Saved curves data to "{}"'.format(output_file))
 
-    def saveRRBdata(self, data_filename: str) -> None:
-        content = "RRB model\n"
-        content += "=========\n\n"
-        content += "X(d) = 1 - exp(-(d/D')^n)\n\n"
-        content += "Parameters: \n"
-        content += "            D' = {:.10f}   std. dev. = {:.10f}\n".format(
-            self.__Dp__RRB, self.__Dp_std_dev__RRB
-        )
-        content += "            n  = {:.10f}   std. dev. = {:.10f}\n".format(
-            self.__n__RRB, self.__n_std_dev__RRB
-        )
-        content += "\n"
-        content += "Standard error of the regression (S) = {:.10f}\n".format(
-            self.__std_error_of_the_regression__RRB
-        )
-        content += "NOTE: S must be <= 2.5 to produce a sufficiently narrow 95% prediction interval.\n"
-        content += "\n"
-        content += "R-squared = {:.10f}\n".format(self.__r_squared__RRB)
-        content += "NOTE: R-squared is not trustworthy for nonlinear regression\n"
-        content += "\n"
-        with open(data_filename + ".txt", "w") as of:
-            of.write(content)
-        logger.info('Saved RRB data to "{}"'.format(data_filename + ".txt"))
+    def saveModelsData(self, output_dir : str, data_filename: str) -> None:
+        for model in self.__models:
+            output_file = os.path.join(output_dir, model.getModelName() + "_" + data_filename  + ".txt")
+            content = model.getFormattedOutput()
+            with open(output_file, "w") as of:
+                of.write(content)
+            logger.info('Saved {} data to "{}"'.format(model.getModelName(), output_file))
         return
-
-    def evalRRB(self, d: float) -> float:
-        return self.__RRBModel(d, self.__Dp__RRB, self.__n__RRB)
 
     # Getters
     def getNumberOfPoints(self) -> int:
@@ -301,9 +282,6 @@ class MasterSizerReport:
 
     def getXmeanValues(self) -> np.array:
         return self.__x_data_mean
-
-    def getRRBparameters(self) -> List[float]:
-        return (self.__Dp__RRB, self.__n__RRB)
 
     def getVersion(self) -> str:
         return self.__version
@@ -338,72 +316,12 @@ class MasterSizerReport:
         self.__x_data = self.__ms_input.getx()
         self.__y_data = self.__ms_input.gety()
         self.__number_of_points = len(self.__y_data)
-        # self.evaluateData()
 
     def __setVolInPerFile(self, filename: str) -> None:
         self.__vol_in_per_filename = filename
 
     def __setDiametersFile(self, filename: str) -> None:
         self.__diameters_filename = filename
-
-    def __getInitialRRBParameters(self) -> list:
-        # get inital guesses
-        p0 = [100.0, 1.1]
-        for i in range(self.__number_of_points):
-            if self.__cumulative_y_vals[i] >= 0.632:
-                p0[0] = self.__x_data_mean[i]
-                break
-        logger.info(
-            "Initial guesses are D' = {:.7f} and n = {:.7f}".format(p0[0], p0[1])
-        )
-        return p0
-
-    def __evaluateRRBParameters(self) -> None:
-
-        logger.info("Evaluating RRB parameters")
-        # get inital guesses
-        p0 = self.__getInitialRRBParameters()
-
-        # calculate using scipy
-        logger.info("Calling scipy curve_fit function")
-        self.__popt, self.__pcov = scipy.optimize.curve_fit(
-            self.__RRBModel, self.__x_data_mean, self.__cumulative_y_vals, p0=p0
-        )
-
-        # set outputs parameters and errors infos
-        self.__Dp__RRB = self.__popt[0]
-        self.__n__RRB = self.__popt[1]
-
-        # std dev for each parameters
-        std_devs = np.sqrt(np.diag(self.__pcov))
-        self.__Dp_std_dev__RRB = std_devs[0]
-        self.__n_std_dev__RRB = std_devs[1]
-        logger.info(
-            "Estimated parameters: D' = {:.7f} +- {:.7f} and n = {:.7f} +- {:.7f}".format(
-                self.__Dp__RRB,
-                self.__Dp_std_dev__RRB,
-                self.__n__RRB,
-                self.__n_std_dev__RRB,
-            )
-        )
-
-        # calculate R squared (it is not apropriate to nonlinear regression, but some people love it)
-        self.__r_squared__RRB = 1.0 - np.sum(
-            (self.__cumulative_y_vals - self.evalRRB(self.__x_data_mean)) ** 2
-        ) / np.sum((self.__cumulative_y_vals - np.mean(self.__cumulative_y_vals)) ** 2)
-        logger.info("R-squared = {:.10f}".format(self.__r_squared__RRB))
-
-        # Standard Error of the Regression
-        self.__std_error_of_the_regression__RRB = np.mean(
-            np.abs(self.__cumulative_y_vals - self.evalRRB(self.__x_data_mean))
-        )
-        logger.info("S = {:.10f}".format(self.__std_error_of_the_regression__RRB))
-        logger.info("Finished estimating RRB parameters")
-
-        return
-
-    def __RRBModel(self, d, dp, n) -> float:
-        return 1.0 - np.exp(-np.power(d / dp, n))
 
     def __isFloatEqual(self, x: float, y: float, tol: float = 1e-10) -> bool:
         return np.abs(x - y) < tol

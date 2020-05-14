@@ -150,17 +150,17 @@ def main():
     #  [('W ignore', None, 'OPTION')],
 
     # name of outputfiles
-    curves = os.path.join(output_dir, output_basename + "curves")
-    curves_data = os.path.join(output_dir, output_basename + "curves_data.txt")
-    rrb_model = os.path.join(output_dir, output_basename + "RRB_model")
-    rrb_data = os.path.join(output_dir, output_basename + "RRB_model_parameters")
-    excel_data = os.path.join(output_dir, output_basename + "curve_data")
+    curves =  output_basename + "curves"
+    curves_data =  output_basename + "curves_data.txt"
+    PSD_model = output_basename + "model"
+    PSD_data =  output_basename + "model_parameters"
+    excel_data =  output_basename + "curve_data"
 
-    reporter.saveFig(curves)
-    reporter.saveRRBFig(rrb_model)
-    reporter.saveData(curves_data)
-    reporter.saveRRBdata(rrb_data)
-    reporter.saveExcel(excel_data)
+    reporter.saveFig(output_dir, curves)
+    reporter.saveModelsFig(output_dir, PSD_model)
+    reporter.saveData(output_dir, curves_data)
+    reporter.saveModelsData(output_dir, PSD_data)
+    reporter.saveExcel(output_dir, excel_data)
     logger.info("Results saved")
 
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))
