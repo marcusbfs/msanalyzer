@@ -150,11 +150,11 @@ def main():
     #  [('W ignore', None, 'OPTION')],
 
     # name of outputfiles
-    curves =  output_basename + "curves"
-    curves_data =  output_basename + "curves_data.txt"
+    curves = output_basename + "curves"
+    curves_data = output_basename + "curves_data.txt"
     PSD_model = output_basename + "model"
-    PSD_data =  output_basename + "model_parameters"
-    excel_data =  output_basename + "curve_data"
+    PSD_data = output_basename + "model_parameters"
+    excel_data = output_basename + "curve_data"
 
     reporter.saveFig(output_dir, curves)
     reporter.saveModelsFig(output_dir, PSD_model)

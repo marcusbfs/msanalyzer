@@ -49,7 +49,7 @@ class MasterSizerReport:
             "cumulative volume fraction [-]",
         ]
         self.__log_scale: bool = False
-        self.__models : List[SizeDistributionBaseModel] = getPSDModelsList()
+        self.__models: List[SizeDistributionBaseModel] = getPSDModelsList()
 
     # Public
     def setDataFiles(
@@ -145,7 +145,7 @@ class MasterSizerReport:
         if total_zeros >= number_of_lefting_zeros:
             self.cutFirstNPoints(total_zeros - number_of_lefting_zeros - 1)
 
-    def saveExcel(self, output_dir : str, base_filename: str) -> None:
+    def saveExcel(self, output_dir: str, base_filename: str) -> None:
         data = np.transpose(
             [self.__x_data_mean, self.__y_data, self.__cumulative_y_vals]
         )
@@ -155,7 +155,7 @@ class MasterSizerReport:
         logger.info('Exported data to excel file: "{}"'.format(filename))
         return
 
-    def saveFig(self, output_dir : str,  base_filename: str) -> None:
+    def saveFig(self, output_dir: str, base_filename: str) -> None:
         # plot
         fig, ax1 = plt.subplots()
         ax2 = plt.twinx()
@@ -200,7 +200,7 @@ class MasterSizerReport:
         logger.info('Saved curves to "{}"'.format(filename))
         # end of plot
 
-    def saveModelsFig(self, output_dir : str, base_filename: str) -> None:
+    def saveModelsFig(self, output_dir: str, base_filename: str) -> None:
 
         for model in self.__models:
             # plot
@@ -232,12 +232,14 @@ class MasterSizerReport:
             else:
                 ax.set_xlabel(u"diameter [$\mu m$]")
 
-            filename = os.path.join(output_dir, model.getModelName() + "_" +base_filename + ".svg")
+            filename = os.path.join(
+                output_dir, model.getModelName() + "_" + base_filename + ".svg"
+            )
             plt.savefig(filename, dpi=1200)
             logger.info('Saved {} curve to "{}"'.format(model.getModelName(), filename))
             # end of plot
 
-    def saveData(self, output_dir : str, data_filename: str) -> None:
+    def saveData(self, output_dir: str, data_filename: str) -> None:
         output_file = os.path.join(output_dir, data_filename)
         header = "%10s\t%10s\t%10s" % (
             self.__headers[0],
@@ -252,13 +254,17 @@ class MasterSizerReport:
         )
         logger.info('Saved curves data to "{}"'.format(output_file))
 
-    def saveModelsData(self, output_dir : str, data_filename: str) -> None:
+    def saveModelsData(self, output_dir: str, data_filename: str) -> None:
         for model in self.__models:
-            output_file = os.path.join(output_dir, model.getModelName() + "_" + data_filename  + ".txt")
+            output_file = os.path.join(
+                output_dir, model.getModelName() + "_" + data_filename + ".txt"
+            )
             content = model.getFormattedOutput()
             with open(output_file, "w") as of:
                 of.write(content)
-            logger.info('Saved {} data to "{}"'.format(model.getModelName(), output_file))
+            logger.info(
+                'Saved {} data to "{}"'.format(model.getModelName(), output_file)
+            )
         return
 
     # Getters

@@ -19,7 +19,6 @@ class RRB(PSDBase.SizeDistributionBaseModel):
     def specificModel(self, d, *args) -> float:
         return 1.0 - np.exp(-np.power(d / args[0], args[1]))
 
-
     def getInitialGuesses(self, x: np.ndarray, y: np.ndarray) -> List[float]:
         p0 = [100.0, 1.1]
         for i in range(len(x)):

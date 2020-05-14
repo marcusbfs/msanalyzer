@@ -24,7 +24,6 @@ class SizeDistributionBaseModel:
     def getInitialGuesses(self, x: np.ndarray, y: np.ndarray) -> List[float]:
         raise NotImplementedError
 
-
     # base class
 
     def compute(self, x: np.ndarray) -> np.ndarray:
@@ -32,7 +31,6 @@ class SizeDistributionBaseModel:
 
     def getModelName(self) -> str:
         return self.model_name_str
-
 
     def evaluate(self, x: np.ndarray, y: np.ndarray) -> None:
         logger.info("Evaluating {} parameters".format(self.getModelName()))
