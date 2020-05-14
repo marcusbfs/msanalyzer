@@ -5,7 +5,7 @@ REM auto
 set scripts_dir=%~dp0
 set repo_dir=%scripts_dir%..
 set src_dir=%repo_dir%\%main_name%
-set shortcut_creator="%repo_dir%\scripts\create_shortcut.bat"
+set shortcut_creator="%scripts_dir%\create_shortcut.bat"
 set venv_name=%main_name%_venv
 set venv_dir=%repo_dir%\%venv_name%
 set activate_venv="%venv_dir%\Scripts\activate.bat"

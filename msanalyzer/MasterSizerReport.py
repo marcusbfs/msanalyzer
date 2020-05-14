@@ -1,3 +1,5 @@
+from datetime import date
+from textwrap import wrap
 from enum import Enum, unique
 import os
 import warnings
@@ -19,6 +21,8 @@ from SizeDistributionModelsFactory import getPSDModelsList
 
 logger = logging.getLogger(__name__)
 __version__: str = "2.0.0"
+__author__: str = "Marcus Bruno Fernandes Silva"
+__email__: str = "marcusbfs@gmail.com"
 
 
 @unique
@@ -50,6 +54,7 @@ class MasterSizerReport:
         ]
         self.__log_scale: bool = False
         self.__models: List[SizeDistributionBaseModel] = getPSDModelsList()
+        self.__num_of_models: int = len(self.__models)
 
     # Public
     def setDataFiles(
@@ -85,6 +90,182 @@ class MasterSizerReport:
         self.__diff_of_cumulative_y_vals = np.diff(
             self.__cumulative_y_vals, prepend=0.0
         ) / np.diff(self.__x_data_mean, prepend=1.0)
+
+    # saving files
+
+    def saveExcel(self, output_dir: str, base_filename: str) -> None:
+        data = np.transpose(
+            [self.__x_data_mean, self.__y_data, self.__cumulative_y_vals]
+        )
+        df = pd.DataFrame(data, columns=self.__headers)
+        filename = os.path.join(output_dir, base_filename + ".xlsx")
+        df.to_excel(filename, index=False)
+        logger.info('Exported data to excel file: "{}"'.format(filename))
+        return
+
+    def saveFig(self, output_dir: str, base_filename: str) -> None:
+        # plot
+        fig, ax1 = plt.subplots()
+        ax2 = plt.twinx()
+        ax1.set_ylabel(u"volume fraction (dX) [-]")
+        ax2.set_ylabel(u"Cumulative distribution (X) [-]")
+        ax2.grid()
+
+        ax1_color = "#1f77b4"
+        ax2_color = "red"
+
+        ax1.tick_params(axis="y", colors=ax1_color, which="both")
+        ax1.plot(
+            self.getXmeanValues(),
+            self.getYvalues(),
+            linestyle="--",
+            marker="o",
+            color=ax1_color,
+            label="dX",
+        )
+
+        ax2.tick_params(axis="y", colors=ax2_color, which="both")
+        ax2.plot(
+            self.getXmeanValues(),
+            self.getCumulativeYvalues(),
+            linestyle="--",
+            marker="o",
+            color=ax2_color,
+            label="X",
+        )
+
+        if self.__log_scale:
+            ax1.set_xlabel(u"log scale - diameter [$\mu m$]")
+            self.__format_LogScale_Xaxis(ax1)
+        else:
+            ax1.set_xlabel(u"diameter [$\mu m$]")
+
+        filename = os.path.join(output_dir, base_filename + ".svg")
+        plt.savefig(filename, dpi=1200)
+        logger.info('Saved curves to "{}"'.format(filename))
+        # end of plot
+
+    def saveModelsFig(self, output_dir: str, base_filename: str) -> None:
+
+        for model in self.__models:
+            # plot
+            fig, ax = plt.subplots()
+
+            ax.set_ylabel(u"Cumulative distribution (X) [-]")
+            ax.grid()
+
+            ax.plot(
+                self.__x_data_mean,
+                model.compute(self.__x_data_mean),
+                label="{} Model".format(model.getModelName()),
+                linestyle="--",
+                color="red",
+            )
+            ax.scatter(
+                self.__x_data_mean,
+                self.__cumulative_y_vals,
+                label="Data",
+                facecolors="none",
+                edgecolors="black",
+            )
+
+            ax.legend()
+
+            if self.__log_scale:
+                ax.set_xlabel(u"log scale - diameter [$\mu m$]")
+                self.__format_LogScale_Xaxis(ax)
+            else:
+                ax.set_xlabel(u"diameter [$\mu m$]")
+
+            filename = os.path.join(
+                output_dir, model.getModelName() + "_" + base_filename + ".svg"
+            )
+            plt.savefig(filename, dpi=1200)
+            logger.info('Saved {} curve to "{}"'.format(model.getModelName(), filename))
+            # end of plot
+
+    def saveData(self, output_dir: str, data_filename: str) -> None:
+        output_file = os.path.join(output_dir, data_filename)
+        header = "%10s\t%10s\t%10s" % (
+            self.__headers[0],
+            self.__headers[1],
+            self.__headers[2],
+        )
+        np.savetxt(
+            output_file,
+            np.transpose([self.__x_data_mean, self.__y_data, self.__cumulative_y_vals]),
+            fmt="%15.10f",
+            header=header,
+        )
+
+        content = self.getTxtFilesHeader()
+        with open(output_file, "r+") as f:
+            content += f.read()
+
+        with open(output_file, "w") as f:
+            f.write(content)
+
+        logger.info('Saved curves data to "{}"'.format(output_file))
+
+    def saveModelsData(self, output_dir: str, data_filename: str) -> None:
+        for model in self.__models:
+            output_file = os.path.join(
+                output_dir, model.getModelName() + "_" + data_filename + ".txt"
+            )
+            content = self.getTxtFilesHeader()
+            content += model.getFormattedOutput()
+            with open(output_file, "w") as of:
+                of.write(content)
+            logger.info(
+                'Saved {} data to "{}"'.format(model.getModelName(), output_file)
+            )
+        return
+
+    def saveBestModelsRanking(self, output_dir: str, base_filename: str) -> None:
+        output_file = os.path.join(output_dir, base_filename + ".txt")
+        logger.info(
+            "Searching best R-squared (highest value) and best S (lowest value) models"
+        )
+
+        ranking_models_S_based = sorted(
+            self.__models, key=lambda x: x.getStdErrorMean()
+        )
+        logger.info("Ranking based on S: {}".format(ranking_models_S_based))
+        ranking_models_r2_based = sorted(
+            self.__models, key=lambda x: x.getRsquared(), reverse=True
+        )
+        logger.info("Ranking based on R-squared: {}".format(ranking_models_r2_based))
+
+        file_content = self.getTxtFilesHeader()
+        file_content += "Best models\n"
+        file_content += "===========\n\n"
+
+        file_content += (
+            "Ranking based on S (standard error mean). Lowest value is better.\n\n"
+        )
+
+        i = 1
+        for model in ranking_models_S_based:
+            file_content += "  #{:02d} - {}: S = {:.7f}\n".format(
+                i, model.getModelName(), model.getStdErrorMean()
+            )
+            i += 1
+
+        file_content += "\n"
+        file_content += (
+            "Ranking based on R-squared (not trustworthy). Highest value is better.\n\n"
+        )
+
+        i = 1
+        for model in ranking_models_r2_based:
+            file_content += "  #{:02d} - {}: R-squared = {:.7f}\n".format(
+                i, model.getModelName(), model.getRsquared()
+            )
+            i += 1
+
+        with open(output_file, "w") as of:
+            of.write(file_content)
+        logger.info('Saved best model rankings to "{}"'.format(output_file))
 
     def evaluateData(self) -> None:
         # Extract data
@@ -145,128 +326,6 @@ class MasterSizerReport:
         if total_zeros >= number_of_lefting_zeros:
             self.cutFirstNPoints(total_zeros - number_of_lefting_zeros - 1)
 
-    def saveExcel(self, output_dir: str, base_filename: str) -> None:
-        data = np.transpose(
-            [self.__x_data_mean, self.__y_data, self.__cumulative_y_vals]
-        )
-        df = pd.DataFrame(data, columns=self.__headers)
-        filename = os.path.join(output_dir, base_filename + ".xlsx")
-        df.to_excel(filename, index=False)
-        logger.info('Exported data to excel file: "{}"'.format(filename))
-        return
-
-    def saveFig(self, output_dir: str, base_filename: str) -> None:
-        # plot
-        fig, ax1 = plt.subplots()
-        ax2 = plt.twinx()
-        ax1.set_ylabel(u"volume fraction (dX) [-]")
-        ax2.set_ylabel(u"Cumulative distribution (X) [-]")
-        ax2.grid()
-
-        ax1_color = "#1f77b4"
-        ax2_color = "red"
-
-        ax1.tick_params(axis="y", colors=ax1_color, which="both")
-        ax1.plot(
-            self.getXmeanValues(),
-            self.getYvalues(),
-            linestyle="--",
-            marker="o",
-            color=ax1_color,
-            label="dX",
-        )
-
-        ax2.tick_params(axis="y", colors=ax2_color, which="both")
-        ax2.plot(
-            self.getXmeanValues(),
-            self.getCumulativeYvalues(),
-            linestyle="--",
-            marker="o",
-            color=ax2_color,
-            label="X",
-        )
-
-        if self.__log_scale:
-            ax1.set_xlabel(u"log scale - diameter [$\mu m$]")
-            self.__format_LogScale_Xaxis(ax1)
-        else:
-            ax1.set_xlabel(u"diameter [$\mu m$]")
-
-        # ax1.legend()
-        # ax2.legend()
-
-        filename = os.path.join(output_dir, base_filename + ".svg")
-        plt.savefig(filename, dpi=1200)
-        logger.info('Saved curves to "{}"'.format(filename))
-        # end of plot
-
-    def saveModelsFig(self, output_dir: str, base_filename: str) -> None:
-
-        for model in self.__models:
-            # plot
-            fig, ax = plt.subplots()
-
-            ax.set_ylabel(u"Cumulative distribution (X) [-]")
-            ax.grid()
-
-            ax.plot(
-                self.__x_data_mean,
-                model.compute(self.__x_data_mean),
-                label="{} Model".format(model.getModelName()),
-                linestyle="--",
-                color="red",
-            )
-            ax.scatter(
-                self.__x_data_mean,
-                self.__cumulative_y_vals,
-                label="Data",
-                facecolors="none",
-                edgecolors="black",
-            )
-
-            ax.legend()
-
-            if self.__log_scale:
-                ax.set_xlabel(u"log scale - diameter [$\mu m$]")
-                self.__format_LogScale_Xaxis(ax)
-            else:
-                ax.set_xlabel(u"diameter [$\mu m$]")
-
-            filename = os.path.join(
-                output_dir, model.getModelName() + "_" + base_filename + ".svg"
-            )
-            plt.savefig(filename, dpi=1200)
-            logger.info('Saved {} curve to "{}"'.format(model.getModelName(), filename))
-            # end of plot
-
-    def saveData(self, output_dir: str, data_filename: str) -> None:
-        output_file = os.path.join(output_dir, data_filename)
-        header = "%10s\t%10s\t%10s" % (
-            self.__headers[0],
-            self.__headers[1],
-            self.__headers[2],
-        )
-        np.savetxt(
-            output_file,
-            np.transpose([self.__x_data_mean, self.__y_data, self.__cumulative_y_vals]),
-            fmt="%15.10f",
-            header=header,
-        )
-        logger.info('Saved curves data to "{}"'.format(output_file))
-
-    def saveModelsData(self, output_dir: str, data_filename: str) -> None:
-        for model in self.__models:
-            output_file = os.path.join(
-                output_dir, model.getModelName() + "_" + data_filename + ".txt"
-            )
-            content = model.getFormattedOutput()
-            with open(output_file, "w") as of:
-                of.write(content)
-            logger.info(
-                'Saved {} data to "{}"'.format(model.getModelName(), output_file)
-            )
-        return
-
     # Getters
     def getNumberOfPoints(self) -> int:
         return self.__number_of_points
@@ -289,8 +348,29 @@ class MasterSizerReport:
     def getXmeanValues(self) -> np.array:
         return self.__x_data_mean
 
-    def getVersion(self) -> str:
-        return self.__version
+    def getTxtFilesHeader(self) -> str:
+        content = ""
+        content += " msanalyzer {} \n\n".format(__version__)
+        content += " Author: {} \n".format(__author__)
+        content += " email: {} \n\n".format(__email__)
+        content += ' file analyzed: "{}" \n'.format(self.__input_xps_file)
+        content += " Date: {} \n".format(date.today().strftime("%d-%b-%Y"))
+        content = self.getBorderedText(content)
+        content += "\n\n"
+        return content
+
+    def getBorderedText(self, text: str):
+        lines = text.splitlines()
+        width = max(len(s) for s in lines)
+        res = ["+" + "-" * width + "+"]
+        for s in lines:
+            res.append("|" + (s + " " * width)[:width] + "|")
+        res.append("+" + "-" * width + "+")
+        return "\n".join(res)
+
+    @staticmethod
+    def getVersion() -> str:
+        return __version__
 
     # Setters
     def setGeometricMean(self) -> None:
@@ -308,7 +388,6 @@ class MasterSizerReport:
         logger.info("Diameter mean type setted to {}".format(typed))
 
     # Private
-
     def __format_LogScale_Xaxis(self, xaxis: matplotlib.axes.Axes) -> None:
         from matplotlib.ticker import ScalarFormatter
 
@@ -331,7 +410,3 @@ class MasterSizerReport:
 
     def __isFloatEqual(self, x: float, y: float, tol: float = 1e-10) -> bool:
         return np.abs(x - y) < tol
-
-
-def getVersion() -> str:
-    return __version__

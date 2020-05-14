@@ -26,6 +26,12 @@ class SizeDistributionBaseModel:
 
     # base class
 
+    def getRsquared(self) -> float:
+        return self.__r_squared
+
+    def getStdErrorMean(self) -> float:
+        return self.__std_error_mean
+
     def compute(self, x: np.ndarray) -> np.ndarray:
         return self.specificModel(x, *self.model_par_values)
 
@@ -97,3 +103,12 @@ class SizeDistributionBaseModel:
         content += "NOTE: R-squared is not trustworthy for nonlinear regression\n"
 
         return content
+
+    def getDn(self, x: np.ndarray, y: np.ndarray, n: float, DnInitial: float) -> float:
+        for i in range(len(x)):
+            if y[i] >= n:
+                return x[i]
+        return DnInitial
+
+    def __repr__(self):
+        return self.getModelName()

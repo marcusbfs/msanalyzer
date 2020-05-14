@@ -20,9 +20,4 @@ class RRB(PSDBase.SizeDistributionBaseModel):
         return 1.0 - np.exp(-np.power(d / args[0], args[1]))
 
     def getInitialGuesses(self, x: np.ndarray, y: np.ndarray) -> List[float]:
-        p0 = [100.0, 1.1]
-        for i in range(len(x)):
-            if y[i] >= 0.632:
-                p0[0] = x[i]
-                break
-        return p0
+        return [self.getDn(x, y, 0.632, 100), 1.0]

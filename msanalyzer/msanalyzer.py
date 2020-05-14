@@ -14,12 +14,12 @@ def main():
 
     version_message = (
         "MasterSizerReport "
-        + msreport.getVersion()
+        + msreport.MasterSizerReport.getVersion()
         + os.linesep
         + os.linesep
-        + "Author: Marcus Bruno Fernandes Silva"
+        + "Author: {}".format(msreport.__author__)
         + os.linesep
-        + "email: marcusbfs@gmail.com"
+        + "email: {}".format(msreport.__email__)
     )
 
     desc = (
@@ -147,14 +147,13 @@ def main():
         os.mkdir(output_dir)
         logger.info('Directory "{}" created'.format(output_dir))
 
-    #  [('W ignore', None, 'OPTION')],
-
     # name of outputfiles
     curves = output_basename + "curves"
     curves_data = output_basename + "curves_data.txt"
     PSD_model = output_basename + "model"
     PSD_data = output_basename + "model_parameters"
     excel_data = output_basename + "curve_data"
+    best_model_basename = "best_models_ranking"
 
     reporter.saveFig(output_dir, curves)
     reporter.saveModelsFig(output_dir, PSD_model)
@@ -162,6 +161,9 @@ def main():
     reporter.saveModelsData(output_dir, PSD_data)
     reporter.saveExcel(output_dir, excel_data)
     logger.info("Results saved")
+
+    logger.info("Analyzing best model")
+    reporter.saveBestModelsRanking(output_dir, best_model_basename)
 
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))
 
