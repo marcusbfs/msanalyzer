@@ -3,5 +3,5 @@ call "%~dp0variables.bat"
 
 call python -m venv "%venv_dir%"
 call %activate_venv%
-
 pip install -r "%repo_dir%\requirements.txt"
+call %deactivate_venv%
