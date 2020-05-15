@@ -353,7 +353,7 @@ class MasterSizerReport:
         content += " msanalyzer {} \n\n".format(__version__)
         content += " Author: {} \n".format(__author__)
         content += " email: {} \n\n".format(__email__)
-        content += ' file analyzed: "{}" \n'.format(self.__input_xps_file)
+        content += ' file analyzed: "{}" \n'.format(os.path.abspath(self.__input_xps_file))
         content += " Date: {} \n".format(date.today().strftime("%d-%b-%Y"))
         content = self.getBorderedText(content)
         content += "\n\n"
