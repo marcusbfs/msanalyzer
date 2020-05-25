@@ -107,6 +107,15 @@ class SizeDistributionBaseModel:
         content += "Sauter diameter mean: dps = {:.10f}\n".format(
             self.getSauterDiameterValue()
         )
+        content += "D25 = {:.10f}\n".format(
+            self.getD25fromCompute()
+        )
+        content += "D50 = {:.10f}\n".format(
+            self.getD50fromCompute()
+        )
+        content += "D75 = {:.10f}\n".format(
+            self.getD75fromCompute()
+        )
 
         content += "\n"
 
@@ -129,3 +138,30 @@ class SizeDistributionBaseModel:
 
     def __repr__(self):
         return self.getModelName()
+
+    def getD25fromCompute(self) -> float:
+        return self.getDnFromCompute(.25)
+    def getD50fromCompute(self) -> float:
+        return self.getDnFromCompute(.5)
+    def getD75fromCompute(self) -> float:
+        return self.getDnFromCompute(.75)
+
+    def getDnFromCompute(self, n : float) -> float:
+        x50 = n
+
+        d50 = 50
+        cont = True
+        while cont:
+            x = self.compute(d50)
+            if x >= x50:
+                cont = False
+            else:
+                d50 += 50
+
+        x0 = d50
+        x1 = d50*1.1
+
+        d50 = scipy.optimize.root_scalar(lambda _x : x50 - self.compute(_x), x0= x0, x1=x1, method="secant").root
+
+        return d50
+
