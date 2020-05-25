@@ -20,7 +20,7 @@ from SizeDistributionBaseModel import SizeDistributionBaseModel
 from SizeDistributionModelsFactory import getPSDModelsList
 
 logger = logging.getLogger(__name__)
-__version__: str = "2.0.0"
+__version__: str = "2.1.0"
 __author__: str = "Marcus Bruno Fernandes Silva"
 __email__: str = "marcusbfs@gmail.com"
 
@@ -353,7 +353,9 @@ class MasterSizerReport:
         content += " msanalyzer {} \n\n".format(__version__)
         content += " Author: {} \n".format(__author__)
         content += " email: {} \n\n".format(__email__)
-        content += ' file analyzed: "{}" \n'.format(os.path.abspath(self.__input_xps_file))
+        content += ' file analyzed: "{}" \n'.format(
+            os.path.abspath(self.__input_xps_file)
+        )
         content += " Date: {} \n".format(date.today().strftime("%d-%b-%Y"))
         content = self.getBorderedText(content)
         content += "\n\n"

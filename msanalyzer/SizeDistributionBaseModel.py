@@ -24,7 +24,13 @@ class SizeDistributionBaseModel:
     def getInitialGuesses(self, x: np.ndarray, y: np.ndarray) -> List[float]:
         raise NotImplementedError
 
-    # base class
+    def getSauterDiameterValue(self) -> float:
+        raise NotImplementedError
+
+    def getSauterDiameterExpression(self) -> str:
+        raise NotImplementedError
+
+    # =================== base class ======================================
 
     def getRsquared(self) -> float:
         return self.__r_squared
@@ -80,8 +86,10 @@ class SizeDistributionBaseModel:
         logger.info("Finished estimating {} parameters".format(self.getModelName()))
 
     def getFormattedOutput(self) -> str:
-        content = "{} model\n".format(self.getModelName())
-        content += "=========\n\n"
+        model_header = "{} model".format(self.getModelName())
+        content = model_header + "\n"
+        content += "=" * len(model_header)
+        content += "\n\n"
         content += "{}\n\n".format(self.model_expression_str)
 
         content += "Parameters: \n"
@@ -91,6 +99,15 @@ class SizeDistributionBaseModel:
             content += "            {} = {:.10f}    std. dev. = {:.10f}\n".format(
                 symbol, val, std_dev
             )
+        content += "\n"
+
+        content += "Sauter diameter expression: {}\n".format(
+            self.getSauterDiameterExpression()
+        )
+        content += "Sauter diameter mean: dps = {:.10f}\n".format(
+            self.getSauterDiameterValue()
+        )
+
         content += "\n"
 
         content += "Standard error of the regression (S) = {:.10f}\n".format(

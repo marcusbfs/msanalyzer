@@ -21,3 +21,13 @@ class GGS(PSDBase.SizeDistributionBaseModel):
 
     def getInitialGuesses(self, x: np.ndarray, y: np.ndarray) -> List[float]:
         return [np.max(x), 1.0]
+
+    def getSauterDiameterValue(self) -> float:
+        k = self.model_par_values[0]
+        m = self.model_par_values[1]
+        if m > 1:
+            k * (m - 1.0) / m
+        return 0.0
+
+    def getSauterDiameterExpression(self) -> str:
+        return "dps = k*(m - 1)/m for m> 1"

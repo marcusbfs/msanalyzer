@@ -6,6 +6,7 @@ from typing import List
 import numpy as np
 
 import SizeDistributionBaseModel as PSDBase
+from scipy.special import gamma
 
 
 class RRB(PSDBase.SizeDistributionBaseModel):
@@ -21,3 +22,13 @@ class RRB(PSDBase.SizeDistributionBaseModel):
 
     def getInitialGuesses(self, x: np.ndarray, y: np.ndarray) -> List[float]:
         return [self.getDn(x, y, 0.632, 100), 1.0]
+
+    def getSauterDiameterValue(self) -> float:
+        Dprime = self.model_par_values[0]
+        n = self.model_par_values[1]
+        if n > 1:
+            return Dprime / gamma(1.0 - 1.0 / n)
+        return 0.0
+
+    def getSauterDiameterExpression(self) -> str:
+        return "dps = D'/gamma(1 - 1/n) for n > 1"

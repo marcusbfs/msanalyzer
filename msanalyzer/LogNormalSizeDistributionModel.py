@@ -31,3 +31,11 @@ class LogNormal(PSDBase.SizeDistributionBaseModel):
         D84 = self.getDn(x, y, 0.84, 120)
         delta = D84 / D50
         return [D50, delta]
+
+    def getSauterDiameterValue(self) -> float:
+        D50 = self.model_par_values[0]
+        delta = self.model_par_values[1]
+        return D50 * np.exp(-0.5 * np.log(delta) ** 2)
+
+    def getSauterDiameterExpression(self) -> str:
+        return "dps = D50*exp(-0.5 * ln(delta)^2)"
