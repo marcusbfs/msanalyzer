@@ -218,7 +218,7 @@ def main():
             number_of_zero_first,
             number_of_zero_last,
             custom_plot_args,
-            not args.multiple_no_labels
+            not args.multiple_no_labels,
         )
         logger.info("Created multiple files reporter object")
 
