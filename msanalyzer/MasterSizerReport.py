@@ -20,7 +20,7 @@ from SizeDistributionBaseModel import SizeDistributionBaseModel
 from SizeDistributionModelsFactory import getPSDModelsList
 
 logger = logging.getLogger(__name__)
-__version__: str = "2.2.0"
+__version__: str = "3.0.0"
 __author__: str = "Marcus Bruno Fernandes Silva"
 __email__: str = "marcusbfs@gmail.com"
 
@@ -279,7 +279,6 @@ class MasterSizerReport:
         self.setDiameterMeanType(self.__meantype)
 
         self.genCumulativeSizeDistribution()
-
 
     def evaluateModels(self) -> None:
 

@@ -2,6 +2,7 @@ import os
 import logging
 import argparse
 import time
+import json
 
 logger = logging.getLogger("msanalyzer")
 
@@ -101,8 +102,24 @@ def main():
         "-M",
         "--multiple-files",
         dest="multiple_files",
-        nargs='+',
+        nargs="+",
         help="plot multiple data",
+    )
+
+    parser.add_argument(
+        "--multi-labels",
+        dest="multiple_labels",
+        nargs="+",
+        help="multiple data plot labels",
+    )
+
+    parser.add_argument(
+        "--custom-plot-args",
+        dest="custom_plot_args",
+        nargs=1,
+        help="custom matplotlib args",
+        default=[{}],
+        type=json.loads,
     )
 
     parser.add_argument(
@@ -128,6 +145,7 @@ def main():
     number_of_zero_first = int(args.first_zeros[0])
     number_of_zero_last = int(args.last_zeros[0])
     log_scale = args.log_scale
+    custom_plot_args = args.custom_plot_args[0]
 
     # end of args parser
 
@@ -136,8 +154,11 @@ def main():
 
     logger.info("Arguments passed: {}".format(args))
 
-    # calculate results - one file only input
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+        logger.info('Directory "{}" created'.format(output_dir))
 
+    # calculate results - one file only input
     if not args.multiple_files:
         logger.info("Single file mode")
 
@@ -153,15 +174,11 @@ def main():
         reporter.setLogScale(logscale=log_scale)
         logger.info("Reporter object setted up")
 
-        # calcualte
+        # calculate
         reporter.evaluateData()
         logger.info("Data evaluated")
         reporter.evaluateModels()
         logger.info("Models evaluated")
-
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
-            logger.info('Directory "{}" created'.format(output_dir))
 
         # name of outputfiles
         curves = output_basename + "curves"
@@ -181,18 +198,31 @@ def main():
         logger.info("Analyzing best model")
         reporter.saveBestModelsRanking(output_dir, best_model_basename)
 
+    # calculate results - multiple files input
     else:
         number_of_files = len(args.multiple_files)
         logger.info("Multiple files mode - {} files".format(number_of_files))
 
-        multiReporter = multireport.MultipleFilesReport(args.multiple_files, meanType, log_scale, number_of_zero_first, number_of_zero_last)
+        multiReporter = multireport.MultipleFilesReport(
+            args.multiple_files,
+            meanType,
+            log_scale,
+            number_of_zero_first,
+            number_of_zero_last,
+            custom_plot_args,
+        )
         logger.info("Created multiple files reporter object")
 
-        # multiReporter.setLabels(["1", "2", "3"])
+        if args.multiple_labels and len(args.multiple_labels) > 1:
+            multiReporter.setLabels(args.multiple_labels)
 
-        multiReporter.sizeDistributionPlot("sizeDistirbution")
-        multiReporter.frequencyPlot("frequency")
+        MultiSizeDistribution_output_file = os.path.join(
+            output_dir, "MultiSizeDistribution"
+        )
+        MultiFrequency_output_file = os.path.join(output_dir, "MultiFrequency")
 
+        multiReporter.sizeDistributionPlot(MultiSizeDistribution_output_file)
+        multiReporter.frequencyPlot(MultiFrequency_output_file)
 
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))
 
