@@ -23,6 +23,7 @@ class MultipleFilesReport:
         number_of_zero_first: int,
         number_of_zero_last: int,
         custom_plot_dict: dict,
+        show_labels : bool,
     ):
         self.__files: List[str] = files
         self.__number_of_files: int = len(self.__files)
@@ -33,6 +34,7 @@ class MultipleFilesReport:
         self.__reporters: List[msreport.MasterSizerReport] = []
         self.__labels: List[str] = []
         self.__custom_plot_kwargs: dict = custom_plot_dict
+        self.__show_labels : bool = show_labels
 
         self.__create_reporters()
 
@@ -66,7 +68,8 @@ class MultipleFilesReport:
                 **self.__custom_plot_kwargs,
             )
 
-        ax.legend()
+        if self.__show_labels:
+            ax.legend()
 
         filename = os.path.join(output_path + ".svg")
         plt.savefig(filename, dpi=1200)
@@ -101,7 +104,8 @@ class MultipleFilesReport:
                 label=labelName,
             )
 
-        ax.legend()
+        if self.__show_labels:
+            ax.legend()
 
         filename = os.path.join(output_path + ".svg")
         plt.savefig(filename, dpi=1200)

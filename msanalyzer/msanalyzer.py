@@ -114,6 +114,14 @@ def main():
     )
 
     parser.add_argument(
+        "--multi-no-labels",
+        dest="multiple_no_labels",
+        default=False,
+        help="do not plot labels on multiple plots",
+        action="store_true",
+    )
+
+    parser.add_argument(
         "--custom-plot-args",
         dest="custom_plot_args",
         nargs=1,
@@ -210,6 +218,7 @@ def main():
             number_of_zero_first,
             number_of_zero_last,
             custom_plot_args,
+            not args.multiple_no_labels
         )
         logger.info("Created multiple files reporter object")
 
