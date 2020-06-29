@@ -2,6 +2,7 @@
 mastersizer_output/
 # venv folder
 msanalyzer_venv/
+msanalyzer/.vscode
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

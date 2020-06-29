@@ -6,6 +6,7 @@ import time
 logger = logging.getLogger("msanalyzer")
 
 import MasterSizerReport as msreport
+import MultipleFilesReport as multireport
 
 
 def main():
@@ -97,6 +98,14 @@ def main():
     )
 
     parser.add_argument(
+        "-M",
+        "--multiple-files",
+        dest="multiple_files",
+        nargs='+',
+        help="plot multiple data",
+    )
+
+    parser.add_argument(
         "--info",
         dest="info",
         default=False,
@@ -107,63 +116,83 @@ def main():
     parser.add_argument("-v", "--version", action="version", version=version_message)
 
     args = parser.parse_args()
-    # end of args parser
-
-    # calculate results
-
-    # set logging level
 
     if args.info:
         level = logging.INFO
     else:
         level = logging.WARNING
 
-    logging.basicConfig(level=level, format="%(asctime)s - %(name)s: %(message)s")
-
-    logger.info("Arguments passed: {}".format(args))
-
-    reporter = msreport.MasterSizerReport()
-    logger.info("Created reporter object")
-
-    xps_file = args.xps
     meanType = list_of_diameterchoices[args.meantype[0]]
     output_dir = args.output_dir
     output_basename = args.output_basename
     number_of_zero_first = int(args.first_zeros[0])
     number_of_zero_last = int(args.last_zeros[0])
+    log_scale = args.log_scale
 
-    reporter.setXPSfile(xps_file)
-    reporter.setDiameterMeanType(meanType)
-    reporter.cutFirstZeroPoints(number_of_zero_first, tol=1e-8)
-    reporter.cutLastZeroPoints(number_of_zero_last, tol=1e-8)
-    reporter.setLogScale(logscale=args.log_scale)
-    logger.info("Reporter object setted up")
+    # end of args parser
 
-    # calcualte
-    reporter.evaluateData()
-    logger.info("Data evaluated")
+    # set logging level
+    logging.basicConfig(level=level, format="%(asctime)s - %(name)s: %(message)s")
 
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
-        logger.info('Directory "{}" created'.format(output_dir))
+    logger.info("Arguments passed: {}".format(args))
 
-    # name of outputfiles
-    curves = output_basename + "curves"
-    curves_data = output_basename + "curves_data.txt"
-    PSD_model = output_basename + "model"
-    PSD_data = output_basename + "model_parameters"
-    excel_data = output_basename + "curve_data"
-    best_model_basename = "best_models_ranking"
+    # calculate results - one file only input
 
-    reporter.saveFig(output_dir, curves)
-    reporter.saveModelsFig(output_dir, PSD_model)
-    reporter.saveData(output_dir, curves_data)
-    reporter.saveModelsData(output_dir, PSD_data)
-    reporter.saveExcel(output_dir, excel_data)
-    logger.info("Results saved")
+    if not args.multiple_files:
+        logger.info("Single file mode")
 
-    logger.info("Analyzing best model")
-    reporter.saveBestModelsRanking(output_dir, best_model_basename)
+        reporter = msreport.MasterSizerReport()
+        logger.info("Created reporter object")
+
+        xps_file = args.xps
+
+        reporter.setXPSfile(xps_file)
+        reporter.setDiameterMeanType(meanType)
+        reporter.cutFirstZeroPoints(number_of_zero_first, tol=1e-8)
+        reporter.cutLastZeroPoints(number_of_zero_last, tol=1e-8)
+        reporter.setLogScale(logscale=log_scale)
+        logger.info("Reporter object setted up")
+
+        # calcualte
+        reporter.evaluateData()
+        logger.info("Data evaluated")
+        reporter.evaluateModels()
+        logger.info("Models evaluated")
+
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+            logger.info('Directory "{}" created'.format(output_dir))
+
+        # name of outputfiles
+        curves = output_basename + "curves"
+        curves_data = output_basename + "curves_data.txt"
+        PSD_model = output_basename + "model"
+        PSD_data = output_basename + "model_parameters"
+        excel_data = output_basename + "curve_data"
+        best_model_basename = "best_models_ranking"
+
+        reporter.saveFig(output_dir, curves)
+        reporter.saveModelsFig(output_dir, PSD_model)
+        reporter.saveData(output_dir, curves_data)
+        reporter.saveModelsData(output_dir, PSD_data)
+        reporter.saveExcel(output_dir, excel_data)
+        logger.info("Results saved")
+
+        logger.info("Analyzing best model")
+        reporter.saveBestModelsRanking(output_dir, best_model_basename)
+
+    else:
+        number_of_files = len(args.multiple_files)
+        logger.info("Multiple files mode - {} files".format(number_of_files))
+
+        multiReporter = multireport.MultipleFilesReport(args.multiple_files, meanType, log_scale, number_of_zero_first, number_of_zero_last)
+        logger.info("Created multiple files reporter object")
+
+        # multiReporter.setLabels(["1", "2", "3"])
+
+        multiReporter.sizeDistributionPlot("sizeDistirbution")
+        multiReporter.frequencyPlot("frequency")
+
 
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))
 

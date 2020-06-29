@@ -108,7 +108,7 @@ class MasterSizerReport:
         fig, ax1 = plt.subplots()
         ax2 = plt.twinx()
         ax1.set_ylabel(u"volume fraction (dX) [-]")
-        ax2.set_ylabel(u"Cumulative distribution (X) [-]")
+        ax2.set_ylabel(u"cumulative distribution (X) [-]")
         ax2.grid()
 
         ax1_color = "#1f77b4"
@@ -280,6 +280,9 @@ class MasterSizerReport:
 
         self.genCumulativeSizeDistribution()
 
+
+    def evaluateModels(self) -> None:
+
         self.genDiffCumulativeSizeDistribution()
         for model in self.__models:
             model.evaluate(self.__x_data_mean, self.__cumulative_y_vals)
@@ -370,6 +373,9 @@ class MasterSizerReport:
         res.append("+" + "-" * width + "+")
         return "\n".join(res)
 
+    def getInputFile(self) -> str:
+        return self.__input_xps_file
+
     @staticmethod
     def getVersion() -> str:
         return __version__
@@ -390,7 +396,9 @@ class MasterSizerReport:
         logger.info("Diameter mean type setted to {}".format(typed))
 
     # Private
-    def __format_LogScale_Xaxis(self, xaxis: matplotlib.axes.Axes) -> None:
+
+    @staticmethod
+    def formatLogScaleXaxis(xaxis: matplotlib.axes.Axes) -> None:
         from matplotlib.ticker import ScalarFormatter
 
         xaxis.set_xscale("log")
@@ -398,6 +406,9 @@ class MasterSizerReport:
         for axis in [xaxis.xaxis, xaxis.yaxis]:
             axis.set_major_formatter(ScalarFormatter())
         return
+
+    def __format_LogScale_Xaxis(self, xaxis: matplotlib.axes.Axes) -> None:
+        return MasterSizerReport.formatLogScaleXaxis(xaxis)
 
     def __updateXY_data(self) -> None:
         self.__x_data = self.__ms_input.getx()
