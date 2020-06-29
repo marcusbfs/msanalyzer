@@ -114,7 +114,7 @@ class MultipleFilesReport:
         self.__labels = labels
         return
 
-    # private mtehods
+    # private methods
 
     def __create_reporters(self) -> None:
         for f in self.__files:
