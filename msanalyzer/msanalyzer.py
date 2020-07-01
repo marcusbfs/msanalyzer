@@ -142,11 +142,6 @@ def main():
 
     args = parser.parse_args()
 
-    if args.info:
-        level = logging.INFO
-    else:
-        level = logging.WARNING
-
     meanType = list_of_diameterchoices[args.meantype[0]]
     output_dir = args.output_dir
     output_basename = args.output_basename
@@ -154,6 +149,7 @@ def main():
     number_of_zero_last = int(args.last_zeros[0])
     log_scale = args.log_scale
     custom_plot_args = args.custom_plot_args[0]
+    level = logging.INFO if args.info else logging.WARNING
 
     # end of args parser
 
