@@ -103,10 +103,6 @@ def main():
         [sg.Text(text="Zeros à esquerda: "), zerosSpin("first_zeros##spin")],
         [sg.Text(text="Zeros à direita:  "), zerosSpin("last_zeros##spin"),],
         [sg.HorizontalSeparator()],
-        [
-            sg.Text(text="Fonte do aplicativo"),
-            zerosSpin("font##spin", min_val=10, max_val=30, default_val=16),
-        ],
     ]
 
     layout_principal = [
@@ -255,14 +251,6 @@ def main():
 
                     cmd.append(xps_file)
 
-                    # -l
-                    cmd.append("--last_zeros")
-                    cmd.append(str(values["last_zeros##spin"]))
-
-                    # -s
-                    if values["logscale##checkbox"]:
-                        cmd.append("--log-scale")
-
                 else:
                     cmd.append("-M")
                     for f in xps_file:
@@ -300,6 +288,14 @@ def main():
                 # -f
                 cmd.append("--first_zeros")
                 cmd.append(str(values["first_zeros##spin"]))
+
+                # -l
+                cmd.append("--last_zeros")
+                cmd.append(str(values["last_zeros##spin"]))
+
+                # -s
+                if values["logscale##checkbox"]:
+                    cmd.append("--log-scale")
 
                 progress_bar.update(60)
                 window.refresh()
@@ -375,15 +371,10 @@ def main():
                 )
                 continue
 
-        elif event in ("first_zeros##spin", "last_zeros##spin", "font##spin"):
+        elif event in ("first_zeros##spin", "last_zeros##spin"):
             window.FindElement(event).Update(
                 int(re.sub(r"[^0-9]", "", str(values[event])))
             )
-
-        if event == "font##spin":
-            font_size = values[event]
-            sg.set_options(font=("Helvetica", font_size))
-            window.refresh()
 
         if progress_bar.visible:
             if (time.time() - t0) >= time_progress_bar_to_exit_sec:
