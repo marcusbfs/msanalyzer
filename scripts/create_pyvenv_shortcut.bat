@@ -8,3 +8,9 @@ call "%~dp0variables.bat"
     echo %python_exe% %main_py_file% %%*
 
 ) > %sname%
+
+(
+    echo @echo off
+    echo start "" %pythonw_exe% %gui_py_file% %%*
+
+) > %sname_gui%

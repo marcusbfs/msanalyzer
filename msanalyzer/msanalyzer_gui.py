@@ -4,17 +4,26 @@ import pathlib
 import subprocess
 import time
 import re
-import icons_gui
+import threading
 
 import PySimpleGUI as sg
 
+import icons_gui
+
 sg.theme("DarkAmber")  # Add a touch of color
+# sg.theme("DarkBlack1")  # Add a touch of color
 
 
-def zerosSpin(key: str = "", min_val: int = 1, max_val: int = 50, size=(4, 1)):
+def zerosSpin(
+    key: str = "",
+    min_val: int = 1,
+    max_val: int = 50,
+    size=(4, 1),
+    default_val: int = 1,
+):
     return sg.Spin(
         values=[i for i in range(min_val, max_val + 1)],
-        initial_value=min_val,
+        initial_value=default_val,
         key=key,
         size=size,
         enable_events=True,
@@ -58,8 +67,8 @@ def main():
 
     input_xps_layout = [
         [
-            sg.Text("Arquivo(s) XPS:"),
-            sg.Input(enable_events=True, key="input##xps"),
+            sg.Text("Arquivo(s) XPS:", justification="left"),
+            sg.Input(enable_events=True, key="input##xps",),
             sg.FilesBrowse(
                 button_text="Selecionar",
                 file_types=(("XPS files", "*.xps"),),
@@ -82,6 +91,7 @@ def main():
             ),
             sg.Radio(text="Aritimética", group_id=1),
         ],
+        [sg.HorizontalSeparator()],
         [
             sg.Checkbox(
                 "Não colocar legenda nos gráficos de múltiplos arquivos",
@@ -89,8 +99,14 @@ def main():
                 key="nomultiplolabel",
             )
         ],
+        [sg.HorizontalSeparator()],
         [sg.Text(text="Zeros à esquerda: "), zerosSpin("first_zeros##spin")],
         [sg.Text(text="Zeros à direita:  "), zerosSpin("last_zeros##spin"),],
+        [sg.HorizontalSeparator()],
+        [
+            sg.Text(text="Fonte do aplicativo"),
+            zerosSpin("font##spin", min_val=10, max_val=30, default_val=16),
+        ],
     ]
 
     layout_principal = [
@@ -99,9 +115,15 @@ def main():
                 "",
                 input_xps_layout,
                 tooltip="Selecione um arquivos para fazer a análise isolada e mais detalhada (com modelos tipo RRB).\nSelecione dois ou mais arquivos XPS para comparar os gráficos.",
+                key="input_xps##frame",
+                vertical_alignment="top",
             )
         ],
-        [sg.Frame("Opções", options_layout)],
+        [
+            sg.Frame(
+                "Opções", options_layout, key="options##frame", vertical_alignment="top"
+            )
+        ],
         [sg.HorizontalSeparator()],
         [
             sg.Checkbox(
@@ -120,26 +142,40 @@ def main():
                 key="exec##progress",
                 orientation="horizontal",
                 size=(20, 20),
-                visible=False,
+                visible=True,
             )
         ],
     ]
 
     output_layout = [
-        [sg.Multiline("", auto_refresh=True, key="out##multiline", disabled=True)]
+        [sg.Multiline("", auto_refresh=True, key="out##multiline", disabled=True)],
     ]
 
     layout = [
         [
-            sg.TabGroup(
+            sg.Column(
                 [
                     [
-                        sg.Tab("Principal", layout_principal, key="principal##tab"),
-                        sg.Tab("Opções avançadas", advanced_options_layout),
-                        sg.Tab("Output", output_layout, key="output##tab"),
+                        sg.TabGroup(
+                            [
+                                [
+                                    sg.Tab(
+                                        "Principal",
+                                        layout_principal,
+                                        key="principal##tab",
+                                    ),
+                                    sg.Tab("Opções avançadas", advanced_options_layout),
+                                    sg.Tab("Output", output_layout, key="output##tab"),
+                                ]
+                            ],
+                            key="main##tabgroup",
+                        )
                     ]
                 ],
-                key="main##tabgroup",
+                scrollable=False,
+                key="main##col",
+                vertical_alignment="top",
+                element_justification="left",
             )
         ]
     ]
@@ -154,14 +190,25 @@ def main():
     )
     window.Resizable = True
     window.finalize()
-    window.Size = (1100, 600)
 
     progress_bar: sg.Progress = window["exec##progress"]
     out_text: sg.Multiline = window["out##multiline"]
     tabgroup: sg.Trabgroup = window["main##tabgroup"]
+    input_xps_frame: sg.Frame = window["input_xps##frame"]
+    options_frame: sg.Frame = window["options##frame"]
 
     out_text.expand(expand_x=True, expand_y=True)
     tabgroup.expand(expand_x=True, expand_y=True)
+    input_xps_frame.expand(expand_x=True)
+    options_frame.expand(expand_x=True)
+    window["input##xps"].expand(expand_x=True)
+    window["output_path##input"].expand(expand_x=True)
+    window["basename##input"].expand(expand_x=True)
+    window["main##col"].expand(expand_x=True, expand_y=True)
+
+    window.set_min_size((1080, 400))
+
+    progress_bar.update(0, visible=False)
 
     # Event Loop to process "events" and get the "values" of the inputs
     while True:
@@ -328,10 +375,15 @@ def main():
                 )
                 continue
 
-        elif event in ("first_zeros##spin", "last_zeros##spin"):
+        elif event in ("first_zeros##spin", "last_zeros##spin", "font##spin"):
             window.FindElement(event).Update(
                 int(re.sub(r"[^0-9]", "", str(values[event])))
             )
+
+        if event == "font##spin":
+            font_size = values[event]
+            sg.set_options(font=("Helvetica", font_size))
+            window.refresh()
 
         if progress_bar.visible:
             if (time.time() - t0) >= time_progress_bar_to_exit_sec:
