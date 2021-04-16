@@ -52,7 +52,9 @@ def main():
         [
             sg.Text(text="Diretório de saída:"),
             sg.Input(default_text="./msanalyzer_output", key="output_path##input"),
-            sg.FolderBrowse(button_text="Selecionar",),
+            sg.FolderBrowse(
+                button_text="Selecionar",
+            ),
             sg.Button(button_text="Abrir diretório", key="open_output_dir##button"),
         ],
         [sg.Text(text="Nome de saída:"), sg.InputText(key="basename##input")],
@@ -68,7 +70,10 @@ def main():
     input_xps_layout = [
         [
             sg.Text("Arquivo(s) XPS:", justification="left"),
-            sg.Input(enable_events=True, key="input##xps",),
+            sg.Input(
+                enable_events=True,
+                key="input##xps",
+            ),
             sg.FilesBrowse(
                 button_text="Selecionar",
                 file_types=(("XPS files", "*.xps"),),
@@ -101,7 +106,10 @@ def main():
         ],
         [sg.HorizontalSeparator()],
         [sg.Text(text="Zeros à esquerda: "), zerosSpin("first_zeros##spin")],
-        [sg.Text(text="Zeros à direita:  "), zerosSpin("last_zeros##spin"),],
+        [
+            sg.Text(text="Zeros à direita:  "),
+            zerosSpin("last_zeros##spin"),
+        ],
         [sg.HorizontalSeparator()],
     ]
 
@@ -123,8 +131,8 @@ def main():
         [sg.HorizontalSeparator()],
         [
             sg.Checkbox(
-                'Ir para aba "Output" depois de executado',
-                default=False,
+                'Ir para aba "Output" automaticamente',
+                default=True,
                 key="go_out##check",
             )
         ],
@@ -144,7 +152,11 @@ def main():
     ]
 
     output_layout = [
-        [sg.Output(key='out##output',)],
+        [
+            sg.Output(
+                key="out##output",echo_stdout_stderr=True
+            )
+        ],
     ]
 
     layout = [
@@ -306,7 +318,7 @@ def main():
                 cmd_args.append("--info")
 
                 # clear current output
-                out_text.update('')
+                out_text.update("")
                 msanalyzer.main(_args=cmd_args)
 
                 progress_bar.update(80)
@@ -316,8 +328,10 @@ def main():
                 progress_bar.update(100)
                 t0 = time.time()
 
-
                 window.refresh()
+
+                if values["go_out##check"]:
+                    window["principal##tab"].select()
 
         elif event == "input##xps":
 

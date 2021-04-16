@@ -20,7 +20,7 @@ from SizeDistributionBaseModel import SizeDistributionBaseModel
 from SizeDistributionModelsFactory import getPSDModelsList
 
 logger = logging.getLogger(__name__)
-__version__: str = "3.0.0"
+__version__: str = "3.1.0"
 __author__: str = "Marcus Bruno Fernandes Silva"
 __email__: str = "marcusbfs@gmail.com"
 
