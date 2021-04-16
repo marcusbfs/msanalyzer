@@ -1,0 +1,24 @@
++-------------------------------------------------------------------------+
+| msanalyzer 3.0.0                                                        |
+|                                                                         |
+| Author: Marcus Bruno Fernandes Silva                                    |
+| email: marcusbfs@gmail.com                                              |
+|                                                                         |
+| file analyzed: "D:\Applications\msanalyzer\input_examples\ms_input.xps" |
+| Date: 16-Apr-2021                                                       |
++-------------------------------------------------------------------------+
+
+Best models
+===========
+
+Ranking based on S (standard error mean). Lowest value is better.
+
+  #01 - Log-normal: S = 0.0105975
+  #02 - RRB: S = 0.0247229
+  #03 - GGS: S = 0.0857816
+
+Ranking based on R-squared (not trustworthy). Highest value is better.
+
+  #01 - Log-normal: R-squared = 0.9979723
+  #02 - RRB: R-squared = 0.9940924
+  #03 - GGS: R-squared = 0.9308988

@@ -1,7 +1,7 @@
 import os
 import sys
 import pathlib
-import subprocess
+import msanalyzer
 import time
 import re
 import threading
@@ -144,7 +144,7 @@ def main():
     ]
 
     output_layout = [
-        [sg.Multiline("", auto_refresh=True, key="out##multiline", disabled=True)],
+        [sg.Output(key='out##output',)],
     ]
 
     layout = [
@@ -188,7 +188,7 @@ def main():
     window.finalize()
 
     progress_bar: sg.Progress = window["exec##progress"]
-    out_text: sg.Multiline = window["out##multiline"]
+    out_text: sg.Multiline = window["out##output"]
     tabgroup: sg.Trabgroup = window["main##tabgroup"]
     input_xps_frame: sg.Frame = window["input_xps##frame"]
     options_frame: sg.Frame = window["options##frame"]
@@ -239,7 +239,10 @@ def main():
 
             if go_on:
 
-                cmd = [python_exe, msanalyzer_py]
+                if values["go_out##check"]:
+                    window["output##tab"].select()
+
+                cmd_args = []
 
                 progress_bar.update(5, visible=True)
                 window.Element("status##text").Update("Computando...")
@@ -249,20 +252,20 @@ def main():
 
                     xps_file = xps_file[0]
 
-                    cmd.append(xps_file)
+                    cmd_args.append(xps_file)
 
                 else:
-                    cmd.append("-M")
+                    cmd_args.append("-M")
                     for f in xps_file:
-                        cmd.append(f)
+                        cmd_args.append(f)
 
                     if not values["nomultiplolabel"]:
-                        cmd.append("--multi-labels")
+                        cmd_args.append("--multi-labels")
                         for f in xps_file:
                             basename = os.path.splitext(os.path.basename(f))[0]
-                            cmd.append(basename)
+                            cmd_args.append(basename)
                     else:
-                        cmd.append("--multi-no-labels")
+                        cmd_args.append("--multi-no-labels")
 
                 progress_bar.update(30)
                 window.refresh()
@@ -274,53 +277,45 @@ def main():
                 # -o
                 if output_basename[-1] != "_":
                     output_basename = output_basename + "_"
-                cmd.append("--output_basename")
-                cmd.append(output_basename)
+                cmd_args.append("--output_basename")
+                cmd_args.append(output_basename)
 
                 # -d
-                cmd.append("--output_dir")
-                cmd.append(output_dir)
+                cmd_args.append("--output_dir")
+                cmd_args.append(output_dir)
 
                 # -m
-                cmd.append("--diameter_mean")
-                cmd.append(media)
+                cmd_args.append("--diameter_mean")
+                cmd_args.append(media)
 
                 # -f
-                cmd.append("--first_zeros")
-                cmd.append(str(values["first_zeros##spin"]))
+                cmd_args.append("--first_zeros")
+                cmd_args.append(str(values["first_zeros##spin"]))
 
                 # -l
-                cmd.append("--last_zeros")
-                cmd.append(str(values["last_zeros##spin"]))
+                cmd_args.append("--last_zeros")
+                cmd_args.append(str(values["last_zeros##spin"]))
 
                 # -s
                 if values["logscale##checkbox"]:
-                    cmd.append("--log-scale")
+                    cmd_args.append("--log-scale")
 
                 progress_bar.update(60)
                 window.refresh()
 
-                cmd.append("--info")
+                cmd_args.append("--info")
 
-                # run command
-                out = subprocess.check_output(
-                    cmd, shell=True, stderr=subprocess.STDOUT
-                ).decode("utf-8")
+                # clear current output
+                out_text.update('')
+                msanalyzer.main(_args=cmd_args)
 
                 progress_bar.update(80)
                 window.refresh()
-
-                # send output
-                out_text.update(disabled=False)
-                out_text.update(value=out)
-                out_text.update(disabled=True)
 
                 window.Element("status##text").Update("Pronto!")
                 progress_bar.update(100)
                 t0 = time.time()
 
-                if values["go_out##check"]:
-                    window["output##tab"].select()
 
                 window.refresh()
 

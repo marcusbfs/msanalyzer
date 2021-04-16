@@ -10,7 +10,7 @@ import MasterSizerReport as msreport
 import MultipleFilesReport as multireport
 
 
-def main():
+def main(_args=None):
 
     start_time = time.time()
 
@@ -140,7 +140,7 @@ def main():
 
     parser.add_argument("-v", "--version", action="version", version=version_message)
 
-    args = parser.parse_args()
+    args = parser.parse_args(args=_args)
 
     meanType = list_of_diameterchoices[args.meantype[0]]
     output_dir = args.output_dir
@@ -232,4 +232,5 @@ def main():
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))
 
 
-main()
+if __name__ == "__main__":
+    main()
