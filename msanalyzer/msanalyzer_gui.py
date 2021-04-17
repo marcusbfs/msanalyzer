@@ -82,6 +82,7 @@ options_layout = [
 
         sg.FolderBrowse(
             button_text="...",
+            target='output_path##input'
         ),
         sg.Button(button_text="Abrir diretório", key="open_output_dir##button"),
 
