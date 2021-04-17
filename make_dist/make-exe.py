@@ -10,13 +10,18 @@ def shutil_copy_verbose(src:str, dst:str) -> None:
 
 start = time.time()
 
+cur_folder = os.path.abspath('.')
+src_folder = os.path.join(os.path.abspath('..'), 'msanalyzer')
+
 python_exe = sys.executable
 main_py = 'msanalyzer.py'
 main_gui_py = 'msanalyzer_gui.py'
 hidden_matplotlib = ['matplotlib.backends.backend_svg', 'matplotlib.backends.backend_tkagg']
-matplotlibrc = 'matplotlibrc'
-dist_folder = '.\dist'
-build_folder = r'.\build'
+matplotlibrc = os.path.join(src_folder, 'matplotlibrc')
+dist_folder = os.path.join(cur_folder, 'dist')
+build_folder = os.path.join(cur_folder, 'build')
+
+os.chdir(src_folder)
 
 if not os.path.isfile(matplotlibrc):
     raise RuntimeError(f'Could not find: "{matplotlibrc}"')
@@ -34,6 +39,8 @@ subprocess.call(cmd, shell=True)
 shutil_copy_verbose(matplotlibrc, os.path.join(dist_folder, os.path.splitext(main_py)[0]))
 cli_time = time.time() - cli_start_time
 print(f"CLI build time: {int(cli_time//60)} min {int(cli_time%60)} sec")
+
+exit()
 
 # gui
 cmd = cmd_common + ['-w', main_gui_py]
