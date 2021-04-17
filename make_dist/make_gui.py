@@ -21,7 +21,7 @@ def main():
     subprocess.call(cmd, shell=True)
     shutil_copy_verbose(matplotlibrc, os.path.join(dist_folder, os.path.splitext(main_gui_py)[0]))
     gui_time = time.time() - gui_start_time
-    print(f"GUI build time: {int(gui_time//60)} min {int(gui_time%60)} sec")
+    print(f"\nGUI build time: {int(gui_time//60)} min {int(gui_time%60)} sec")
 
 
 if __name__ == "__main__":

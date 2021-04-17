@@ -21,7 +21,7 @@ def main():
     subprocess.call(cmd, shell=True)
     shutil_copy_verbose(matplotlibrc, os.path.join(dist_folder, os.path.splitext(main_py)[0]))
     cli_time = time.time() - cli_start_time
-    print(f"CLI build time: {int(cli_time//60)} min {int(cli_time%60)} sec")
+    print(f"\nCLI build time: {int(cli_time//60)} min {int(cli_time%60)} sec")
 
 
 if __name__ == "__main__":
