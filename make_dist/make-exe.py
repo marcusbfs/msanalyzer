@@ -40,8 +40,6 @@ shutil_copy_verbose(matplotlibrc, os.path.join(dist_folder, os.path.splitext(mai
 cli_time = time.time() - cli_start_time
 print(f"CLI build time: {int(cli_time//60)} min {int(cli_time%60)} sec")
 
-exit()
-
 # gui
 cmd = cmd_common + ['-w', main_gui_py]
 gui_start_time = time.time()
