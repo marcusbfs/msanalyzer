@@ -6,11 +6,32 @@ import time
 import re
 import threading
 
+from matplotlib.ticker import NullFormatter  # useful for `logit` scale
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib
+matplotlib.use('TkAgg')
+
+
 import PySimpleGUI as sg
 
 import icons_gui
 
+
 sg.theme("DarkAmber")  # Add a touch of color
+
+fig_canvas_agg = None
+
+def delete_figure_agg(figure_agg):
+    figure_agg.get_tk_widget().forget()
+    plt.close('all')
+
+def draw_figure(canvas, figure):
+    figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
+    figure_canvas_agg.draw()
+    figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
+    return figure_canvas_agg
 
 
 def long_function_thread(window, cmd_args):
@@ -49,7 +70,7 @@ output_dir: str = ""
 output_basename: str = ""
 t0: float = time.time()
 single_file_mode: bool = True
-time_progress_bar_to_exit_sec: float = 1.5
+time_progress_bar_to_exit_sec: float = 2.0
 
 sg.set_options(font=("Helvetica", 16))
 
@@ -116,6 +137,12 @@ advanced_options_layout = [
     [sg.HorizontalSeparator()],
 ]
 
+
+tab_plot_layout = [
+    [sg.T('', k='plot_text')],
+    [sg.Canvas(k='canvas')],
+    ]
+
 layout_principal = [
     [
         sg.Frame(
@@ -163,6 +190,7 @@ layout = [
                                     key="principal##tab",
                                 ),
                                 sg.Tab("Opções avançadas", advanced_options_layout),
+                                sg.Tab("Plot", tab_plot_layout, key="plot##tab"),
                                 sg.Tab("Output", output_layout, key="output##tab"),
                             ]
                         ],
@@ -215,12 +243,14 @@ window["input##xps"].expand(expand_x=True)
 window["output_path##input"].expand(expand_x=True)
 window["basename##input"].expand(expand_x=True)
 window["main##col"].expand(expand_x=True, expand_y=True)
+window["canvas"].expand(expand_x=True, expand_y=True)
 
 window.set_min_size((1080, 400))
 
 progress_bar.update(0, visible=False)
 
 can_clear_status :bool = True
+
 
 # Event Loop to process "events" and get the "values" of the inputs
 while True:
@@ -331,7 +361,6 @@ while True:
             window.refresh()
             window.write_event_value('-THREAD DONE-','')
 
-
     if event == '-THREAD DONE-':
         window.Element("status##text").Update("Pronto!")
         progress_bar.update(100)
@@ -341,6 +370,15 @@ while True:
         can_clear_status = True
         exec_button.update(disabled=False)
         window.refresh()
+
+        # plot
+        if msanalyzer.fig:
+            # clear canvas
+            window['canvas'].tk_canvas.delete('all')
+            if fig_canvas_agg:
+                delete_figure_agg(fig_canvas_agg)
+            # plot
+            fig_canvas_agg = draw_figure(window['canvas'].TKCanvas, msanalyzer.fig)
 
 
     if event == "input##xps":

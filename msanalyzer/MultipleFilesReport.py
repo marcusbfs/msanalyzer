@@ -75,6 +75,7 @@ class MultipleFilesReport:
         plt.savefig(filename, dpi=1200)
 
         logger.info('Saved multiuple curves to "{}"'.format(filename))
+        return fig
         # end of plot
 
     def frequencyPlot(self, output_path: str) -> None:

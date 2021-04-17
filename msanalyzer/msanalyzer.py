@@ -9,6 +9,7 @@ logger = logging.getLogger("msanalyzer")
 import MasterSizerReport as msreport
 import MultipleFilesReport as multireport
 
+fig = None
 
 def main(_args=None):
 
@@ -162,6 +163,8 @@ def main(_args=None):
         os.mkdir(output_dir)
         logger.info('Directory "{}" created'.format(output_dir))
 
+    global fig
+
     # calculate results - one file only input
     if not args.multiple_files:
         logger.info("Single file mode")
@@ -192,7 +195,7 @@ def main(_args=None):
         excel_data = output_basename + "curve_data"
         best_model_basename = "best_models_ranking"
 
-        reporter.saveFig(output_dir, curves)
+        fig = reporter.saveFig(output_dir, curves)
         reporter.saveModelsFig(output_dir, PSD_model)
         reporter.saveData(output_dir, curves_data)
         reporter.saveModelsData(output_dir, PSD_data)
@@ -226,7 +229,7 @@ def main(_args=None):
         )
         MultiFrequency_output_file = os.path.join(output_dir, "MultiFrequency")
 
-        multiReporter.sizeDistributionPlot(MultiSizeDistribution_output_file)
+        fig = multiReporter.sizeDistributionPlot(MultiSizeDistribution_output_file)
         multiReporter.frequencyPlot(MultiFrequency_output_file)
 
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))

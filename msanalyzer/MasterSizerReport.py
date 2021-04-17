@@ -104,6 +104,8 @@ class MasterSizerReport:
         return
 
     def saveFig(self, output_dir: str, base_filename: str) -> None:
+        # clear old figures
+        plt.clf()
         # plot
         fig, ax1 = plt.subplots()
         ax2 = plt.twinx()
@@ -143,6 +145,7 @@ class MasterSizerReport:
         filename = os.path.join(output_dir, base_filename + ".svg")
         plt.savefig(filename, dpi=1200)
         logger.info('Saved curves to "{}"'.format(filename))
+        return fig
         # end of plot
 
     def saveModelsFig(self, output_dir: str, base_filename: str) -> None:
