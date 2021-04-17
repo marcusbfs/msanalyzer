@@ -150,6 +150,8 @@ class MasterSizerReport:
 
     def saveModelsFig(self, output_dir: str, base_filename: str) -> None:
 
+        models_figs = {}
+
         for model in self.__models:
             # plot
             fig, ax = plt.subplots()
@@ -185,7 +187,11 @@ class MasterSizerReport:
             )
             plt.savefig(filename, dpi=1200)
             logger.info('Saved {} curve to "{}"'.format(model.getModelName(), filename))
+
+            models_figs[model.getModelName()] = fig
             # end of plot
+
+        return models_figs
 
     def saveData(self, output_dir: str, data_filename: str) -> None:
         output_file = os.path.join(output_dir, data_filename)

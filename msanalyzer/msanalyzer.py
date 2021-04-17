@@ -11,9 +11,15 @@ import MultipleFilesReport as multireport
 
 fig = None
 
+models_figs_labels = []
+models_figs = []
+
 def main(_args=None):
 
     start_time = time.time()
+
+    global models_figs_labels
+    global models_figs
 
     version_message = (
         "MasterSizerReport "
@@ -196,7 +202,7 @@ def main(_args=None):
         best_model_basename = "best_models_ranking"
 
         fig = reporter.saveFig(output_dir, curves)
-        reporter.saveModelsFig(output_dir, PSD_model)
+        models_figs = reporter.saveModelsFig(output_dir, PSD_model)
         reporter.saveData(output_dir, curves_data)
         reporter.saveModelsData(output_dir, PSD_data)
         reporter.saveExcel(output_dir, excel_data)

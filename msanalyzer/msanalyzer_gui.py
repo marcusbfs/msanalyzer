@@ -22,6 +22,7 @@ import icons_gui
 sg.theme("DarkAmber")  # Add a touch of color
 
 fig_canvas_agg = None
+fig_model_canvas_agg = None
 
 def delete_figure_agg(figure_agg):
     figure_agg.get_tk_widget().forget()
@@ -176,6 +177,12 @@ output_layout = [
     ],
 ]
 
+
+tab_models_layout = [ 
+    [sg.T('Modelo: '), sg.Combo(['GGS', 'RRB', 'Log-normal'],default_value='RRB',k='model##combo', size=(15,1), readonly=True, enable_events=True),],
+    [sg.Canvas(k='model##canvas')],
+]
+
 layout = [
     [
         sg.Column(
@@ -191,6 +198,7 @@ layout = [
                                 ),
                                 sg.Tab("Opções avançadas", advanced_options_layout),
                                 sg.Tab("Plot", tab_plot_layout, key="plot##tab"),
+                                sg.Tab("Modelos", tab_models_layout, key="models##tab"),
                                 sg.Tab("Output", output_layout, key="output##tab"),
                             ]
                         ],
@@ -234,6 +242,8 @@ tabgroup: sg.TabGroup = window["main##tabgroup"]
 input_xps_frame: sg.Frame = window["input_xps##frame"]
 options_frame: sg.Frame = window["options##frame"]
 exec_button : sg.Button = window['Executar']
+model_canvas : sg.Canvas = window['model##canvas']
+tab_models : sg.Tab = window['models##tab']
 
 out_text.expand(expand_x=True, expand_y=True)
 tabgroup.expand(expand_x=True, expand_y=True)
@@ -244,6 +254,7 @@ window["output_path##input"].expand(expand_x=True)
 window["basename##input"].expand(expand_x=True)
 window["main##col"].expand(expand_x=True, expand_y=True)
 window["canvas"].expand(expand_x=True, expand_y=True)
+model_canvas.expand(expand_x=True, expand_y=True)
 
 window.set_min_size((1080, 400))
 
@@ -251,6 +262,7 @@ progress_bar.update(0, visible=False)
 
 can_clear_status :bool = True
 
+tab_models.update(disabled=True)
 
 # Event Loop to process "events" and get the "values" of the inputs
 while True:
@@ -380,6 +392,18 @@ while True:
             # plot
             fig_canvas_agg = draw_figure(window['canvas'].TKCanvas, msanalyzer.fig)
 
+        if single_file_mode:
+            # Display models
+            if len(msanalyzer.models_figs) > 0:
+                tab_models.update(disabled=False)
+                model_canvas.tk_canvas.delete('all')
+                if fig_model_canvas_agg:
+                    delete_figure_agg(fig_model_canvas_agg)
+                fig_model_canvas_agg = draw_figure(model_canvas.TKCanvas, msanalyzer.models_figs['RRB'])
+        else:
+            tab_models.update(disabled=True)
+
+
 
     if event == "input##xps":
 
@@ -426,6 +450,15 @@ while True:
                 f'Arquivo "{xps_file}" não existe"', title="Erro no arquivo XPS"
             )
             continue
+
+    if event == 'model##combo':
+        model = values[event]
+
+        if len(msanalyzer.models_figs) > 0:
+            model_canvas.tk_canvas.delete('all')
+            if fig_model_canvas_agg:
+                delete_figure_agg(fig_model_canvas_agg)
+            fig_model_canvas_agg = draw_figure(model_canvas.TKCanvas, msanalyzer.models_figs[model])
 
     if event in ("first_zeros##spin", "last_zeros##spin"):
         window.FindElement(event).Update(
