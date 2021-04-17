@@ -432,7 +432,7 @@ while True:
             int(re.sub(r"[^0-9]", "", str(values[event])))
         )
 
-    window['plot#tab'].update(disabled=False if msanalyzer.fig else True)
+    window['plot##tab'].update(disabled=False if msanalyzer.fig else True)
 
     if can_clear_status:
         if (time.time() - t0) >= time_progress_bar_to_exit_sec:
