@@ -1,5 +1,6 @@
 # output folder
 mastersizer_output/
+input_examples/*_output/
 # venv folder
 msanalyzer_venv/
 msanalyzer/.vscode
