@@ -3,22 +3,21 @@ import logging
 import argparse
 import time
 import json
+import matplotlib.pyplot as plt
 
 logger = logging.getLogger("msanalyzer")
 
 import MasterSizerReport as msreport
 import MultipleFilesReport as multireport
 
-fig = None
+fig : plt.figure = None
 
-models_figs_labels = []
-models_figs = []
+models_figs : dict = {}
 
 def main(_args=None):
 
     start_time = time.time()
 
-    global models_figs_labels
     global models_figs
 
     version_message = (

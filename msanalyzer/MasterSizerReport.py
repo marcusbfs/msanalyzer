@@ -103,7 +103,7 @@ class MasterSizerReport:
         logger.info('Exported data to excel file: "{}"'.format(filename))
         return
 
-    def saveFig(self, output_dir: str, base_filename: str) -> None:
+    def saveFig(self, output_dir: str, base_filename: str) -> plt.figure:
         # clear old figures
         plt.clf()
         # plot
@@ -148,7 +148,7 @@ class MasterSizerReport:
         return fig
         # end of plot
 
-    def saveModelsFig(self, output_dir: str, base_filename: str) -> None:
+    def saveModelsFig(self, output_dir: str, base_filename: str) -> dict:
 
         models_figs = {}
 

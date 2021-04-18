@@ -6,6 +6,8 @@ import time
 import re
 import threading
 
+from typing import List
+
 from matplotlib.ticker import NullFormatter  # useful for `logit` scale
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,25 +23,25 @@ import icons_gui
 
 sg.theme("DarkAmber")  # Add a touch of color
 
-fig_canvas_agg = None
-fig_model_canvas_agg = None
+fig_canvas_agg : FigureCanvasTkAgg = None
+fig_model_canvas_agg : FigureCanvasTkAgg = None
 
 def delete_figure_agg(figure_agg):
     figure_agg.get_tk_widget().forget()
     plt.close('all')
 
-def draw_figure(canvas, figure):
+def draw_figure(canvas, figure : plt.figure) -> FigureCanvasTkAgg:
     figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
     figure_canvas_agg.draw()
     figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
     return figure_canvas_agg
 
 
-def long_function_thread(window, cmd_args):
+def long_function_thread(window : sg.Window, cmd_args:List[str]) -> None:
     msanalyzer.main(cmd_args)
     window.write_event_value('-THREAD DONE-', '')
 
-def long_function():
+def long_function() -> None:
     threading.Thread(target=long_function_thread, args=(window, cmd_args), daemon=True).start()
 
 def zerosSpin(
@@ -48,7 +50,7 @@ def zerosSpin(
     max_val: int = 50,
     size=(4, 1),
     default_val: int = 1,
-):
+) -> sg.Spin :
     return sg.Spin(
         values=[i for i in range(min_val, max_val + 1)],
         initial_value=default_val,
@@ -58,7 +60,6 @@ def zerosSpin(
         readonly=True,
         text_color="black",
     )
-
 
 
 python_exe = os.path.join(os.path.dirname(sys.executable), "python.exe")
@@ -141,7 +142,8 @@ advanced_options_layout = [
 
 
 tab_plot_layout = [
-    [sg.T('', k='plot_text')],
+    [sg.T('', k='plot_text', size=(70,1), justification='left')],
+    [sg.HorizontalSeparator()],
     [sg.Canvas(k='canvas')],
     ]
 
@@ -181,7 +183,12 @@ output_layout = [
 
 tab_models_layout = [ 
     [sg.T('Modelo: '), sg.Combo(['GGS', 'RRB', 'Log-normal'],default_value='RRB',k='model##combo', size=(15,1), readonly=True, enable_events=True),],
+    [sg.HorizontalSeparator()],
+    [sg.T('', k='model_name_text', size=(70, 1), justification='left')],
+    [sg.HorizontalSeparator()],
     [sg.Canvas(k='model##canvas')],
+    [sg.HorizontalSeparator()],
+    [sg.B('Ranking dos modelos', k='models_rank##button'), sg.T('',size=(5,1)),sg.B('Dados do modelo', k='open_model_data##button')],
 ]
 
 layout = [
@@ -264,6 +271,9 @@ progress_bar.update(0, visible=False)
 can_clear_status :bool = True
 
 tab_models.update(disabled=True)
+
+button_text = f'Dados do modelo {"RRB"}'
+window['open_model_data##button'].update(text=button_text)
 
 # Event Loop to process "events" and get the "values" of the inputs
 while True:
@@ -392,6 +402,10 @@ while True:
                 delete_figure_agg(fig_canvas_agg)
             # plot
             fig_canvas_agg = draw_figure(window['canvas'].TKCanvas, msanalyzer.fig)
+            # set name
+            file_name = 'Arquivo: ' + os.path.basename(values['input##xps'])
+            # window['plot_text'].set_size((len(file_name),1))
+            window['plot_text'].update(file_name)
 
         if single_file_mode:
             # Display models
@@ -400,10 +414,29 @@ while True:
                 model_canvas.tk_canvas.delete('all')
                 if fig_model_canvas_agg:
                     delete_figure_agg(fig_model_canvas_agg)
-                fig_model_canvas_agg = draw_figure(model_canvas.TKCanvas, msanalyzer.models_figs['RRB'])
+                curr_model_label = values['model##combo']
+                fig_model_canvas_agg = draw_figure(model_canvas.TKCanvas, msanalyzer.models_figs[curr_model_label])
+                # set name
+                file_name = 'Arquivo: ' + os.path.basename(values['input##xps'])
+                window['model_name_text'].update(file_name)
         else:
             tab_models.update(disabled=True)
 
+    if event == 'models_rank##button':
+        output_dir = os.path.abspath(values["output_path##input"])
+        rank_data_file = os.path.join(output_dir, 'best_models_ranking.txt')
+        if os.path.isfile(rank_data_file):
+            os.startfile(rank_data_file)
+
+    if event == 'open_model_data##button':
+        output_dir = os.path.abspath(values["output_path##input"])
+        base_file =output_basename = values["basename##input"]
+        model_name = values['model##combo']
+        out_file = model_name + '_' + base_file + '_model_parameters.txt'
+        model_data_file = os.path.join(output_dir, out_file)
+
+        if os.path.isfile(model_data_file):
+            os.startfile(model_data_file)
 
 
     if event == "input##xps":
@@ -455,11 +488,16 @@ while True:
     if event == 'model##combo':
         model = values[event]
 
+        # update plot
         if len(msanalyzer.models_figs) > 0:
             model_canvas.tk_canvas.delete('all')
             if fig_model_canvas_agg:
                 delete_figure_agg(fig_model_canvas_agg)
             fig_model_canvas_agg = draw_figure(model_canvas.TKCanvas, msanalyzer.models_figs[model])
+
+        # update button
+        button_text = f'Dados do modelo {model}'
+        window['open_model_data##button'].update(text=button_text)
 
     if event in ("first_zeros##spin", "last_zeros##spin"):
         window.FindElement(event).Update(

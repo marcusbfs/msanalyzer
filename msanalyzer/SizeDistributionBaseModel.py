@@ -108,6 +108,8 @@ class SizeDistributionBaseModel:
             self.getSauterDiameterValue()
         )
 
+        content += "\n"
+
         content += "D05 = {:.10f}\n".format(self.getDnFromCompute(0.05))
         content += "D10 = {:.10f}\n".format(self.getDnFromCompute(0.1))
         content += "D25 = {:.10f}\n".format(self.getDnFromCompute(0.25))
