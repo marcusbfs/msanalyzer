@@ -5,8 +5,11 @@ import msanalyzer
 import time
 import re
 import threading
+import json
+import tkinter
+from tkinter import font
 
-from typing import List
+from typing import List, TypedDict
 
 from matplotlib.ticker import NullFormatter  # useful for `logit` scale
 import matplotlib.pyplot as plt
@@ -15,13 +18,49 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib
 matplotlib.use('TkAgg')
 
+class ConfigDict(TypedDict):
+    theme: str
+    font: str
+    font_size: int
 
 import PySimpleGUI as sg
 
 import icons_gui
 
+script_folder = pathlib.Path(__file__).parent.absolute()
+config_file : str = os.path.join(script_folder, 'config_msanalyzer.cfg')
 
-sg.theme("DarkAmber")  # Add a touch of color
+root = tkinter.Tk()
+fonts = list(font.families())
+fonts.extend(['Helvetica'])
+fonts.sort()
+root.destroy()
+
+DEFAULT_SETTINGS : ConfigDict = {'theme': 'DarkAmber', 'font': 'Helvetica' , 'font_size': 16}
+
+##################### Load/Save Settings File #####################
+def save_settings(settings_file : str, settings : ConfigDict) -> None:
+    with open(settings_file, 'w') as f:
+        json.dump(settings, f)
+
+def load_settings(settings_file : str, default_settings : ConfigDict) -> ConfigDict:
+    try:
+        with open(settings_file, 'r') as f:
+            settings = json.load(f)
+    except Exception as e:
+        print('Creating default config file...')
+        settings = default_settings
+        save_settings(settings_file, settings)
+    return settings
+
+CURRENT_SETTINGS : ConfigDict = load_settings(config_file, DEFAULT_SETTINGS)
+
+cf_theme : str = CURRENT_SETTINGS['theme']
+cf_font : str= CURRENT_SETTINGS['font']
+cf_font_size : int = int( CURRENT_SETTINGS['font_size'])
+
+sg.theme(cf_theme)
+sg.set_options(font=(cf_font, cf_font_size))
 
 fig_canvas_agg : FigureCanvasTkAgg = None
 fig_model_canvas_agg : FigureCanvasTkAgg = None
@@ -61,6 +100,20 @@ def zerosSpin(
         text_color="black",
     )
 
+def create_settings_window(settings : ConfigDict) -> sg.Window:
+    sg.theme(settings['theme'])
+
+    def TextLabel(text): return sg.Text(text+':', justification='r', size=(15,1))
+
+    layout = [  [sg.Text('Configurações',)],
+            [sg.T('Tema: '), sg.Combo(sg.theme_list(),default_value=cf_theme,k='theme#combo', readonly=True)],
+            [sg.T('Fonte: '), sg.Combo(fonts,default_value=cf_font,k='font#combo', readonly=True)],
+            [sg.T('Tamanho da fonte: '),sg.Spin(values=[i for i in range(10, 51)], initial_value=int(cf_font_size), size=(5, 1), k='font_size', readonly=True)],
+                [sg.Button('Salvar', k='save_config'), sg.Button('Sair', k='sair_config')]  ]
+
+    window = sg.Window('Configurações', layout, keep_on_top=True, finalize=True)
+
+    return window
 
 python_exe = os.path.join(os.path.dirname(sys.executable), "python.exe")
 pythonw_exe = os.path.join(os.path.dirname(sys.executable), "pythonw.exe")
@@ -73,8 +126,6 @@ output_basename: str = ""
 t0: float = time.time()
 single_file_mode: bool = True
 time_progress_bar_to_exit_sec: float = 2.0
-
-sg.set_options(font=("Helvetica", 16))
 
 options_layout = [
     [sg.Col([[sg.Text(text="Diretório de saída:")], [sg.Text(text="Nome de saída:")]]), 
@@ -138,6 +189,8 @@ advanced_options_layout = [
     [sg.Col([[sg.Text(text="Zeros à esquerda: ")],[sg.Text(text="Zeros à direita:  ")]]),
         sg.Col([[zerosSpin("first_zeros##spin")],[zerosSpin("last_zeros##spin")]],element_justification='left')],
     [sg.HorizontalSeparator()],
+    [sg.B('Opções do aplicativo', k='app_config##button')],
+    [sg.HorizontalSeparator()],
 ]
 
 
@@ -180,9 +233,8 @@ output_layout = [
     ],
 ]
 
-
 tab_models_layout = [ 
-    [sg.T('Modelo: '), sg.Combo(['GGS', 'RRB', 'Log-normal'],default_value='RRB',k='model##combo', size=(15,1), readonly=True, enable_events=True),],
+    [sg.T('Modelo: '), sg.Combo(['GGS', 'RRB', 'Log-normal'],default_value='RRB',k='model##combo', size=(15,1), readonly=True, enable_events=True,),],
     [sg.HorizontalSeparator()],
     [sg.T('', k='model_name_text', size=(70, 1), justification='left')],
     [sg.HorizontalSeparator()],
@@ -498,6 +550,23 @@ while True:
         # update button
         button_text = f'Dados do modelo {model}'
         window['open_model_data##button'].update(text=button_text)
+
+    if event == 'app_config##button':
+        event, values = create_settings_window(CURRENT_SETTINGS).read(close=True)
+        if event == 'save_config':
+            try:
+                CURRENT_SETTINGS['theme'] :str = str(values['theme#combo'])
+                CURRENT_SETTINGS['font'] : str = str(values['font#combo'])
+                CURRENT_SETTINGS['font_size'] : int = int(values['font_size'])
+
+                save_settings(config_file, CURRENT_SETTINGS)
+                window['status##text'].update('Salvo! É necessário reiniciar o app!')
+            except:
+                window['status##text'].update('Erro ao salvar configurações!')
+
+            can_clear_status = True
+            t0 = time.time()
+            window.refresh()
 
     if event in ("first_zeros##spin", "last_zeros##spin"):
         window.FindElement(event).Update(
