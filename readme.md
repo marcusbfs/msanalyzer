@@ -8,9 +8,9 @@ Para usar a interface gráfica, baixe o arquivo *msanalyzer_gui_win64.zip* dispo
 
 Dentro da pasta descompactada, haverá um arquivo chamado *msanalyzer_gui.exe*. Execute-o para iniciar o programa.
 
-*Obs: Ao abrir o executável pela primeira vez, pode ser que o programa demora para iniciar. Isto é normal: o interpretador do Python precisa ser descompactado; este procedimento não deve demorar mais que 20 segundos. Apenas espere :)*
+*Obs: Ao abrir o executável pela primeira vez, pode ser que o programa demore para iniciar. Isto é normal: o interpretador do Python precisa ser descompactado; este procedimento não deve demorar mais que 20 segundos. Apenas espere e não se preocupe :)*
 
-Qualquer dúvida sobre a utilização do programa, sugestões de melhoria ou desejo de colaborar, sinta-se a vontade para entrar em contato!
+Qualquer dúvida sobre a utilização do programa, sugestões de melhoria ou desejo de colaborar com o código, sinta-se a vontade para entrar em contato!
 
 ### Seleção e visualização de modelos
 [![Models](https://raw.githubusercontent.com/marcusbfs/msanalyzer/master/images/models_tab.png)](https://raw.githubusercontent.com/marcusbfs/msanalyzer/master/images/models_tab.png)
