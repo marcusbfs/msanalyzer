@@ -14,13 +14,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from MasterSizerInput import MasterSizerInput
+from MasterSizerInputReader import MasterSizerInputReader
 
 from RRBSizeDistributionModel import RRB
 from SizeDistributionBaseModel import SizeDistributionBaseModel
 from SizeDistributionModelsFactory import getPSDModelsList
 
 logger = logging.getLogger(__name__)
-__version__: str = "3.1.0"
+__version__: str = "3.2.0"
 __author__: str = "Marcus Bruno Fernandes Silva"
 __email__: str = "marcusbfs@gmail.com"
 
@@ -32,7 +33,9 @@ class DiameterMeanType(Enum):
 
 
 class MasterSizerReport:
-    def __init__(self) -> None:
+    def __init__(
+        self, input_reader: MasterSizerInputReader = MasterSizerInput()
+    ) -> None:
         self.__diameters_filename: str = ""
         self.__vol_in_per_filename: str = ""
         self.__number_of_points: int = 0
@@ -43,7 +46,7 @@ class MasterSizerReport:
         self.__x_data_mean: np.array = None
         self.__cumulative_y_vals: np.array = None
         self.__diff_of_cumulative_y_vals: np.array = None
-        self.__ms_input: MasterSizerInput = MasterSizerInput()
+        self.__ms_input: MasterSizerInputReader = input_reader
         self.__version: str = __version__
         self.__input_xps_file: str = ""
         self.__meantype: DiameterMeanType = DiameterMeanType.geometric
@@ -57,13 +60,6 @@ class MasterSizerReport:
         self.__num_of_models: int = len(self.__models)
 
     # Public
-    def setDataFiles(
-        self, x_filename: str, y_filename: str, isCommaSeparator: bool = False
-    ) -> None:
-
-        self.__ms_input.setDataFiles(x_filename, y_filename, isCommaSeparator)
-        self.__updateXY_data()
-
     def setLogScale(self, logscale: bool = True) -> None:
         self.__log_scale = logscale
         logger.info("Log scale setted to {}".format(logscale))
@@ -71,10 +67,10 @@ class MasterSizerReport:
     def setXPSfile(self, xps_filename: str) -> None:
         self.__input_xps_file = xps_filename
         logger.info('XPS file setted to "{}"'.format(xps_filename))
-        self.__ms_input.setXPSfile(xps_filename)
+        self.__ms_input.setFile(xps_filename)
         self.__updateXY_data()
 
-    def setXandY(self, x_vals : List[float], y_vals: List[float]) -> None:
+    def setXandY(self, x_vals: List[float], y_vals: List[float]) -> None:
         self.__x_data = x_vals
         self.__y_data = y_vals
         assert len(self.__x_data) == len(self.__y_data) + 1
@@ -419,6 +415,7 @@ class MasterSizerReport:
         return MasterSizerReport.formatLogScaleXaxis(xaxis)
 
     def __updateXY_data(self) -> None:
+        self.__ms_input.extractData()
         self.__x_data = self.__ms_input.getx()
         self.__y_data = self.__ms_input.gety()
         self.__number_of_points = len(self.__y_data)

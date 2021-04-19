@@ -1,3 +1,4 @@
+import abc
 from typing import List
 
 import numpy as np
@@ -8,7 +9,7 @@ logger = logging.getLogger(__name__)
 import scipy.optimize
 
 
-class SizeDistributionBaseModel:
+class SizeDistributionBaseModel(abc.ABC):
     def __init__(self) -> None:
         self.__r_squared: float = 0.0
         self.__std_error_mean: float = 0.0
@@ -18,15 +19,19 @@ class SizeDistributionBaseModel:
         self.model_expression_str: str = ""
         self.model_name_str: str = ""
 
-    def specificModel(self, d : float, *args : float) -> float:
+    @abc.abstractmethod
+    def specificModel(self, d: float, *args: float) -> float:
         raise NotImplementedError
 
+    @abc.abstractmethod
     def getInitialGuesses(self, x: np.ndarray, y: np.ndarray) -> List[float]:
         raise NotImplementedError
 
+    @abc.abstractmethod
     def getSauterDiameterValue(self) -> float:
         raise NotImplementedError
 
+    @abc.abstractmethod
     def getSauterDiameterExpression(self) -> str:
         raise NotImplementedError
 

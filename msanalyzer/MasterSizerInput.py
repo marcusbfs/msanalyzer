@@ -6,10 +6,12 @@ from typing import List
 
 import fitz
 
+from MasterSizerInputReader import MasterSizerInputReader
+
 logger = logging.getLogger(__name__)
 
 
-class MasterSizerInput:
+class MasterSizerInput(MasterSizerInputReader):
     def __init__(self) -> None:
 
         self.__text: str = ""
@@ -17,15 +19,15 @@ class MasterSizerInput:
         self.__x_header: str = r"Size (µm)"
         self.__y_header: str = r"Volume In %"
 
-        self.__x_values : List[float] = []
-        self.__y_values : List[float] = []
+        self.__x_values: List[float] = []
+        self.__y_values: List[float] = []
 
         self.__n_tables: int = 6
 
         self.__values_per_table: int = 17
         self.__values_last_table: int = 15
 
-    def setXPSfile(self, input_xps: str) -> None:
+    def setFile(self, input_xps: str) -> None:
 
         if not os.path.exists(input_xps):
             logger.critical('File "{}" does not exist'.format(input_xps))
@@ -37,28 +39,24 @@ class MasterSizerInput:
         self.__text = page.getText()
         doc.close()
 
-        self.__extractData()
-        logger.info('Data extracted from "{}"'.format(input_xps))
+        logger.info('Raw data loaded from "{}"'.format(input_xps))
 
-    def setDataFiles(
-        self, x_filename: str, y_filename: str, isCommaSeparator: bool = False
-    ) -> None:
-
-        self.__x_values = np.loadtxt(x_filename)
-        self.__y_values = np.loadtxt(y_filename) / 100.0
-        assert len(self.__x_values) == len(self.__y_values) + 1
-
-    def getx(self) -> np.array:
+    def getx(self) -> List[float]:
         return self.__x_values
 
-    def gety(self) -> np.array:
+    def gety(self) -> List[float]:
         return self.__y_values
 
-    def __extractData(self) -> None:
+    def extractData(self) -> None:
         lines = self.__text.splitlines()
         n_of_lines = len(lines)
 
+        logger.info("Parsing raw data loaded")
+
         table_count = 1
+
+        self.__x_values = []
+        self.__y_values = []
 
         i = 0
 

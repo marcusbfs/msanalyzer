@@ -27,6 +27,8 @@ import PySimpleGUI as sg
 
 import icons_gui
 
+from SizeDistributionModelsFactory import available_models
+
 script_folder = pathlib.Path(__file__).parent.absolute()
 config_file : str = os.path.join(script_folder, 'config_msanalyzer.cfg')
 
@@ -235,7 +237,7 @@ output_layout = [
 ]
 
 tab_models_layout = [ 
-    [sg.T('Modelo: '), sg.Combo(['GGS', 'RRB', 'Log-normal'],default_value='RRB',k='model##combo', size=(15,1), readonly=True, enable_events=True,),],
+    [sg.T('Modelo: '), sg.Combo(available_models,default_value='RRB',k='model##combo', size=(15,1), readonly=True, enable_events=True,),],
     [sg.HorizontalSeparator()],
     [sg.T('', k='model_name_text', size=(70, 1), justification='left')],
     [sg.HorizontalSeparator()],
@@ -298,13 +300,14 @@ window.Resizable = True
 window.finalize()
 
 progress_bar: sg.Progress = window["exec##progress"]
-out_text: sg.Multiline = window["out##output"]
+out_text: sg.Output = window["out##output"]
 tabgroup: sg.TabGroup = window["main##tabgroup"]
 input_xps_frame: sg.Frame = window["input_xps##frame"]
 options_frame: sg.Frame = window["options##frame"]
 exec_button : sg.Button = window['Executar']
 model_canvas : sg.Canvas = window['model##canvas']
 tab_models : sg.Tab = window['models##tab']
+tab_plot : sg.Tab = window['plot##tab']
 
 out_text.expand(expand_x=True, expand_y=True)
 tabgroup.expand(expand_x=True, expand_y=True)
@@ -321,7 +324,7 @@ window.set_min_size((1080, 400))
 
 progress_bar.update(0, visible=False)
 
-can_clear_status :bool = True
+can_clear_status : bool = True
 
 tab_models.update(disabled=True)
 
@@ -331,9 +334,6 @@ window['open_model_data##button'].update(text=button_text)
 # Event Loop to process "events" and get the "values" of the inputs
 while True:
     event, values = window.read(timeout=333)
-
-    # event, values = window.read()
-    # print("-------------------\n", event, values, "\n---------------")
 
     if (
         event == sg.WIN_CLOSED or event == "Cancel" or event == None
@@ -575,6 +575,7 @@ while True:
         )
 
     window['plot##tab'].update(disabled=False if msanalyzer.fig else True)
+
 
     if can_clear_status:
         if (time.time() - t0) >= time_progress_bar_to_exit_sec:
