@@ -9,7 +9,7 @@ import scipy.optimize
 
 
 class SizeDistributionBaseModel:
-    def __init__(self):
+    def __init__(self) -> None:
         self.__r_squared: float = 0.0
         self.__std_error_mean: float = 0.0
         self.model_par_values: List[float] = []
@@ -18,7 +18,7 @@ class SizeDistributionBaseModel:
         self.model_expression_str: str = ""
         self.model_name_str: str = ""
 
-    def specificModel(self, d, *args) -> float:
+    def specificModel(self, d : float, *args : float) -> float:
         raise NotImplementedError
 
     def getInitialGuesses(self, x: np.ndarray, y: np.ndarray) -> List[float]:
@@ -134,10 +134,10 @@ class SizeDistributionBaseModel:
     def getDn(self, x: np.ndarray, y: np.ndarray, n: float, DnInitial: float) -> float:
         for i in range(len(x)):
             if y[i] >= n:
-                return x[i]
+                return float(x[i])
         return DnInitial
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.getModelName()
 
     def getDnFromCompute(self, n: float) -> float:

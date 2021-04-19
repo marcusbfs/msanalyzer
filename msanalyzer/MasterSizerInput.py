@@ -2,6 +2,7 @@ import os
 import logging
 
 import numpy as np
+from typing import List
 
 import fitz
 
@@ -9,15 +10,15 @@ logger = logging.getLogger(__name__)
 
 
 class MasterSizerInput:
-    def __init__(self):
+    def __init__(self) -> None:
 
         self.__text: str = ""
 
         self.__x_header: str = r"Size (µm)"
         self.__y_header: str = r"Volume In %"
 
-        self.__x_values = []
-        self.__y_values = []
+        self.__x_values : List[float] = []
+        self.__y_values : List[float] = []
 
         self.__n_tables: int = 6
 

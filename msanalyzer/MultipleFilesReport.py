@@ -40,7 +40,7 @@ class MultipleFilesReport:
 
     # public methods
 
-    def sizeDistributionPlot(self, output_path: str) -> None:
+    def sizeDistributionPlot(self, output_path: str) -> plt.figure:
         # plot
         logger.info("sizeDistributionPlot called")
 

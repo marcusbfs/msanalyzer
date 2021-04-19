@@ -32,7 +32,7 @@ class DiameterMeanType(Enum):
 
 
 class MasterSizerReport:
-    def __init__(self):
+    def __init__(self) -> None:
         self.__diameters_filename: str = ""
         self.__vol_in_per_filename: str = ""
         self.__number_of_points: int = 0
@@ -74,7 +74,7 @@ class MasterSizerReport:
         self.__ms_input.setXPSfile(xps_filename)
         self.__updateXY_data()
 
-    def setXandY(self, x_vals, y_vals) -> None:
+    def setXandY(self, x_vals : List[float], y_vals: List[float]) -> None:
         self.__x_data = x_vals
         self.__y_data = y_vals
         assert len(self.__x_data) == len(self.__y_data) + 1
@@ -372,7 +372,7 @@ class MasterSizerReport:
         content += "\n\n"
         return content
 
-    def getBorderedText(self, text: str):
+    def getBorderedText(self, text: str) -> str:
         lines = text.splitlines()
         width = max(len(s) for s in lines)
         res = ["+" + "-" * width + "+"]
@@ -430,4 +430,4 @@ class MasterSizerReport:
         self.__diameters_filename = filename
 
     def __isFloatEqual(self, x: float, y: float, tol: float = 1e-10) -> bool:
-        return np.abs(x - y) < tol
+        return bool(np.abs(x - y) < tol)

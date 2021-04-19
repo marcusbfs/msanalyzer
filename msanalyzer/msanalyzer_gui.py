@@ -9,7 +9,7 @@ import json
 import tkinter
 from tkinter import font
 
-from typing import List, TypedDict
+from typing import List, TypedDict, Tuple
 
 from matplotlib.ticker import NullFormatter  # useful for `logit` scale
 import matplotlib.pyplot as plt
@@ -44,6 +44,7 @@ def save_settings(settings_file : str, settings : ConfigDict) -> None:
         json.dump(settings, f)
 
 def load_settings(settings_file : str, default_settings : ConfigDict) -> ConfigDict:
+    settings : ConfigDict
     try:
         with open(settings_file, 'r') as f:
             settings = json.load(f)
@@ -65,11 +66,11 @@ sg.set_options(font=(cf_font, cf_font_size))
 fig_canvas_agg : FigureCanvasTkAgg = None
 fig_model_canvas_agg : FigureCanvasTkAgg = None
 
-def delete_figure_agg(figure_agg):
+def delete_figure_agg(figure_agg : FigureCanvasTkAgg) -> None:
     figure_agg.get_tk_widget().forget()
     plt.close('all')
 
-def draw_figure(canvas, figure : plt.figure) -> FigureCanvasTkAgg:
+def draw_figure(canvas : tkinter.Canvas, figure : plt.figure) -> FigureCanvasTkAgg:
     figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
     figure_canvas_agg.draw()
     figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
@@ -87,7 +88,7 @@ def zerosSpin(
     key: str = "",
     min_val: int = 1,
     max_val: int = 50,
-    size=(4, 1),
+    size : Tuple[int, int] = (4, 1),
     default_val: int = 1,
 ) -> sg.Spin :
     return sg.Spin(
@@ -103,7 +104,7 @@ def zerosSpin(
 def create_settings_window(settings : ConfigDict) -> sg.Window:
     sg.theme(settings['theme'])
 
-    def TextLabel(text): return sg.Text(text+':', justification='r', size=(15,1))
+    def TextLabel(text : str) -> sg.Text: return sg.Text(text+':', justification='r', size=(15,1))
 
     layout = [  [sg.Text('Configurações',)],
             [sg.T('Tema: '), sg.Combo(sg.theme_list(),default_value=cf_theme,k='theme#combo', readonly=True)],
@@ -555,9 +556,9 @@ while True:
         event, values = create_settings_window(CURRENT_SETTINGS).read(close=True)
         if event == 'save_config':
             try:
-                CURRENT_SETTINGS['theme'] :str = str(values['theme#combo'])
-                CURRENT_SETTINGS['font'] : str = str(values['font#combo'])
-                CURRENT_SETTINGS['font_size'] : int = int(values['font_size'])
+                CURRENT_SETTINGS['theme'] = str(values['theme#combo'])
+                CURRENT_SETTINGS['font'] = str(values['font#combo'])
+                CURRENT_SETTINGS['font_size'] = int(values['font_size'])
 
                 save_settings(config_file, CURRENT_SETTINGS)
                 window['status##text'].update('Salvo! É necessário reiniciar o app!')

@@ -4,6 +4,7 @@ import argparse
 import time
 import json
 import matplotlib.pyplot as plt
+from typing import List
 
 logger = logging.getLogger("msanalyzer")
 
@@ -14,7 +15,7 @@ fig : plt.figure = None
 
 models_figs : dict = {}
 
-def main(_args=None):
+def main(_args : List[str] = None) -> None:
 
     start_time = time.time()
 
@@ -174,7 +175,7 @@ def main(_args=None):
     if not args.multiple_files:
         logger.info("Single file mode")
 
-        reporter = msreport.MasterSizerReport()
+        reporter : msreport.MasterSizerReport = msreport.MasterSizerReport()
         logger.info("Created reporter object")
 
         xps_file = args.xps
