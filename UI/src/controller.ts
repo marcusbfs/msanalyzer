@@ -1,19 +1,20 @@
 const base_url = 'http://127.0.0.1:2342/';
 
-export function getXPSFiles() {
+export function getXPSFiles(): Promise<{
+  files: Array<string>;
+  basenames: Array<string>;
+  dirnames: Array<string>;
+}> {
   const options = {
     fileTypes: [['Arquivos XPS', '.xps']],
   };
 
-  fetch(base_url + 'getFiles', {
+  return fetch(base_url + 'getFiles', {
     method: 'post',
     body: JSON.stringify(options),
   })
     .then((r) => {
       return r.json();
-    })
-    .then((d) => {
-      return d;
     })
     .catch((e) => {
       console.log('Error: ' + e);

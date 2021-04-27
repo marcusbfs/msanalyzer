@@ -28,6 +28,8 @@
     "src/main.prod.js",
     "src/renderer.prod.js",
     "src/dist",
+    "src/redux",
+    "src/components",
     ".erb/dll"
   ]
 }

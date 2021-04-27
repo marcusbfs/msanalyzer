@@ -9,10 +9,15 @@ import Switch from '@material-ui/core/Switch';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+// redux
+import { useSelector, useDispatch } from 'react-redux';
 
 // my imports
 import useStyles from '../styles';
 import InputSetOpen from './InputSetOpen';
+import * as controller from '../controller';
+import { setXPS } from '../redux/actions';
+import { RootState } from '../redux/store';
 
 interface IProps {
   isPlotLog: boolean;
@@ -22,29 +27,28 @@ interface IProps {
 const MainTabView = ({ isPlotLog, setIsPlotLog }: IProps) => {
   const classes = useStyles();
 
-  const files = {
-    filenames: [
-      'asdlasd.xps',
-      'ojaldad.xps',
-      'oasdjaldad.xps',
-      'ojaasdladad.xps',
-      'ojaldawwsdad.xps',
-      'ojaldaslzxcdad.xps',
-      'ojaldasdjiajdlasjdad.xps',
-      'ojaladaksjdldad.xps',
-    ],
-  };
+  const xps_files = useSelector((state: RootState) => state.xps.xpsfiles);
+  const dispatch = useDispatch();
+
   return (
     <>
       {/* <InputSetOpen textLabel="Arquivo(s) XPS" /> */}
-      <Grid container spacing={3}>
+      <Grid container spacing={2}>
         <Grid item container>
           <Grid item sm={9}>
             <Typography variant="h5">Arquivo(s) XPS</Typography>
           </Grid>
           <Grid item container sm={3} justify="flex-end">
             <Grid item>
-              <Button variant="contained" color="primary">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  controller.getXPSFiles().then((e) => {
+                    dispatch(setXPS(e.files));
+                  });
+                }}
+              >
                 Selecionar
               </Button>
             </Grid>
@@ -52,7 +56,7 @@ const MainTabView = ({ isPlotLog, setIsPlotLog }: IProps) => {
         </Grid>
         <Grid item>
           <List component="ul">
-            {files.filenames.map((file) => {
+            {xps_files.map((file: string) => {
               return (
                 <ListItem key={file} alignItems="flex-start">
                   <ListItemText primary={file} />
