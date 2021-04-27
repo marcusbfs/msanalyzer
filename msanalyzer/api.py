@@ -20,6 +20,29 @@ class Files(BaseModel):
     dirnames : List[str]
     basenames : List[str]
 
+
+class Directory(BaseModel):
+    dirname : str
+    rootdir : str
+    basename : str
+
+@app.get('/getDir', response_model=Directory)
+async def getDir():
+    try:
+        root = Tk()
+        root.withdraw()
+        root.wm_attributes('-topmost', 1)
+
+        dirname = os.path.abspath(askdirectory())
+        basename = os.path.splitext(dirname)[0]
+        rootdir = os.path.basename(dirname)
+        return {"dirname": dirname, "rootdir" : rootdir, "basename" :  basename}
+    except:
+        return {"dirname": "","rootdir" : "", "basename" :  ""}
+
+
+
+
 @app.post('/getFiles', response_model=Files)
 async def getFiles(types : selectFileTypes):
     try:

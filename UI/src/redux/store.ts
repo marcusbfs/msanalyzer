@@ -1,9 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 import setXPSReducer from './reducers/setXPSReducer';
+import setOutDirReducer from './reducers/setOutDirReducer';
+import setOutNameReducer from './reducers/setOutNameReducer';
 
 export const store = configureStore({
   reducer: {
     xps: setXPSReducer,
+    outdir: setOutDirReducer,
+    outname: setOutNameReducer,
   },
 });
 

@@ -31,3 +31,18 @@ export function open(path: string) {
       console.log('Error: ' + e);
     });
 }
+
+export function getDir(): Promise<{
+  rootdir: string;
+  basename: string;
+  dirname: string;
+}> {
+  return fetch(base_url + 'getDir')
+    .then((r) => {
+      return r.json();
+    })
+    .catch((e) => {
+      console.log('Error: ' + e);
+      return null;
+    });
+}

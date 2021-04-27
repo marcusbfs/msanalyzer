@@ -3,30 +3,32 @@ import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 // import useStyles from '../styles';
+// redux
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../redux/store';
 
 // my imports
 import * as controller from '../controller';
+import { setOutDir } from '../redux/actions';
 
 interface IProps {
   textLabel: string;
-  setBtnLabel?: string;
-  openBtnLabel?: string;
-  // setIsPlotLog: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const InputSetOpen = ({
-  textLabel,
-  setBtnLabel = '...',
-  openBtnLabel = 'Abrir',
-}: IProps) => {
+const InputSetOpen = ({ textLabel }: IProps) => {
   // const classes = useStyles();
 
+  const outDir = useSelector((state: RootState) => state.outdir.outdir);
+  const dispatch = useDispatch();
+
   const handleSetClick = () => {
-    console.log(controller.getXPSFiles());
+    controller.getDir().then((d) => {
+      dispatch(setOutDir(d.dirname));
+    });
   };
 
   const handleOpenClick = () => {
-    console.log(controller.open('D:\\Desktop'));
+    controller.open(outDir);
   };
 
   return (
@@ -42,6 +44,7 @@ const InputSetOpen = ({
         <Grid item xs>
           <TextField
             required
+            value={outDir}
             InputProps={{
               readOnly: true,
             }}
@@ -60,7 +63,7 @@ const InputSetOpen = ({
       >
         <Grid item xs>
           <Button variant="contained" color="primary" onClick={handleSetClick}>
-            {setBtnLabel}
+            ...
           </Button>
         </Grid>
       </Grid>
@@ -74,7 +77,7 @@ const InputSetOpen = ({
       >
         <Grid item xs>
           <Button variant="contained" color="primary" onClick={handleOpenClick}>
-            {openBtnLabel}
+            Abrir
           </Button>
         </Grid>
       </Grid>

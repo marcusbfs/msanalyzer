@@ -11,13 +11,13 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 // redux
 import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../redux/store';
 
 // my imports
 import useStyles from '../styles';
 import InputSetOpen from './InputSetOpen';
 import * as controller from '../controller';
-import { setXPS } from '../redux/actions';
-import { RootState } from '../redux/store';
+import { setXPS, setOutDir, setOutName } from '../redux/actions';
 
 interface IProps {
   isPlotLog: boolean;
@@ -27,8 +27,24 @@ interface IProps {
 const MainTabView = ({ isPlotLog, setIsPlotLog }: IProps) => {
   const classes = useStyles();
 
+  const [outDirText, setOutDirText] = React.useState('');
+
   const xps_files = useSelector((state: RootState) => state.xps.xpsfiles);
+  const outName = useSelector((state: RootState) => state.outname.outname);
+
   const dispatch = useDispatch();
+
+  //functions
+
+  const handleSetXPSFiles = () => {
+    controller.getXPSFiles().then((e) => {
+      dispatch(setXPS(e.files));
+      dispatch(setOutDir(e.dirnames[0]));
+      dispatch(
+        setOutName(e.files.length > 1 ? 'arquivos_multiplos' : e.basenames[0])
+      );
+    });
+  };
 
   return (
     <>
@@ -43,11 +59,7 @@ const MainTabView = ({ isPlotLog, setIsPlotLog }: IProps) => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => {
-                  controller.getXPSFiles().then((e) => {
-                    dispatch(setXPS(e.files));
-                  });
-                }}
+                onClick={handleSetXPSFiles}
               >
                 Selecionar
               </Button>
@@ -85,23 +97,28 @@ const MainTabView = ({ isPlotLog, setIsPlotLog }: IProps) => {
         <Grid item container alignItems="flex-end" spacing={2}>
           <Grid item container xs={12} sm={11}>
             <Grid item xs>
-              <TextField required label="Nome de saída" fullWidth />
+              <TextField
+                required
+                label="Nome de saída"
+                fullWidth
+                value={outName}
+                onChange={(e) => {
+                  dispatch(setOutName(e.target.value));
+                }}
+              />
             </Grid>
           </Grid>
-          <Grid
-            container
-            item
-            xs={12}
-            sm={1}
-            // alignItems="flex-end"
-            justify="flex-end"
-          >
+          {/* <Grid container item xs={12} sm={1} justify="flex-end">
             <Grid item xs>
-              <Button variant="contained" color="primary">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => controller.open(outDir + '\\' + outName)}
+              >
                 Abrir
               </Button>
             </Grid>
-          </Grid>
+          </Grid> */}
         </Grid>
         <Grid item>
           <FormControlLabel
