@@ -6,8 +6,8 @@ import time
 start_time = time.time()
 
 repo_dir = os.path.abspath('..')
-python_exe = os.path.join(repo_dir, 'env', 'Scripts', 'python.exe')
-main_py = 'csv_edem_api.py'
+python_exe = os.path.join(repo_dir, 'msanalyzer_venv', 'Scripts', 'python.exe')
+main_py = os.path.join(repo_dir, 'msanalyzer','api.py')
 
 hidden_imports=[
                 'uvicorn.logging',
@@ -21,6 +21,10 @@ hidden_imports=[
                 'uvicorn.lifespan',
                 'uvicorn.lifespan.on',
             ]
+
+hidden_matplotlib = ['matplotlib.backends.backend_svg', 'matplotlib.backends.backend_tkagg']
+
+hidden_imports = hidden_imports + hidden_matplotlib
 
 cmd_options = ['--clean', '--onedir', '--console']
 
