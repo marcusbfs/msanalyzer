@@ -37,8 +37,6 @@ const App = () => {
 
   // States
   const [tab, setTab] = React.useState(0);
-  const [isPlotLog, setIsPlotLog] = React.useState(true);
-  // const [xpsFiles, setIsPlotLog] = React.useState(true);
 
   return (
     <React.Fragment>
@@ -63,10 +61,7 @@ const App = () => {
           <Container maxWidth="md" className={classes.mainTab}>
             {tab === 0 && (
               <Grid container>
-                <MainTabView
-                  isPlotLog={isPlotLog}
-                  setIsPlotLog={setIsPlotLog}
-                />
+                <MainTabView />
               </Grid>
             )}
             {tab === 1 && (

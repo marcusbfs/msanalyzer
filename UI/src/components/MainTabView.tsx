@@ -17,18 +17,19 @@ import { RootState } from '../redux/store';
 import useStyles from '../styles';
 import InputSetOpen from './InputSetOpen';
 import * as controller from '../controller';
-import { setOutDir, setOutName, setXPSFiles } from '../redux/App.store';
+import {
+  setOutDir,
+  setOutName,
+  setXPSFiles,
+  toggleIsLogScale,
+} from '../redux/App.store';
 
-interface IProps {
-  isPlotLog: boolean;
-  setIsPlotLog: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-const MainTabView = ({ isPlotLog, setIsPlotLog }: IProps) => {
+const MainTabView = () => {
   const classes = useStyles();
 
   const xps_files = useSelector((state: RootState) => state.app.xpsfiles);
   const outName = useSelector((state: RootState) => state.app.outName);
+  const isLogScale = useSelector((state: RootState) => state.app.isLogScale);
 
   const dispatch = useDispatch();
 
@@ -127,9 +128,9 @@ const MainTabView = ({ isPlotLog, setIsPlotLog }: IProps) => {
           <FormControlLabel
             control={<Switch name="checked_log" />}
             color="primary"
-            value={isPlotLog}
+            checked={isLogScale}
             onChange={() => {
-              setIsPlotLog(!isPlotLog);
+              dispatch(toggleIsLogScale());
             }}
             label="Gráficos em escala logarítmica"
           />

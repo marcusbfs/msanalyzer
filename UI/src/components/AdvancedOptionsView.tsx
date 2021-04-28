@@ -10,13 +10,29 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import Divider from '@material-ui/core/Divider';
 import Switch from '@material-ui/core/Switch';
 import Tooltip from '@material-ui/core/Tooltip';
+// redux
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../redux/store';
 
 // my imports
 import useStyles from '../styles';
-import InputSetOpen from './InputSetOpen';
+import {
+  MeanType,
+  setMeanType,
+  toggleMultiLabel,
+  setZerosRight,
+  setZerosLeft,
+} from '../redux/App.store';
 
 const AdvancedOptionsView = () => {
   const classes = useStyles();
+
+  const meanType = useSelector((state: RootState) => state.app.meanType);
+  const multiLabel = useSelector((state: RootState) => state.app.multiLabel);
+  const zerosLeft = useSelector((state: RootState) => state.app.zerosLeft);
+  const zerosRight = useSelector((state: RootState) => state.app.zerosRight);
+  const dispatch = useDispatch();
+
   return (
     <>
       <Grid item container>
@@ -28,7 +44,16 @@ const AdvancedOptionsView = () => {
           </Grid>
         </Grid>
         <Grid item className={classes.typeDiaRadio}>
-          <RadioGroup defaultValue="geo">
+          <RadioGroup
+            value={meanType === MeanType.geo ? 'geo' : 'ari'}
+            onChange={(e) =>
+              dispatch(
+                setMeanType(
+                  e.target.value === 'geo' ? MeanType.geo : MeanType.ari
+                )
+              )
+            }
+          >
             <FormControlLabel
               value="geo"
               control={<Radio color="primary" />}
@@ -52,6 +77,8 @@ const AdvancedOptionsView = () => {
             control={<Switch />}
             color="primary"
             label="Não colocar legendas nos gráficos de múltiplos arquivos"
+            checked={multiLabel}
+            onChange={() => dispatch(toggleMultiLabel())}
           />
         </Grid>
 
@@ -73,9 +100,11 @@ const AdvancedOptionsView = () => {
                 label="Zeros à esquerda"
                 type="number"
                 required
+                value={zerosLeft}
                 InputLabelProps={{
                   shrink: true,
                 }}
+                onChange={(e) => dispatch(setZerosLeft(Number(e.target.value)))}
               />
             </Grid>
             <Grid item xs={12}>
@@ -83,9 +112,13 @@ const AdvancedOptionsView = () => {
                 label="Zeros à direita"
                 type="number"
                 required
+                value={zerosRight}
                 InputLabelProps={{
                   shrink: true,
                 }}
+                onChange={(e) =>
+                  dispatch(setZerosRight(Number(e.target.value)))
+                }
               />
             </Grid>
           </Grid>
