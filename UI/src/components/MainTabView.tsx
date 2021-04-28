@@ -39,9 +39,9 @@ const MainTabView = () => {
 
   const handleSetXPSFiles = () => {
     controller.getXPSFiles().then((e) => {
-      dispatch(setXPSFiles(e.files));
       dispatch(setBasenames(e.basenames));
       dispatch(setDirnames(e.dirnames));
+      dispatch(setXPSFiles(e.files));
     });
   };
 

@@ -1,13 +1,6 @@
 import React from 'react';
 
-import ListItemText from '@material-ui/core/ListItemText';
-import {
-  Button,
-  Grid,
-  TextField,
-  IconButton,
-  Tooltip,
-} from '@material-ui/core';
+import { Grid, TextField, IconButton, Tooltip } from '@material-ui/core';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../redux/store';
 import { setXPSFiles, setBasenames } from '../redux/App.store';
@@ -49,41 +42,48 @@ const FilesListItem = ({ file }: FilesListItemProps) => {
   }
 
   return (
-    <>
-      <Grid item container xs={12} alignItems="center">
-        <Grid item container xs={10} justify="flex-start">
-          <Grid item xs={12} className={classes.fileItemText}>
-            <TextField
-              id="outlined-basic"
-              value={file}
-              variant="outlined"
-              fullWidth
-              InputProps={{
-                readOnly: true,
-              }}
-            />
-          </Grid>
-        </Grid>
-        <Grid item container xs={1} justify="flex-end">
-          <Grid item xs={12}>
-            <Tooltip title="Abrir">
-              <IconButton onClick={handleOpen} color="secondary">
-                <LaunchIcon />
-              </IconButton>
-            </Tooltip>
-          </Grid>
-        </Grid>
-        <Grid item container xs={1} justify="flex-end">
-          <Grid item xs={12}>
-            <Tooltip title="Remover">
-              <IconButton onClick={handleClose} color="secondary">
-                <DeleteIcon />
-              </IconButton>
-            </Tooltip>
-          </Grid>
+    <Grid item container xs={12} key={file} alignItems="center">
+      <Grid item container xs={10} key={file + '_1'} justify="flex-start">
+        <Grid item xs={12} key={file + '_2'} className={classes.fileItemText}>
+          <TextField
+            id="outlined-basic"
+            value={file}
+            variant="outlined"
+            fullWidth
+            InputProps={{
+              readOnly: true,
+            }}
+            key={file + '_txt'}
+          />
         </Grid>
       </Grid>
-    </>
+      <Grid item container xs={1} key={file + '_3'} justify="flex-end">
+        <Grid item xs={12} key={file + '_4'}>
+          <Tooltip title="Abrir" key={file + '_tooltip1'}>
+            <IconButton
+              onClick={handleOpen}
+              color="secondary"
+              key={file + '_button1'}
+            >
+              <LaunchIcon key={file + '_icon1'} />
+            </IconButton>
+          </Tooltip>
+        </Grid>
+      </Grid>
+      <Grid item container xs={1} justify="flex-end" key={file + '_5'}>
+        <Grid item xs={12} key={file + '_6'}>
+          <Tooltip title="Remover" key={file + '_tooltip2'}>
+            <IconButton
+              onClick={handleClose}
+              color="secondary"
+              key={file + '_button2'}
+            >
+              <DeleteIcon key={file + '_icon2'} />
+            </IconButton>
+          </Tooltip>
+        </Grid>
+      </Grid>
+    </Grid>
   );
 };
 

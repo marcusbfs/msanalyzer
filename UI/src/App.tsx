@@ -9,7 +9,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Container from '@material-ui/core/Container';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core';
+import { createMuiTheme, ThemeProvider, Tooltip } from '@material-ui/core';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -130,8 +130,8 @@ const App = () => {
           >
             <Tab label="Principal" />
             <Tab label="Opções avançadas" />
-            <Tab label="Gráficos" />
-            <Tab label="Modelos" />
+            <Tab label="Curvas" disabled={!isSingleFile} />
+            <Tab label="Modelos" disabled={!isSingleFile} />
           </Tabs>
         </AppBar>
 
@@ -160,7 +160,7 @@ const App = () => {
                       variant="contained"
                       color="primary"
                       onClick={handleExec}
-                      disabled={isComputing}
+                      disabled={isComputing || xpsfiles.length < 1}
                     >
                       Executar
                     </Button>
