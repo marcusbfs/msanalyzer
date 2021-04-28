@@ -88,7 +88,7 @@ const App = () => {
     const fullPath = path.join(
       path.dirname(app.getAppPath()),
       'dist',
-      'msanalyzer',
+      'api',
       'api.exe'
     );
     console.log(fullPath);

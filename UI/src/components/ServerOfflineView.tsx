@@ -9,7 +9,7 @@ const ServerOfflineView = () => {
   return (
     <Container maxWidth="md" className={classes.mainTab}>
       <Grid container alignItems={'center'} justify={'center'}>
-        <Typography>Servidor offline!</Typography>
+        <Typography variant="h1">Servidor offline!</Typography>
       </Grid>
     </Container>
   );

@@ -22,11 +22,12 @@ hidden_imports=[
                 'uvicorn.lifespan.on',
             ]
 
-hidden_matplotlib = ['matplotlib.backends.backend_svg', 'matplotlib.backends.backend_tkagg']
+
+hidden_matplotlib = []
+# hidden_matplotlib = ['matplotlib.backends.backend_svg', 'matplotlib.backends.backend_tkagg']
 
 hidden_imports = hidden_imports + hidden_matplotlib
 
-cmd_options = ['--clean', '--onedir', '--console']
 cmd_options = ['--clean', '--onedir', '--console']
 
 for i in hidden_imports:
