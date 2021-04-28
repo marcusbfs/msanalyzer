@@ -9,7 +9,7 @@ import { RootState } from '../redux/store';
 
 // my imports
 import * as controller from '../controller';
-import { setOutDir } from '../redux/actions';
+import { setOutDir } from '../redux/App.store';
 
 interface IProps {
   textLabel: string;
@@ -18,7 +18,7 @@ interface IProps {
 const InputSetOpen = ({ textLabel }: IProps) => {
   // const classes = useStyles();
 
-  const outDir = useSelector((state: RootState) => state.outdir.outdir);
+  const outDir = useSelector((state: RootState) => state.app.outDirName);
   const dispatch = useDispatch();
 
   const handleSetClick = () => {

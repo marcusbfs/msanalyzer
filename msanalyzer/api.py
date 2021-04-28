@@ -33,7 +33,12 @@ async def getDir():
         root.withdraw()
         root.wm_attributes('-topmost', 1)
 
-        dirname = os.path.abspath(askdirectory())
+        dirname = askdirectory()
+
+        if not dirname:
+            return {"dirname": "","rootdir" : "", "basename" :  ""}
+
+        dirname = os.path.abspath(dirname)
         basename = os.path.splitext(dirname)[0]
         rootdir = os.path.basename(dirname)
         return {"dirname": dirname, "rootdir" : rootdir, "basename" :  basename}

@@ -17,7 +17,7 @@ import { RootState } from '../redux/store';
 import useStyles from '../styles';
 import InputSetOpen from './InputSetOpen';
 import * as controller from '../controller';
-import { setXPS, setOutDir, setOutName } from '../redux/actions';
+import { setOutDir, setOutName, setXPSFiles } from '../redux/App.store';
 
 interface IProps {
   isPlotLog: boolean;
@@ -27,10 +27,8 @@ interface IProps {
 const MainTabView = ({ isPlotLog, setIsPlotLog }: IProps) => {
   const classes = useStyles();
 
-  const [outDirText, setOutDirText] = React.useState('');
-
-  const xps_files = useSelector((state: RootState) => state.xps.xpsfiles);
-  const outName = useSelector((state: RootState) => state.outname.outname);
+  const xps_files = useSelector((state: RootState) => state.app.xpsfiles);
+  const outName = useSelector((state: RootState) => state.app.outName);
 
   const dispatch = useDispatch();
 
@@ -38,11 +36,16 @@ const MainTabView = ({ isPlotLog, setIsPlotLog }: IProps) => {
 
   const handleSetXPSFiles = () => {
     controller.getXPSFiles().then((e) => {
-      dispatch(setXPS(e.files));
-      dispatch(setOutDir(e.dirnames[0]));
-      dispatch(
-        setOutName(e.files.length > 1 ? 'arquivos_multiplos' : e.basenames[0])
-      );
+      dispatch(setXPSFiles(e.files));
+      if (e.files.length > 0) {
+        dispatch(setOutDir(e.dirnames[0]));
+        dispatch(
+          setOutName(e.files.length > 1 ? 'arquivos_multiplos' : e.basenames[0])
+        );
+      } else {
+        dispatch(setOutDir(''));
+        dispatch(setOutName(''));
+      }
     });
   };
 
