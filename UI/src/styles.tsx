@@ -53,6 +53,10 @@ const useStyles = makeStyles((theme) => ({
   ZerosIgnore: {
     marginLeft: '30px',
   },
+  fileItemText: {
+    marginRight: '30px',
+    marginLeft: '30px',
+  },
 }));
 
 export default useStyles;

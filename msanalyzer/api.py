@@ -16,6 +16,11 @@ app = FastAPI()
 
 current_folder = pathlib.Path(__file__).parent.absolute()
 
+list_of_diameterchoices = {
+"geo": msreport.DiameterMeanType.geometric,
+"ari": msreport.DiameterMeanType.arithmetic,
+}
+
 class selectFileTypes(BaseModel):
     fileTypes : Optional[List[Tuple[str, str]]] = None
 
@@ -96,15 +101,7 @@ async def alive():
 
 @app.post('/singleModeCompute')
 async def singleModeCompute(xpsfile : str, outputName : str, outputDir : str, options : CommonOptions):
-
     reporter : msreport.MasterSizerReport = msreport.MasterSizerReport()
-
-    print(options)
-
-    list_of_diameterchoices = {
-    "geo": msreport.DiameterMeanType.geometric,
-    "ari": msreport.DiameterMeanType.arithmetic,
-    }
 
     meanType = list_of_diameterchoices[options.meanType]
     number_of_zero_first = options.zerosLeft
@@ -141,10 +138,6 @@ async def singleModeCompute(xpsfile : str, outputName : str, outputDir : str, op
 @app.post('/multiModeCompute')
 async def multiModeCompute(multiInput : MultiInput, options : CommonOptions):
     number_of_files = len(multiInput.xpsfiles)
-    list_of_diameterchoices = {
-    "geo": msreport.DiameterMeanType.geometric,
-    "ari": msreport.DiameterMeanType.arithmetic,
-    }
 
     meanType = list_of_diameterchoices[options.meanType]
 

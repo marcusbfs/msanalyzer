@@ -16,6 +16,8 @@ import { useDispatch, useSelector } from 'react-redux';
 // My custom
 import useStyles from './styles';
 import MainTabView from './components/MainTabView';
+import PlotsView from './components/PlotsView';
+import ModelsView from './components/ModelsView';
 import AdvancedOptionsView from './components/AdvancedOptionsView';
 import { RootState } from './redux/store';
 import {
@@ -135,40 +137,41 @@ const App = () => {
 
         <main>
           <Container maxWidth="md" className={classes.mainTab}>
-            {tab === 0 && (
-              <Grid container>
-                <MainTabView />
+            <Grid
+              container
+              direction="column"
+              justify="space-between"
+              alignItems="center"
+            >
+              <Grid item container>
+                {tab === 0 && <MainTabView />}
+                {tab === 1 && <AdvancedOptionsView />}
+                {tab === 2 && <PlotsView />}
+                {tab === 3 && <ModelsView />}
               </Grid>
-            )}
-            {tab === 1 && (
-              <Grid container>
-                <AdvancedOptionsView />
-              </Grid>
-            )}
-            {tab === 2 && <Grid container>Gráficos</Grid>}
-            {tab === 3 && <Grid container>Modelos</Grid>}
 
-            <Grid container className={classes.execContainer}>
-              <Grid item xs={12} className={classes.divider}>
-                <Divider />
-              </Grid>
-              <Grid item container alignItems="flex-end">
-                <Grid item xs={3}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleExec}
-                    disabled={isComputing}
-                  >
-                    Executar
-                  </Button>
+              <Grid item container className={classes.execContainer}>
+                <Grid item xs={12} className={classes.divider}>
+                  <Divider />
                 </Grid>
-                <Grid item container xs={9} justify="flex-end">
-                  {!isSpinnerHidden && (
-                    <Grid item>
-                      <CircularProgress color="secondary" />
-                    </Grid>
-                  )}
+                <Grid item container alignItems="flex-end">
+                  <Grid item xs={3}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleExec}
+                      disabled={isComputing}
+                    >
+                      Executar
+                    </Button>
+                  </Grid>
+                  <Grid item container xs={9} justify="flex-end">
+                    {!isSpinnerHidden && (
+                      <Grid item>
+                        <CircularProgress color="secondary" />
+                      </Grid>
+                    )}
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>

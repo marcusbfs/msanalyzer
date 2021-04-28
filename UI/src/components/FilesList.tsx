@@ -11,16 +11,10 @@ const FilesList = () => {
   const xps_files = useSelector((state: RootState) => state.app.xpsfiles);
 
   return (
-    <Grid container>
-      <List component="ul" disablePadding>
-        {xps_files.map((file: string) => {
-          return (
-            <ListItem key={file} disableGutters>
-              <FilesListItem file={file} />
-            </ListItem>
-          );
-        })}
-      </List>
+    <Grid item container xs={12}>
+      {xps_files.map((file: string) => {
+        return <FilesListItem file={file} />;
+      })}
     </Grid>
   );
 };

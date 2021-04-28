@@ -5,7 +5,7 @@ import Button from '@material-ui/core/Button';
 import Radio from '@material-ui/core/Radio';
 import Typography from '@material-ui/core/Typography';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormLabel from '@material-ui/core/FormLabel';
+import SaveIcon from '@material-ui/icons/Save';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Divider from '@material-ui/core/Divider';
 import Switch from '@material-ui/core/Switch';
@@ -130,7 +130,7 @@ const AdvancedOptionsView = () => {
 
         <Grid item container xs={12} justify={'flex-end'}>
           <Grid item>
-            <Button variant="contained" color="secondary">
+            <Button variant="contained" color="secondary" startIcon={<SaveIcon />}>
               Salvar configurações atuais
             </Button>
           </Grid>
