@@ -9,7 +9,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Container from '@material-ui/core/Container';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { createMuiTheme, ThemeProvider, Tooltip } from '@material-ui/core';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 
 import { useDispatch, useSelector } from 'react-redux';
 

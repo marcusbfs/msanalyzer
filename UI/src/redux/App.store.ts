@@ -14,6 +14,7 @@ interface AppStateType {
   outDirName: string;
   isLogScale: boolean;
   meanType: MeanType;
+  currentModel: string;
   multiLabel: boolean;
   zerosLeft: number;
   zerosRight: number;
@@ -33,6 +34,7 @@ const initialState = {
   isLogScale: true,
   multiLabel: true,
   meanType: MeanType.geo,
+  currentModel: 'RRB',
   zerosLeft: 1,
   zerosRight: 1,
   isSpinnerHidden: true,
@@ -72,6 +74,9 @@ const appSlice = createSlice({
     setMeanType(state: AppStateType, action: PayloadAction<MeanType>) {
       state.meanType = action.payload;
     },
+    setCurrentModel(state: AppStateType, action: PayloadAction<string>) {
+      state.currentModel = action.payload;
+    },
     setZerosLeft(state: AppStateType, action: PayloadAction<number>) {
       state.zerosLeft = action.payload;
     },
@@ -97,6 +102,7 @@ export const {
   setXPSFiles,
   setBasenames,
   setDirnames,
+  setCurrentModel,
   setOutName,
   setOutDir,
   toggleIsLogScale,

@@ -2,13 +2,10 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../redux/store';
 
-import useStyles from '../styles';
-
+import Image from './Image';
 import { setSingleSVGfile } from '../redux/App.store';
 
 const CurvesPlot = () => {
-  const classes = useStyles();
-
   const dispatch = useDispatch();
 
   const isComputing = useSelector((state: RootState) => state.app.isComputing);
@@ -29,11 +26,7 @@ const CurvesPlot = () => {
     dispatch(setSingleSVGfile(svg));
   }, [outDir, outName, isComputing, isSingleMode]);
 
-  return (
-    <div>
-      <img src={svg_file} className={classes.image}></img>
-    </div>
-  );
+  return <Image image_source={svg_file} />;
 };
 
 export default CurvesPlot;

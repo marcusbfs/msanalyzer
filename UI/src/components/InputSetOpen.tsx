@@ -2,7 +2,6 @@ import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-// import useStyles from '../styles';
 // redux
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../redux/store';
@@ -16,8 +15,6 @@ interface IProps {
 }
 
 const InputSetOpen = ({ textLabel }: IProps) => {
-  // const classes = useStyles();
-
   const outDir = useSelector((state: RootState) => state.app.outDirName);
   const dispatch = useDispatch();
 
