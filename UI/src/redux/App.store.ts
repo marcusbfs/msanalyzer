@@ -20,8 +20,8 @@ interface AppStateType {
   zerosRight: number;
   isComputing: boolean;
   isSpinnerHidden: boolean;
-  isServerOn: boolean;
   isSingleFile: boolean;
+  isServerOn: boolean;
 }
 
 const initialState = {
@@ -33,13 +33,13 @@ const initialState = {
   singleSVGfile: '',
   isLogScale: true,
   multiLabel: true,
+  isServerOn: true,
   meanType: MeanType.geo,
   currentModel: 'RRB',
   zerosLeft: 1,
   zerosRight: 1,
   isSpinnerHidden: true,
   isComputing: false,
-  isServerOn: true,
   isSingleFile: true,
 } as AppStateType;
 

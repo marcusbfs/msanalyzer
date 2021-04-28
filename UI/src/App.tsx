@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 // My custom
 import useStyles from './styles';
 import MainTabView from './components/MainTabView';
+import ServerOfflineView from './components/ServerOfflineView';
 import PlotsView from './components/PlotsView';
 import ModelsView from './components/ModelsView';
 import AdvancedOptionsView from './components/AdvancedOptionsView';
@@ -25,6 +26,7 @@ import {
   MeanType,
   setIsSpinnerHidden,
   setIsComputing,
+  setIsServerOn,
 } from './redux/App.store';
 import * as controller from './controller';
 
@@ -58,6 +60,7 @@ const App = () => {
   const outDir = useSelector((state: RootState) => state.app.outDirName);
   const isComputing = useSelector((state: RootState) => state.app.isComputing);
   const multiLabel = useSelector((state: RootState) => state.app.multiLabel);
+  const isServerOn = useSelector((state: RootState) => state.app.isServerOn);
   const isSingleFile = useSelector(
     (state: RootState) => state.app.isSingleFile
   );
@@ -66,6 +69,63 @@ const App = () => {
   React.useEffect(() => {
     dispatch(setIsSingleFile(xpsfiles.length <= 1));
   }, [xpsfiles]);
+
+  let pyProc: any = null;
+
+  const exitPyProc = () => {
+    console.log('Exiting Python process');
+    if (pyProc) {
+      pyProc.kill();
+    }
+    pyProc = null;
+  };
+
+  const startServer = () => {
+    console.log('Starting Python process');
+    let fs = require('fs');
+    let path = require('path');
+    const app = require('electron').remote.app;
+    const fullPath = path.join(
+      path.dirname(app.getAppPath()),
+      'dist',
+      'msanalyzer',
+      'api.exe'
+    );
+    console.log(fullPath);
+
+    // initialize python server
+    if (fs.existsSync('../msanalyzer/api.py')) {
+      console.log('Dev mode');
+    } else {
+      console.log('Dist mode');
+      pyProc = require('child_process').execFile(fullPath);
+    }
+  };
+
+  React.useEffect(() => {
+    startServer();
+    return () => {
+      exitPyProc();
+    };
+  }, []);
+
+  const INTERVAL_MS = 30000;
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      controller
+        .isAlive()
+        .then((d) => {
+          dispatch(setIsServerOn(true));
+        })
+        .catch((e) => {
+          console.log('Error: ' + e);
+          dispatch(setIsServerOn(false));
+        });
+    }, INTERVAL_MS);
+
+    return () => clearInterval(interval); // This represents the unmount function, in which you need to clear your interval to prevent memory leaks.
+  }, []);
 
   // functions
 
@@ -137,46 +197,50 @@ const App = () => {
         </AppBar>
 
         <main>
-          <Container maxWidth="md" className={classes.mainTab}>
-            <Grid
-              container
-              direction="column"
-              justify="space-between"
-              alignItems="center"
-            >
-              <Grid item container>
-                {tab === 0 && <MainTabView />}
-                {tab === 1 && <AdvancedOptionsView />}
-                {tab === 2 && <PlotsView />}
-                {tab === 3 && <ModelsView />}
-              </Grid>
+          {isServerOn ? (
+            <Container maxWidth="md" className={classes.mainTab}>
+              <Grid
+                container
+                direction="column"
+                justify="space-between"
+                alignItems="center"
+              >
+                <Grid item container>
+                  {tab === 0 && <MainTabView />}
+                  {tab === 1 && <AdvancedOptionsView />}
+                  {tab === 2 && <PlotsView />}
+                  {tab === 3 && <ModelsView />}
+                </Grid>
 
-              <Grid item container className={classes.execContainer}>
-                <Grid item xs={12} className={classes.divider}>
-                  <Divider />
-                </Grid>
-                <Grid item container alignItems="flex-end">
-                  <Grid item xs={3}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleExec}
-                      disabled={isComputing || xpsfiles.length < 1}
-                    >
-                      Executar
-                    </Button>
+                <Grid item container className={classes.execContainer}>
+                  <Grid item xs={12} className={classes.divider}>
+                    <Divider />
                   </Grid>
-                  <Grid item container xs={9} justify="flex-end">
-                    {!isSpinnerHidden && (
-                      <Grid item>
-                        <CircularProgress color="secondary" />
-                      </Grid>
-                    )}
+                  <Grid item container alignItems="flex-end">
+                    <Grid item xs={3}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleExec}
+                        disabled={isComputing || xpsfiles.length < 1}
+                      >
+                        Executar
+                      </Button>
+                    </Grid>
+                    <Grid item container xs={9} justify="flex-end">
+                      {!isSpinnerHidden && (
+                        <Grid item>
+                          <CircularProgress color="secondary" />
+                        </Grid>
+                      )}
+                    </Grid>
                   </Grid>
                 </Grid>
               </Grid>
-            </Grid>
-          </Container>
+            </Container>
+          ) : (
+            <ServerOfflineView />
+          )}
         </main>
       </ThemeProvider>
     </React.Fragment>

@@ -55,6 +55,12 @@ export async function singleModeCompute(
     .catch((e) => console.log('Error: ' + e));
 }
 
+export async function isAlive() {
+  return fetch(base_url).then((resp) => {
+    return resp.json();
+  });
+}
+
 export async function multiModeCompute(
   xpsfiles: Array<string>,
   labels: Array<string>,

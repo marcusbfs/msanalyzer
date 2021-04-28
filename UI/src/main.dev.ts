@@ -15,9 +15,6 @@ import { app, BrowserWindow, shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
-const fs = require('fs');
-let pyProc: any = null;
-// let pyPort: number = 2342;
 
 export default class AppUpdater {
   constructor() {
@@ -79,6 +76,7 @@ const createWindow = async () => {
     icon: getAssetPath('icon.png'),
     webPreferences: {
       nodeIntegration: true,
+      enableRemoteModule: true,
     },
   });
 
@@ -135,25 +133,4 @@ app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) createWindow();
-
-  // initialize python server
-  if (fs.existsSync('../msanalyzer/api.py')) {
-    console.log('Dev mode');
-  } else {
-    console.log('Dist mode');
-    const fullPath = path.join(
-      path.dirname(app.getPath('exe')),
-      'dist',
-      'msanalyzer',
-      'api.exe'
-    );
-    pyProc = require('child_process').execFile(fullPath);
-  }
 });
-
-const exitPyProc = () => {
-  pyProc.kill();
-  pyProc = null;
-};
-
-app.on('will-quit', exitPyProc);

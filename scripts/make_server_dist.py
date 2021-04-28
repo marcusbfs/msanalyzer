@@ -27,6 +27,7 @@ hidden_matplotlib = ['matplotlib.backends.backend_svg', 'matplotlib.backends.bac
 hidden_imports = hidden_imports + hidden_matplotlib
 
 cmd_options = ['--clean', '--onedir', '--console']
+cmd_options = ['--clean', '--onedir', '--console']
 
 for i in hidden_imports:
     cmd_options.append('--hidden-import')
