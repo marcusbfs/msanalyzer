@@ -8,18 +8,23 @@ import Grid from '@material-ui/core/Grid';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Container from '@material-ui/core/Container';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core';
+
+import { useDispatch, useSelector } from 'react-redux';
 
 // My custom
 import useStyles from './styles';
 import MainTabView from './components/MainTabView';
 import AdvancedOptionsView from './components/AdvancedOptionsView';
-
-const darkTheme = createMuiTheme({
-  palette: {
-    type: 'dark',
-  },
-});
+import { RootState } from './redux/store';
+import {
+  setIsSingleFile,
+  MeanType,
+  setIsSpinnerHidden,
+  setIsComputing,
+} from './redux/App.store';
+import * as controller from './controller';
 
 const App = () => {
   const classes = useStyles();
@@ -36,7 +41,78 @@ const App = () => {
   );
 
   // States
+  const dispatch = useDispatch();
   const [tab, setTab] = React.useState(0);
+  const isSpinnerHidden = useSelector(
+    (state: RootState) => state.app.isSpinnerHidden
+  );
+  const xpsfiles = useSelector((state: RootState) => state.app.xpsfiles);
+  const basenames = useSelector((state: RootState) => state.app.basenames);
+  const meanType = useSelector((state: RootState) => state.app.meanType);
+  const zerosLeft = useSelector((state: RootState) => state.app.zerosLeft);
+  const zerosRight = useSelector((state: RootState) => state.app.zerosRight);
+  const isLogScale = useSelector((state: RootState) => state.app.isLogScale);
+  const outName = useSelector((state: RootState) => state.app.outName);
+  const outDir = useSelector((state: RootState) => state.app.outDirName);
+  const isComputing = useSelector((state: RootState) => state.app.isComputing);
+  const multiLabel = useSelector((state: RootState) => state.app.multiLabel);
+  const isSingleFile = useSelector(
+    (state: RootState) => state.app.isSingleFile
+  );
+
+  React.useEffect(() => {
+    dispatch(setIsSingleFile(xpsfiles.length <= 1));
+  }, [xpsfiles]);
+
+  // functions
+
+  function handleExecSingle() {
+    const options: controller.CommonOptions = {
+      meanType: meanType === MeanType.geo ? 'geo' : 'ari',
+      zerosLeft: zerosLeft,
+      zerosRight: zerosRight,
+      logScale: isLogScale,
+      multiLabel: multiLabel,
+    };
+    controller
+      .singleModeCompute(xpsfiles[0], outName, outDir, options)
+      .then()
+      .finally(() => {
+        dispatch(setIsSpinnerHidden(true));
+        dispatch(setIsComputing(false));
+      });
+  }
+
+  function handleExecMulti() {
+    const options: controller.CommonOptions = {
+      meanType: meanType === MeanType.geo ? 'geo' : 'ari',
+      zerosLeft: zerosLeft,
+      zerosRight: zerosRight,
+      logScale: isLogScale,
+      multiLabel: multiLabel,
+    };
+
+    controller
+      .multiModeCompute(xpsfiles, basenames, outDir, outName, options)
+      .then()
+      .catch((e) => {
+        console.log('Error: ' + e);
+      })
+      .finally(() => {
+        dispatch(setIsSpinnerHidden(true));
+        dispatch(setIsComputing(false));
+      });
+  }
+
+  function handleExec() {
+    dispatch(setIsSpinnerHidden(false));
+    dispatch(setIsComputing(true));
+    if (isSingleFile) {
+      return handleExecSingle();
+    } else {
+      return handleExecMulti();
+    }
+  }
 
   return (
     <React.Fragment>
@@ -76,11 +152,23 @@ const App = () => {
               <Grid item xs={12} className={classes.divider}>
                 <Divider />
               </Grid>
-              <Grid item container alignItems="flex-end" justify="flex-end">
-                <Grid item xs>
-                  <Button variant="contained" color="primary">
+              <Grid item container alignItems="flex-end">
+                <Grid item xs={3}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleExec}
+                    disabled={isComputing}
+                  >
                     Executar
                   </Button>
+                </Grid>
+                <Grid item container xs={9} justify="flex-end">
+                  {!isSpinnerHidden && (
+                    <Grid item>
+                      <CircularProgress color="secondary" />
+                    </Grid>
+                  )}
                 </Grid>
               </Grid>
             </Grid>

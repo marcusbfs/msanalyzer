@@ -22,12 +22,14 @@ import {
   setOutName,
   setXPSFiles,
   toggleIsLogScale,
+  setBasenames,
 } from '../redux/App.store';
 
 const MainTabView = () => {
   const classes = useStyles();
 
   const xps_files = useSelector((state: RootState) => state.app.xpsfiles);
+  const basenames = useSelector((state: RootState) => state.app.basenames);
   const outName = useSelector((state: RootState) => state.app.outName);
   const isLogScale = useSelector((state: RootState) => state.app.isLogScale);
 
@@ -38,6 +40,7 @@ const MainTabView = () => {
   const handleSetXPSFiles = () => {
     controller.getXPSFiles().then((e) => {
       dispatch(setXPSFiles(e.files));
+      dispatch(setBasenames(e.basenames));
       if (e.files.length > 0) {
         dispatch(setOutDir(e.dirnames[0]));
         dispatch(
@@ -98,8 +101,8 @@ const MainTabView = () => {
 
         <InputSetOpen textLabel="Diretório de saída" />
 
-        <Grid item container alignItems="flex-end" spacing={2}>
-          <Grid item container xs={12} sm={11}>
+        <Grid item container alignItems="flex-end">
+          <Grid item container xs={12}>
             <Grid item xs>
               <TextField
                 required
@@ -112,17 +115,6 @@ const MainTabView = () => {
               />
             </Grid>
           </Grid>
-          {/* <Grid container item xs={12} sm={1} justify="flex-end">
-            <Grid item xs>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => controller.open(outDir + '\\' + outName)}
-              >
-                Abrir
-              </Button>
-            </Grid>
-          </Grid> */}
         </Grid>
         <Grid item>
           <FormControlLabel

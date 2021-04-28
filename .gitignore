@@ -1,6 +1,9 @@
 # output folder
 mastersizer_output/
 input_examples/*_output/
+input_examples/*.svg
+input_examples/*.txt
+input_examples/*.xlsx
 scripts/msanalyzer.bat
 scripts/msanalyzer_gui.bat
 msanalyzer/config_msanalyzer.cfg
