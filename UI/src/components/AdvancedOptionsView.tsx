@@ -77,7 +77,7 @@ const AdvancedOptionsView = () => {
             control={<Switch />}
             color="primary"
             label="Não colocar legendas nos gráficos de múltiplos arquivos"
-            checked={multiLabel}
+            checked={!multiLabel}
             onChange={() => dispatch(toggleMultiLabel())}
           />
         </Grid>
@@ -130,7 +130,11 @@ const AdvancedOptionsView = () => {
 
         <Grid item container xs={12} justify={'flex-end'}>
           <Grid item>
-            <Button variant="contained" color="secondary" startIcon={<SaveIcon />}>
+            <Button
+              variant="contained"
+              color="secondary"
+              startIcon={<SaveIcon />}
+            >
               Salvar configurações atuais
             </Button>
           </Grid>

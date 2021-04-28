@@ -10,6 +10,7 @@ interface AppStateType {
   basenames: Array<string>;
   dirnames: Array<string>;
   outName: string;
+  singleSVGfile: string;
   outDirName: string;
   isLogScale: boolean;
   meanType: MeanType;
@@ -28,6 +29,7 @@ const initialState = {
   dirnames: [],
   outName: '',
   outDirName: '',
+  singleSVGfile: '',
   isLogScale: true,
   multiLabel: true,
   meanType: MeanType.geo,
@@ -54,6 +56,9 @@ const appSlice = createSlice({
     },
     setOutName(state: AppStateType, action: PayloadAction<string>) {
       state.outName = action.payload;
+    },
+    setSingleSVGfile(state: AppStateType, action: PayloadAction<string>) {
+      state.singleSVGfile = action.payload;
     },
     setOutDir(state: AppStateType, action: PayloadAction<string>) {
       state.outDirName = action.payload;
@@ -103,5 +108,6 @@ export const {
   setIsComputing,
   setIsServerOn,
   setIsSingleFile,
+  setSingleSVGfile,
 } = appSlice.actions;
 export default appSlice.reducer;

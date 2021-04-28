@@ -62,6 +62,7 @@ const App = () => {
     (state: RootState) => state.app.isSingleFile
   );
 
+  // use effects
   React.useEffect(() => {
     dispatch(setIsSingleFile(xpsfiles.length <= 1));
   }, [xpsfiles]);
@@ -130,7 +131,7 @@ const App = () => {
           >
             <Tab label="Principal" />
             <Tab label="Opções avançadas" />
-            <Tab label="Curvas" disabled={!isSingleFile} />
+            <Tab label="Curvas" />
             <Tab label="Modelos" disabled={!isSingleFile} />
           </Tabs>
         </AppBar>
