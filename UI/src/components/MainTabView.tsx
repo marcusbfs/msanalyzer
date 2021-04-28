@@ -6,9 +6,6 @@ import Typography from '@material-ui/core/Typography';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Divider from '@material-ui/core/Divider';
 import Switch from '@material-ui/core/Switch';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 // redux
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../redux/store';
@@ -16,13 +13,15 @@ import { RootState } from '../redux/store';
 // my imports
 import useStyles from '../styles';
 import InputSetOpen from './InputSetOpen';
+import FilesList from './FilesList';
 import * as controller from '../controller';
 import {
   setOutDir,
   setOutName,
+  setDirnames,
+  setBasenames,
   setXPSFiles,
   toggleIsLogScale,
-  setBasenames,
 } from '../redux/App.store';
 
 const MainTabView = () => {
@@ -30,6 +29,7 @@ const MainTabView = () => {
 
   const xps_files = useSelector((state: RootState) => state.app.xpsfiles);
   const basenames = useSelector((state: RootState) => state.app.basenames);
+  const dirnames = useSelector((state: RootState) => state.app.dirnames);
   const outName = useSelector((state: RootState) => state.app.outName);
   const isLogScale = useSelector((state: RootState) => state.app.isLogScale);
 
@@ -41,17 +41,21 @@ const MainTabView = () => {
     controller.getXPSFiles().then((e) => {
       dispatch(setXPSFiles(e.files));
       dispatch(setBasenames(e.basenames));
-      if (e.files.length > 0) {
-        dispatch(setOutDir(e.dirnames[0]));
-        dispatch(
-          setOutName(e.files.length > 1 ? 'arquivos_multiplos' : e.basenames[0])
-        );
-      } else {
-        dispatch(setOutDir(''));
-        dispatch(setOutName(''));
-      }
+      dispatch(setDirnames(e.dirnames));
     });
   };
+
+  React.useEffect(() => {
+    if (xps_files.length > 0) {
+      dispatch(setOutDir(dirnames[0]));
+      dispatch(
+        setOutName(xps_files.length > 1 ? 'arquivos_multiplos' : basenames[0])
+      );
+    } else {
+      dispatch(setOutDir(''));
+      dispatch(setOutName(''));
+    }
+  }, [xps_files]);
 
   return (
     <>
@@ -73,16 +77,8 @@ const MainTabView = () => {
             </Grid>
           </Grid>
         </Grid>
-        <Grid item>
-          <List component="ul">
-            {xps_files.map((file: string) => {
-              return (
-                <ListItem key={file} alignItems="flex-start">
-                  <ListItemText primary={file} />
-                </ListItem>
-              );
-            })}
-          </List>
+        <Grid item container xs={12}>
+          <FilesList />
         </Grid>
       </Grid>
 

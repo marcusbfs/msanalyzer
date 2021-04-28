@@ -8,6 +8,7 @@ export enum MeanType {
 interface AppStateType {
   xpsfiles: Array<string>;
   basenames: Array<string>;
+  dirnames: Array<string>;
   outName: string;
   outDirName: string;
   isLogScale: boolean;
@@ -24,6 +25,7 @@ interface AppStateType {
 const initialState = {
   xpsfiles: [],
   basenames: [],
+  dirnames: [],
   outName: '',
   outDirName: '',
   isLogScale: true,
@@ -46,6 +48,9 @@ const appSlice = createSlice({
     },
     setBasenames(state: AppStateType, action: PayloadAction<Array<string>>) {
       state.basenames = action.payload;
+    },
+    setDirnames(state: AppStateType, action: PayloadAction<Array<string>>) {
+      state.dirnames = action.payload;
     },
     setOutName(state: AppStateType, action: PayloadAction<string>) {
       state.outName = action.payload;
@@ -86,6 +91,7 @@ const appSlice = createSlice({
 export const {
   setXPSFiles,
   setBasenames,
+  setDirnames,
   setOutName,
   setOutDir,
   toggleIsLogScale,
