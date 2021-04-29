@@ -78,8 +78,7 @@ const App = () => {
   let api_exe_path: string = path.join(
     path.dirname(app.getAppPath()),
     '..',
-    'dist',
-    'api',
+    'msanalyzer_api',
     'api.exe'
   );
 
@@ -91,16 +90,32 @@ const App = () => {
     pyProc = null;
   };
 
-  const startServer = () => {
-    console.log('Starting Python process');
+  const callPythonServer = () => {
     let fs = require('fs');
     // initialize python server
     if (fs.existsSync('../msanalyzer/api.py')) {
       console.log('Dev mode');
     } else {
       console.log('Dist mode');
+      console.log('Starting Python process');
       pyProc = require('child_process').execFile(api_exe_path);
     }
+  };
+
+  const startServer = () => {
+    // check if its alive first
+    controller
+      .isAlive()
+      .then((d) => {
+        // Server is alive: do nothing
+        console.log('Server is already online');
+        return;
+      })
+      .catch((e) => {
+        // Server is not alive: start server
+        console.log('Server offline: calling python');
+        callPythonServer();
+      });
   };
 
   React.useEffect(() => {
@@ -126,7 +141,6 @@ const App = () => {
         .catch((e) => {
           dispatch(setIsServerOn(false));
           console.log('Error: ' + e);
-          startServer();
         });
     }, INTERVAL_MS);
 
@@ -246,14 +260,7 @@ const App = () => {
             </Container>
           ) : (
             <div>
-              <Grid container justify="center">
-                <Grid item xs={12}>
-                  <ServerOfflineView />
-                </Grid>
-                <Grid item>
-                  <div>Verifique se há algo de errado em {api_exe_path}</div>
-                </Grid>
-              </Grid>
+              <ServerOfflineView api_exe_path={api_exe_path} />
             </div>
           )}
         </main>

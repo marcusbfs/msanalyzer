@@ -32,6 +32,9 @@
   "build": {
     "productName": "msanalyzer",
     "appId": "org.erb.ElectronReact",
+    "extraFiles": [
+      "msanalyzer_api"
+    ],
     "files": [
       "dist/",
       "node_modules/",
