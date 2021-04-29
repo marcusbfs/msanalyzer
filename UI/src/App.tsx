@@ -77,6 +77,7 @@ const App = () => {
   const app = require('electron').remote.app;
   let api_exe_path: string = path.join(
     path.dirname(app.getAppPath()),
+    '..',
     'dist',
     'api',
     'api.exe'
@@ -113,7 +114,7 @@ const App = () => {
     dispatch(setIsXPSEmpty(xpsfiles.length < 1));
   }, [xpsfiles]);
 
-  const INTERVAL_MS = 10000;
+  const INTERVAL_MS = 5000;
 
   React.useEffect(() => {
     const interval = setInterval(() => {
@@ -123,8 +124,9 @@ const App = () => {
           dispatch(setIsServerOn(true));
         })
         .catch((e) => {
-          console.log('Error: ' + e);
           dispatch(setIsServerOn(false));
+          console.log('Error: ' + e);
+          startServer();
         });
     }, INTERVAL_MS);
 
