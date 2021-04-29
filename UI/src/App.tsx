@@ -98,7 +98,7 @@ const App = () => {
     } else {
       console.log('Dist mode');
       console.log('Starting Python process');
-      pyProc = require('child_process').execFile(api_exe_path);
+      // pyProc = require('child_process').execFile(api_exe_path);
     }
   };
 

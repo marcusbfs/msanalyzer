@@ -16,6 +16,16 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 
+//server starter
+
+let pyProc: any = null;
+let api_exe_path: string = path.join(
+  path.dirname(app.getAppPath()),
+  '..',
+  'msanalyzer_api',
+  'api.exe'
+);
+
 export default class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
@@ -111,7 +121,7 @@ const createWindow = async () => {
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
-  new AppUpdater();
+  // new AppUpdater();
   mainWindow.removeMenu();
 };
 
@@ -127,10 +137,40 @@ app.on('window-all-closed', () => {
   }
 });
 
-app.whenReady().then(createWindow).catch(console.log);
+const exitPyProc = () => {
+  console.log('Exiting Python process');
+  if (pyProc) {
+    pyProc.kill();
+  }
+  pyProc = null;
+};
+
+const callPythonServer = () => {
+  let fs = require('fs');
+  // initialize python server
+  if (fs.existsSync('../msanalyzer/api.py')) {
+    console.log('Dev mode');
+  } else {
+    console.log('Dist mode');
+    console.log('Starting Python process');
+    pyProc = require('child_process').execFile(api_exe_path);
+  }
+};
+
+app
+  .whenReady()
+  .then(() => {
+    callPythonServer();
+    createWindow();
+  })
+  .catch(console.log);
 
 app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) createWindow();
+});
+
+app.on('will-quit', () => {
+  exitPyProc();
 });
