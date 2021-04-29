@@ -51,7 +51,7 @@ for i in hidden_imports:
 
 cmd = [python_exe, '-m', 'PyInstaller'] + cmd_options + [main_py]
 
-# subprocess.call(cmd, shell=True)
+subprocess.call(cmd, shell=True)
 shutil_copy_verbose(matplotlibrc, os.path.join(dist_folder, os.path.splitext(os.path.basename(main_py))[0]))
 shutil_copy_verbose(matplotlibrc, dist_folder)
 shutil.copytree(mpl_data_dir,mpl_destination,dirs_exist_ok =True)
@@ -60,8 +60,8 @@ shutil.copytree(mpl_data_dir,mpl_destination,dirs_exist_ok =True)
 ui_release_folder = os.path.join(repo_dir, 'UI','release')
 if os.path.isdir(ui_release_folder):
     print("Copying to " + ui_release_folder)
-    shutil.copytree(dist_folder,os.path.join(ui_release_folder, 'win-unpacked', 'resources','dist'),dirs_exist_ok =True)
-    shutil_copy_verbose(matplotlibrc, os.path.join(ui_release_folder, 'win-unpacked', 'resources'))
+    shutil.copytree(dist_folder,os.path.join(ui_release_folder, 'win-unpacked','dist'),dirs_exist_ok =True)
+    shutil_copy_verbose(matplotlibrc, os.path.join(ui_release_folder, 'win-unpacked' ))
 
 
 elapsed_time = time.time() - start_time
