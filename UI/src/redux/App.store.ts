@@ -22,6 +22,7 @@ interface AppStateType {
   isSpinnerHidden: boolean;
   isSingleFile: boolean;
   isServerOn: boolean;
+  isXPSEmpty: boolean;
 }
 
 const initialState = {
@@ -41,6 +42,7 @@ const initialState = {
   isSpinnerHidden: true,
   isComputing: false,
   isSingleFile: true,
+  isXPSEmpty: true,
 } as AppStateType;
 
 const appSlice = createSlice({
@@ -86,6 +88,9 @@ const appSlice = createSlice({
     setIsSpinnerHidden(state: AppStateType, action: PayloadAction<boolean>) {
       state.isSpinnerHidden = action.payload;
     },
+    setIsXPSEmpty(state: AppStateType, action: PayloadAction<boolean>) {
+      state.isXPSEmpty = action.payload;
+    },
     setIsComputing(state: AppStateType, action: PayloadAction<boolean>) {
       state.isComputing = action.payload;
     },
@@ -115,5 +120,6 @@ export const {
   setIsServerOn,
   setIsSingleFile,
   setSingleSVGfile,
+  setIsXPSEmpty,
 } = appSlice.actions;
 export default appSlice.reducer;

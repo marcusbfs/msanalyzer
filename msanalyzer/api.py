@@ -12,6 +12,10 @@ import uvicorn
 import MasterSizerReport as msreport
 import MultipleFilesReport as multireport
 
+import logging
+
+logging.getLogger('matplotlib.font_manager').disabled = True
+
 app = FastAPI()
 
 current_folder = pathlib.Path(__file__).parent.absolute()

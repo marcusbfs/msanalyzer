@@ -27,6 +27,7 @@ import {
   setIsSpinnerHidden,
   setIsComputing,
   setIsServerOn,
+  setIsXPSEmpty,
 } from './redux/App.store';
 import * as controller from './controller';
 
@@ -61,6 +62,7 @@ const App = () => {
   const isComputing = useSelector((state: RootState) => state.app.isComputing);
   const multiLabel = useSelector((state: RootState) => state.app.multiLabel);
   const isServerOn = useSelector((state: RootState) => state.app.isServerOn);
+  const isXPSEmpty = useSelector((state: RootState) => state.app.isXPSEmpty);
   const isSingleFile = useSelector(
     (state: RootState) => state.app.isSingleFile
   );
@@ -70,7 +72,15 @@ const App = () => {
     dispatch(setIsSingleFile(xpsfiles.length <= 1));
   }, [xpsfiles]);
 
+  let path = require('path');
   let pyProc: any = null;
+  const app = require('electron').remote.app;
+  let api_exe_path: string = path.join(
+    path.dirname(app.getAppPath()),
+    'dist',
+    'api',
+    'api.exe'
+  );
 
   const exitPyProc = () => {
     console.log('Exiting Python process');
@@ -83,22 +93,12 @@ const App = () => {
   const startServer = () => {
     console.log('Starting Python process');
     let fs = require('fs');
-    let path = require('path');
-    const app = require('electron').remote.app;
-    const fullPath = path.join(
-      path.dirname(app.getAppPath()),
-      'dist',
-      'api',
-      'api.exe'
-    );
-    console.log(fullPath);
-
     // initialize python server
     if (fs.existsSync('../msanalyzer/api.py')) {
       console.log('Dev mode');
     } else {
       console.log('Dist mode');
-      pyProc = require('child_process').execFile(fullPath);
+      pyProc = require('child_process').execFile(api_exe_path);
     }
   };
 
@@ -109,7 +109,11 @@ const App = () => {
     };
   }, []);
 
-  const INTERVAL_MS = 30000;
+  React.useEffect(() => {
+    dispatch(setIsXPSEmpty(xpsfiles.length < 1));
+  }, [xpsfiles]);
+
+  const INTERVAL_MS = 10000;
 
   React.useEffect(() => {
     const interval = setInterval(() => {
@@ -191,8 +195,8 @@ const App = () => {
           >
             <Tab label="Principal" />
             <Tab label="Opções avançadas" />
-            <Tab label="Curvas" />
-            <Tab label="Modelos" disabled={!isSingleFile} />
+            <Tab label="Curvas" disabled={isXPSEmpty} />
+            <Tab label="Modelos" disabled={isXPSEmpty || !isSingleFile} />
           </Tabs>
         </AppBar>
 
@@ -222,7 +226,7 @@ const App = () => {
                         variant="contained"
                         color="primary"
                         onClick={handleExec}
-                        disabled={isComputing || xpsfiles.length < 1}
+                        disabled={isComputing || isXPSEmpty}
                       >
                         Executar
                       </Button>
@@ -239,7 +243,16 @@ const App = () => {
               </Grid>
             </Container>
           ) : (
-            <ServerOfflineView />
+            <div>
+              <Grid container justify="center">
+                <Grid item xs={12}>
+                  <ServerOfflineView />
+                </Grid>
+                <Grid item>
+                  <div>Verifique se há algo de errado em {api_exe_path}</div>
+                </Grid>
+              </Grid>
+            </div>
           )}
         </main>
       </ThemeProvider>
