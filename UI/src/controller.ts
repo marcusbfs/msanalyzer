@@ -8,6 +8,30 @@ export interface CommonOptions {
   multiLabel: boolean;
 }
 
+export function getConfig(): Promise<CommonOptions> {
+  return fetch(base_url + 'getConfig')
+    .then((r) => {
+      return r.json();
+    })
+    .catch((e) => {
+      console.log('Error: ' + e);
+      return null;
+    });
+}
+
+export function setConfig(options: CommonOptions) {
+  fetch(base_url + 'setConfig', {
+    method: 'post',
+    body: JSON.stringify(options),
+  })
+    .then((r) => {
+      return r.json();
+    })
+    .catch((e) => {
+      console.log('Error: ' + e);
+    });
+}
+
 export function getXPSFiles(): Promise<{
   files: Array<string>;
   basenames: Array<string>;

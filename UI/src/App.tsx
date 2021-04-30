@@ -28,6 +28,9 @@ import {
   setIsComputing,
   setIsServerOn,
   setIsXPSEmpty,
+  setMeanType,
+  setZerosRight,
+  setZerosLeft,
 } from './redux/App.store';
 import * as controller from './controller';
 
@@ -117,6 +120,27 @@ const App = () => {
         callPythonServer();
       });
   };
+
+  // Use effects
+
+  React.useEffect(() => {
+    if (isServerOn) {
+      controller
+        .getConfig()
+        .then((options) => {
+          dispatch(
+            setMeanType(
+              options.meanType === 'geo' ? MeanType.geo : MeanType.ari
+            )
+          );
+          dispatch(setZerosRight(options.zerosRight));
+          dispatch(setZerosLeft(options.zerosLeft));
+        })
+        .catch((e) => {
+          console.log('Error: ' + e);
+        });
+    }
+  }, []);
 
   React.useEffect(() => {
     startServer();

@@ -15,6 +15,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../redux/store';
 
 // my imports
+import * as controller from '../controller';
 import useStyles from '../styles';
 import {
   MeanType,
@@ -32,6 +33,19 @@ const AdvancedOptionsView = () => {
   const zerosLeft = useSelector((state: RootState) => state.app.zerosLeft);
   const zerosRight = useSelector((state: RootState) => state.app.zerosRight);
   const dispatch = useDispatch();
+
+  // functions
+
+  const handleSaveClicked = () => {
+    // const options: controller.CommonOptions = {
+    //   meanType: meanType === MeanType.geo ? 'geo' : 'ari',
+    //   zerosLeft: zerosLeft,
+    //   zerosRight: zerosRight,
+    //   logScale: true,
+    //   multiLabel: multiLabel,
+    // };
+    // controller.setConfig(options);
+  };
 
   return (
     <>
@@ -124,16 +138,13 @@ const AdvancedOptionsView = () => {
           </Grid>
         </Grid>
 
-        {/* <Grid item xs={12} className={classes.divider}>
-          <Divider />
-        </Grid> */}
-
         <Grid item container xs={12} justify={'flex-end'}>
           <Grid item>
             <Button
               variant="contained"
               color="secondary"
               startIcon={<SaveIcon />}
+              onClick={handleSaveClicked}
             >
               Salvar configurações atuais
             </Button>

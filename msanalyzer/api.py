@@ -1,6 +1,8 @@
 import os
 import json
 import pathlib
+import logging
+
 from tkinter import Tk  
 from typing import Optional, List, Tuple
 from tkinter.filedialog import askdirectory, askopenfilenames 
@@ -12,13 +14,52 @@ import uvicorn
 import MasterSizerReport as msreport
 import MultipleFilesReport as multireport
 
-import logging
 
 logging.getLogger('matplotlib.font_manager').disabled = True
+current_folder = pathlib.Path(__file__).parent.absolute()
+
+config_file = os.path.join(current_folder, 'msanalyzer_config.json')
+
+DEFAULT_OPTIONS = {
+    "meanType" : "geo",
+    "zerosLeft" : 1,
+    "zerosRight" : 1,
+    "logScale" : True,
+    "multiLabel" : True,
+}
+CURRENT_SETTINGS = DEFAULT_OPTIONS
+
+CURRENT_OPTIONS = DEFAULT_OPTIONS
+
+def loadSettings(settings):
+    options = {}
+    if os.path.isfile(settings):
+        with open(settings, 'r') as f:
+            options = json.loads(f.read())
+    else:
+        options = DEFAULT_OPTIONS
+        with open(settings, 'w') as f:
+            json.dump(DEFAULT_OPTIONS, f)
+    return options
+
+def saveSettings(settings):
+    try:
+        with open(config_file, 'w') as f:
+            json.dump(settings, f)
+        return settings
+    except:
+        # f = open(config_file)
+        # json.dump(DEFAULT_OPTIONS, f)
+        # f.close()
+        with open(config_file, 'w') as f:
+            json.dump(DEFAULT_OPTIONS, f)
+        return DEFAULT_OPTIONS
+
+CURRENT_OPTIONS = loadSettings(config_file)
+
 
 app = FastAPI()
 
-current_folder = pathlib.Path(__file__).parent.absolute()
 
 list_of_diameterchoices = {
 "geo": msreport.DiameterMeanType.geometric,
@@ -71,6 +112,16 @@ async def getDir():
     except:
         return {"dirname": "","rootdir" : "", "basename" :  ""}
 
+
+
+@app.get('/getConfig', response_model=CommonOptions)
+def getConfig():
+    return CURRENT_SETTINGS
+
+@app.post("/setConfig")
+def setConfig(options : CommonOptions):
+    global CURRENT_OPTIONS
+    CURRENT_OPTIONS = saveSettings(options.dict())
 
 
 
