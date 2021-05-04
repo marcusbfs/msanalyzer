@@ -24,6 +24,7 @@ from . import MultipleFilesReport as multireport
 
 logging.getLogger('matplotlib.font_manager').disabled = True
 current_folder = pathlib.Path(__file__).parent.absolute()
+parent_folder = os.path.dirname(current_folder)
 
 config_file = os.path.join(current_folder, 'msanalyzer_config.json')
 
@@ -138,11 +139,11 @@ class MultiInput(BaseModel):
 def getConfig():
     return CURRENT_SETTINGS
 
-@app.get('/getInputExample')
+@app.post('/getInputExample')
 def getInputExample():
-    example_path = os.path.join(current_folder, '..', 'input_examples', 'ms_input.xps' )
-    response = FileResponse(path=example_path, filename=example_path)
-    return response
+    input_example_file = os.path.join(parent_folder,'input_examples', 'ms_input.xps')
+    filename = 'msanalyzer_input_example.xps'
+    return FileResponse(path=input_example_file, filename=filename, media_type='application/oxps')
 
 @app.post("/setConfig")
 def setConfig(options : CommonOptions):
@@ -179,16 +180,6 @@ async def open(path : str):
 async def alive():
     return {"status": "running"}
 
-
-import zipfile
-    
-def zipdir(path, ziph):
-    # ziph is zipfile handle
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            ziph.write(os.path.join(root, file), 
-                       os.path.relpath(os.path.join(root, file), 
-                                       os.path.join(path, '..')))
 
 @app.post('/singleModeZip')
 async def singleModeZip( file: UploadFile = File(...)):
@@ -333,3 +324,5 @@ async def create_upload_file(file: UploadFile = File(...)):
     pass
 if __name__ == '__main__':
     uvicorn.run(app, host="0.0.0.0", port=2342, reload=False)
+    example_path = os.path.join(parent_folder, 'input_examples', 'ms_input.xps' )
+    print(example_path)
