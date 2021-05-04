@@ -135,9 +135,9 @@ class MultiInput(BaseModel):
 
 
 
-@app.get('/getConfig', response_model=CommonOptions)
-def getConfig():
-    return CURRENT_SETTINGS
+# @app.get('/getConfig', response_model=CommonOptions)
+# def getConfig():
+#     return CURRENT_SETTINGS
 
 @app.post('/getInputExample')
 def getInputExample():
@@ -145,10 +145,10 @@ def getInputExample():
     filename = 'msanalyzer_input_example.xps'
     return FileResponse(path=input_example_file, filename=filename, media_type='application/oxps')
 
-@app.post("/setConfig")
-def setConfig(options : CommonOptions):
-    global CURRENT_OPTIONS
-    CURRENT_OPTIONS = saveSettings(options.dict())
+# @app.post("/setConfig")
+# def setConfig(options : CommonOptions):
+#     global CURRENT_OPTIONS
+#     CURRENT_OPTIONS = saveSettings(options.dict())
 
 
 
@@ -171,14 +171,16 @@ def setConfig(options : CommonOptions):
 #     except:
 #         return {"files": [], "basenames" : [], "dirnames" :  []}
 
-@app.get("/open/{path}")
-async def open(path : str):
-    if (os.path.isfile(path) or os.path.isdir(path)):
-        os.startfile(path)
+# @app.get("/open/{path}")
+# async def open(path : str):
+#     if (os.path.isfile(path) or os.path.isdir(path)):
+#         os.startfile(path)
 
-@app.get("/index")
+@app.get("/")
 async def alive():
-    return {"status": "running"}
+    return {"status": "running",
+    "author" : "Marcus Bruno Fernandes Silva",
+    "email": "marcusbfs@gmail.com"}
 
 
 @app.post('/singleModeZip')
@@ -252,74 +254,74 @@ async def singleModeZip( file: UploadFile = File(...)):
     response = FileResponse(path=full_xps_zip, filename=full_xps_zip)
     return response
 
-@app.post('/singleModeCompute')
-async def singleModeCompute(xpsfile : str, outputName : str, outputDir : str, options : CommonOptions):
-    reporter : msreport.MasterSizerReport = msreport.MasterSizerReport()
+# @app.post('/singleModeCompute')
+# async def singleModeCompute(xpsfile : str, outputName : str, outputDir : str, options : CommonOptions):
+#     reporter : msreport.MasterSizerReport = msreport.MasterSizerReport()
 
-    meanType = list_of_diameterchoices[options.meanType]
-    number_of_zero_first = options.zerosLeft
-    number_of_zero_last = options.zerosRight
-    log_scale = options.logScale
+#     meanType = list_of_diameterchoices[options.meanType]
+#     number_of_zero_first = options.zerosLeft
+#     number_of_zero_last = options.zerosRight
+#     log_scale = options.logScale
 
-    reporter.setXPSfile(xpsfile)
-    reporter.setDiameterMeanType(meanType)
-    reporter.cutFirstZeroPoints(number_of_zero_first, tol=1e-8)
-    reporter.cutLastZeroPoints(number_of_zero_last, tol=1e-8)
-    reporter.setLogScale(logscale=log_scale)
+#     reporter.setXPSfile(xpsfile)
+#     reporter.setDiameterMeanType(meanType)
+#     reporter.cutFirstZeroPoints(number_of_zero_first, tol=1e-8)
+#     reporter.cutLastZeroPoints(number_of_zero_last, tol=1e-8)
+#     reporter.setLogScale(logscale=log_scale)
 
-    # calculate
-    reporter.evaluateData()
-    reporter.evaluateModels()
+#     # calculate
+#     reporter.evaluateData()
+#     reporter.evaluateModels()
 
-    # name of outputfiles
-    curves = outputName + "_curves"
-    curves_data = outputName + "_curves_data.txt"
-    PSD_model = outputName + "_model"
-    PSD_data = outputName + "_model_parameters"
-    excel_data = outputName + "_curve_data"
-    best_model_basename = outputName + "_best_models_ranking"
+#     # name of outputfiles
+#     curves = outputName + "_curves"
+#     curves_data = outputName + "_curves_data.txt"
+#     PSD_model = outputName + "_model"
+#     PSD_data = outputName + "_model_parameters"
+#     excel_data = outputName + "_curve_data"
+#     best_model_basename = outputName + "_best_models_ranking"
 
-    fig = reporter.saveFig(outputDir, curves)
-    models_figs = reporter.saveModelsFig(outputDir, PSD_model)
-    reporter.saveData(outputDir, curves_data)
-    reporter.saveModelsData(outputDir, PSD_data)
-    reporter.saveExcel(outputDir, excel_data)
+#     fig = reporter.saveFig(outputDir, curves)
+#     models_figs = reporter.saveModelsFig(outputDir, PSD_model)
+#     reporter.saveData(outputDir, curves_data)
+#     reporter.saveModelsData(outputDir, PSD_data)
+#     reporter.saveExcel(outputDir, excel_data)
 
-    reporter.saveBestModelsRanking(outputDir, best_model_basename)
-
-
-@app.post('/multiModeCompute')
-async def multiModeCompute(multiInput : MultiInput, options : CommonOptions):
-    number_of_files = len(multiInput.xpsfiles)
-
-    meanType = list_of_diameterchoices[options.meanType]
-
-    multiReporter = multireport.MultipleFilesReport(
-        multiInput.xpsfiles,
-        meanType,
-        options.logScale,
-        options.zerosLeft,
-        options.zerosRight,
-        {},
-        options.multiLabel
-    )
-
-    if options.multiLabel and len(multiInput.labels) > 1:
-        multiReporter.setLabels(multiInput.labels)
-
-    MultiSizeDistribution_output_file = os.path.join(
-        multiInput.outDir, multiInput.outName + '_distribution'
-    )
-    MultiFrequency_output_file = os.path.join(multiInput.outDir,multiInput.outName + "_frequency")
-
-    multiReporter.frequencyPlot(MultiFrequency_output_file)
+#     reporter.saveBestModelsRanking(outputDir, best_model_basename)
 
 
+# @app.post('/multiModeCompute')
+# async def multiModeCompute(multiInput : MultiInput, options : CommonOptions):
+#     number_of_files = len(multiInput.xpsfiles)
 
-@app.post("/uploadfile/")
-async def create_upload_file(file: UploadFile = File(...)):
-    content = await file.read()
-    return {"filename": file.filename, "content" : content} 
+#     meanType = list_of_diameterchoices[options.meanType]
+
+#     multiReporter = multireport.MultipleFilesReport(
+#         multiInput.xpsfiles,
+#         meanType,
+#         options.logScale,
+#         options.zerosLeft,
+#         options.zerosRight,
+#         {},
+#         options.multiLabel
+#     )
+
+#     if options.multiLabel and len(multiInput.labels) > 1:
+#         multiReporter.setLabels(multiInput.labels)
+
+#     MultiSizeDistribution_output_file = os.path.join(
+#         multiInput.outDir, multiInput.outName + '_distribution'
+#     )
+#     MultiFrequency_output_file = os.path.join(multiInput.outDir,multiInput.outName + "_frequency")
+
+#     multiReporter.frequencyPlot(MultiFrequency_output_file)
+
+
+
+# @app.post("/uploadfile/")
+# async def create_upload_file(file: UploadFile = File(...)):
+#     content = await file.read()
+#     return {"filename": file.filename, "content" : content} 
 
     pass
 if __name__ == '__main__':
