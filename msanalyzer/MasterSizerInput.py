@@ -6,7 +6,7 @@ from typing import List
 
 import fitz
 
-from MasterSizerInputReader import MasterSizerInputReader
+from .MasterSizerInputReader import MasterSizerInputReader
 
 logger = logging.getLogger(__name__)
 

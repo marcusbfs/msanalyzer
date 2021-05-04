@@ -8,8 +8,8 @@ from typing import List
 
 logger = logging.getLogger("msanalyzer")
 
-import MasterSizerReport as msreport
-import MultipleFilesReport as multireport
+from . import MasterSizerReport as msreport
+from . import MultipleFilesReport as multireport
 
 fig : plt.figure = None
 

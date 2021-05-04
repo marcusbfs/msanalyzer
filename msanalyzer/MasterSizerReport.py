@@ -13,12 +13,12 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from MasterSizerInput import MasterSizerInput
-from MasterSizerInputReader import MasterSizerInputReader
+from .MasterSizerInput import MasterSizerInput
+from .MasterSizerInputReader import MasterSizerInputReader
 
-from RRBSizeDistributionModel import RRB
-from SizeDistributionBaseModel import SizeDistributionBaseModel
-from SizeDistributionModelsFactory import getPSDModelsList
+from .RRBSizeDistributionModel import RRB
+from .SizeDistributionBaseModel import SizeDistributionBaseModel
+from .SizeDistributionModelsFactory import getPSDModelsList
 
 logger = logging.getLogger(__name__)
 __version__: str = "3.2.0"

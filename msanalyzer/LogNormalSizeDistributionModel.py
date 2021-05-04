@@ -7,7 +7,7 @@ import numpy as np
 from scipy.special import erf
 from typing import List, Any
 
-import SizeDistributionBaseModel as PSDBase
+from . import SizeDistributionBaseModel as PSDBase
 
 
 class LogNormal(PSDBase.SizeDistributionBaseModel):

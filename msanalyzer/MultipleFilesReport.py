@@ -8,7 +8,7 @@ from typing import List
 import matplotlib
 import matplotlib.pyplot as plt
 
-import MasterSizerReport as msreport
+from . import MasterSizerReport as msreport
 
 logger = logging.getLogger(__name__)
 

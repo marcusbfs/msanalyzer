@@ -18,8 +18,8 @@ from pydantic import BaseModel
 import aiofiles
 import uvicorn
 
-import MasterSizerReport as msreport
-import MultipleFilesReport as multireport
+from . import MasterSizerReport as msreport
+from . import MultipleFilesReport as multireport
 
 
 logging.getLogger('matplotlib.font_manager').disabled = True

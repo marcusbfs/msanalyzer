@@ -5,7 +5,7 @@ from typing import List, Any
 
 import numpy as np
 
-import SizeDistributionBaseModel as PSDBase
+from . import SizeDistributionBaseModel as PSDBase
 from scipy.special import gamma
 
 
