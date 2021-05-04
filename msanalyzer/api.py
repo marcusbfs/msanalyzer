@@ -67,8 +67,6 @@ CURRENT_OPTIONS = loadSettings(config_file)
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory=r"D:\Desktop\workspace\msanalyzer_web\frontend\build"), name="static")
-
 origins = [
     "http://localhost",
     "http://localhost:3000",
