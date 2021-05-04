@@ -138,6 +138,12 @@ class MultiInput(BaseModel):
 def getConfig():
     return CURRENT_SETTINGS
 
+@app.get('/getInputExample')
+def getInputExample():
+    example_path = os.path.join(current_folder, '..', 'input_examples', 'ms_input.xps' )
+    response = FileResponse(path=example_path, filename=example_path)
+    return response
+
 @app.post("/setConfig")
 def setConfig(options : CommonOptions):
     global CURRENT_OPTIONS
