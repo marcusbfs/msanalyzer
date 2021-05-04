@@ -2,13 +2,20 @@ import os
 import json
 import pathlib
 import logging
+import time
+import shutil
 
 from tkinter import Tk  
 from typing import Optional, List, Tuple
 from tkinter.filedialog import askdirectory, askopenfilenames 
 
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, StreamingResponse
+
 from pydantic import BaseModel
+import aiofiles
 import uvicorn
 
 import MasterSizerReport as msreport
@@ -59,6 +66,21 @@ CURRENT_OPTIONS = loadSettings(config_file)
 
 
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory=r"D:\Desktop\workspace\msanalyzer_web\frontend\build"), name="static")
+
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 list_of_diameterchoices = {
@@ -149,10 +171,91 @@ async def open(path : str):
     if (os.path.isfile(path) or os.path.isdir(path)):
         os.startfile(path)
 
-@app.get("/")
+@app.get("/index")
 async def alive():
     return {"status": "running"}
 
+
+import zipfile
+    
+def zipdir(path, ziph):
+    # ziph is zipfile handle
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            ziph.write(os.path.join(root, file), 
+                       os.path.relpath(os.path.join(root, file), 
+                                       os.path.join(path, '..')))
+
+@app.post('/singleModeZip')
+async def singleModeZip( file: UploadFile = File(...)):
+    timestr = time.strftime("%Y%m%d-%H%M%S") + "-" + str(time.time())
+    basename_xps = os.path.splitext(file.filename)[0]
+    base_xpsfile = basename_xps + "_" + timestr + '_.xps'
+    xpsfile = os.path.join(current_folder, base_xpsfile)
+    outputName = basename_xps
+    outputDir = os.path.join(current_folder, "outDir_" + timestr)
+    if not os.path.isdir(outputDir):
+        os.mkdir(outputDir)
+
+    meanType = "geo"
+    zerosLeft = 1
+    zerosRight = 1
+    logScale = True
+    multiLabel = False
+
+    # save file
+    async with aiofiles.open(xpsfile, 'wb') as out_file:
+        content = await file.read()  # async read
+        await out_file.write(content)  # async write
+
+    # clean all zip
+    for f in os.listdir(current_folder):
+        if f.endswith('.zip'):
+            os.remove(os.path.join(current_folder, f))
+
+    reporter : msreport.MasterSizerReport = msreport.MasterSizerReport()
+    meanType = list_of_diameterchoices[meanType]
+    number_of_zero_first = zerosLeft
+    number_of_zero_last = zerosRight
+    log_scale = logScale
+
+    reporter.setXPSfile(xpsfile)
+    reporter.setDiameterMeanType(meanType)
+    reporter.cutFirstZeroPoints(number_of_zero_first, tol=1e-8)
+    reporter.cutLastZeroPoints(number_of_zero_last, tol=1e-8)
+    reporter.setLogScale(logscale=log_scale)
+
+    # calculate
+    reporter.evaluateData()
+    reporter.evaluateModels()
+
+    # name of outputfiles
+    curves = outputName + "_curves"
+    curves_data = outputName + "_curves_data.txt"
+    PSD_model = outputName + "_model"
+    PSD_data = outputName + "_model_parameters"
+    excel_data = outputName + "_curve_data"
+    best_model_basename = outputName + "_best_models_ranking"
+
+    fig = reporter.saveFig(outputDir, curves)
+    models_figs = reporter.saveModelsFig(outputDir, PSD_model)
+    reporter.saveData(outputDir, curves_data)
+    reporter.saveModelsData(outputDir, PSD_data)
+    reporter.saveExcel(outputDir, excel_data)
+
+    reporter.saveBestModelsRanking(outputDir, best_model_basename)
+
+    # zip folder
+    xps_zip = basename_xps + "_" + timestr 
+    full_xps_zip = xps_zip + ".zip"
+    shutil.make_archive(xps_zip, 'zip', outputDir)
+
+    # rm dir and file
+    shutil.rmtree(outputDir)
+    os.remove(xpsfile)
+
+    response = FileResponse(path=full_xps_zip, filename=full_xps_zip)
+    return response
 
 @app.post('/singleModeCompute')
 async def singleModeCompute(xpsfile : str, outputName : str, outputDir : str, options : CommonOptions):
@@ -216,6 +319,12 @@ async def multiModeCompute(multiInput : MultiInput, options : CommonOptions):
 
     multiReporter.frequencyPlot(MultiFrequency_output_file)
 
+
+
+@app.post("/uploadfile/")
+async def create_upload_file(file: UploadFile = File(...)):
+    content = await file.read()
+    return {"filename": file.filename, "content" : content} 
 
     pass
 if __name__ == '__main__':
