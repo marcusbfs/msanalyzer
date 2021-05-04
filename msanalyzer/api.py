@@ -5,9 +5,9 @@ import logging
 import time
 import shutil
 
-from tkinter import Tk  
+# from tkinter import Tk  
 from typing import Optional, List, Tuple
-from tkinter.filedialog import askdirectory, askopenfilenames 
+# from tkinter.filedialog import askdirectory, askopenfilenames 
 
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -115,24 +115,24 @@ class MultiInput(BaseModel):
     outDir : str
     outName : str
 
-@app.get('/getDir', response_model=Directory)
-async def getDir():
-    try:
-        root = Tk()
-        root.withdraw()
-        root.wm_attributes('-topmost', 1)
+# @app.get('/getDir', response_model=Directory)
+# async def getDir():
+#     try:
+#         root = Tk()
+#         root.withdraw()
+#         root.wm_attributes('-topmost', 1)
 
-        dirname = askdirectory()
+#         dirname = askdirectory()
 
-        if not dirname:
-            return {"dirname": "","rootdir" : "", "basename" :  ""}
+#         if not dirname:
+#             return {"dirname": "","rootdir" : "", "basename" :  ""}
 
-        dirname = os.path.abspath(dirname)
-        basename = os.path.splitext(dirname)[0]
-        rootdir = os.path.basename(dirname)
-        return {"dirname": dirname, "rootdir" : rootdir, "basename" :  basename}
-    except:
-        return {"dirname": "","rootdir" : "", "basename" :  ""}
+#         dirname = os.path.abspath(dirname)
+#         basename = os.path.splitext(dirname)[0]
+#         rootdir = os.path.basename(dirname)
+#         return {"dirname": dirname, "rootdir" : rootdir, "basename" :  basename}
+#     except:
+#         return {"dirname": "","rootdir" : "", "basename" :  ""}
 
 
 
@@ -147,24 +147,24 @@ def setConfig(options : CommonOptions):
 
 
 
-@app.post('/getFiles', response_model=Files)
-async def getFiles(types : selectFileTypes):
-    try:
-        root = Tk()
-        root.withdraw()
-        root.wm_attributes('-topmost', 1)
+# @app.post('/getFiles', response_model=Files)
+# async def getFiles(types : selectFileTypes):
+#     try:
+#         root = Tk()
+#         root.withdraw()
+#         root.wm_attributes('-topmost', 1)
 
-        if types.fileTypes:
-            files = askopenfilenames(filetypes=types.fileTypes)
-        else:
-            files = askopenfilenames()
+#         if types.fileTypes:
+#             files = askopenfilenames(filetypes=types.fileTypes)
+#         else:
+#             files = askopenfilenames()
 
-        basenames = [ os.path.splitext(os.path.basename(f))[0] for f in files]
-        files = [os.path.abspath(f) for f in files]
-        dirnames = [ os.path.dirname(f) for f in files]
-        return {"files": files, "basenames" : basenames, "dirnames" :  dirnames}
-    except:
-        return {"files": [], "basenames" : [], "dirnames" :  []}
+#         basenames = [ os.path.splitext(os.path.basename(f))[0] for f in files]
+#         files = [os.path.abspath(f) for f in files]
+#         dirnames = [ os.path.dirname(f) for f in files]
+#         return {"files": files, "basenames" : basenames, "dirnames" :  dirnames}
+#     except:
+#         return {"files": [], "basenames" : [], "dirnames" :  []}
 
 @app.get("/open/{path}")
 async def open(path : str):
