@@ -248,14 +248,14 @@ async def singleModeZip( file: UploadFile = File(...)):
 
     # zip folder
     xps_zip = basename_xps + "_" + timestr 
-    full_xps_zip = xps_zip + ".zip"
-    shutil.make_archive(xps_zip, 'zip', outputDir)
+    full_xps_zip = os.path.join(current_folder, xps_zip + ".zip")
+    shutil.make_archive(os.path.join(current_folder, xps_zip), 'zip', outputDir)
 
     # rm dir and file
     shutil.rmtree(outputDir)
     os.remove(xpsfile)
 
-    response = FileResponse(path=full_xps_zip, filename=full_xps_zip)
+    response = FileResponse(path=full_xps_zip, filename=xps_zip + ".zip", headers={"basename": basename_xps})
     return response
 
 # @app.post('/singleModeCompute')

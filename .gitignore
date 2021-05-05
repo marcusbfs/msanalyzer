@@ -7,6 +7,7 @@ input_examples/*.xlsx
 scripts/msanalyzer.bat
 scripts/msanalyzer_gui.bat
 msanalyzer/config_msanalyzer.cfg
+msanalyzer/*.zip
 # venv folder
 msanalyzer_venv/
 msanalyzer/.vscode
