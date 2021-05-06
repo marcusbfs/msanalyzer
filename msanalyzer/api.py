@@ -221,16 +221,16 @@ async def singleModeZip(
         f"singleModeZip called with args: {meanType=}, {zerosLeft=}, {zerosRight=}, {logScale=}, {multiLabel=}"
     )
 
-    timestr = time.strftime("%Y%m%d-%H%M%S") + "-" + str(time.time())
+    timestr = time.strftime("%Y%m%d-%H%M%S") + "-" + str(time.time()).replace(".", "")
     basename_xps = os.path.splitext(file.filename)[0]
     base_xpsfile = basename_xps + "_" + timestr + "_.xps"
     xpsfile = os.path.join(current_folder, base_xpsfile)
     outputName = basename_xps
     outputDir = os.path.join(current_folder, "outDir_" + timestr)
 
-    logger.info('Closing all figures')
+    logger.info("Closing all figures")
     plt.clf()
-    plt.close('all')
+    plt.close("all")
 
     if not os.path.isdir(outputDir):
         logger.info(f"Creating output dir: {outputDir}")
@@ -358,6 +358,89 @@ async def singleModeZip(
     #     return {"filename": file.filename, "content" : content}
 
     pass
+
+
+@app.post("/multiModeZip")
+async def multiModeZip(
+    files: List[UploadFile] = File(...),
+    meanType: str = Form("geo"),
+    zerosLeft: int = Form(1),
+    zerosRight: int = Form(1),
+    logScale: bool = Form(True),
+    multiLabel: bool = Form(True),
+):
+    logger.debug(
+        f"multiModeZip called with args: {meanType=}, {zerosLeft=}, {zerosRight=}, {logScale=}, {multiLabel=}"
+    )
+    number_of_files = len(files)
+
+    timestr = time.strftime("%Y%m%d-%H%M%S") + "-" + str(time.time()).replace(".", "")
+    basenames_xps = [os.path.splitext(f.filename)[0] for f in files]
+    base_xpsfiles = [b + "_" + timestr + "_.xps" for b in basenames_xps]
+    xpsfiles = [os.path.join(current_folder, b) for b in base_xpsfiles]
+    outputName = "multiplos_arquivos"
+    outputDir = os.path.join(current_folder, "outDir_" + timestr)
+
+    logger.info("Closing all figures")
+    plt.clf()
+    plt.close("all")
+
+    if not os.path.isdir(outputDir):
+        logger.info(f"Creating output dir: {outputDir}")
+        os.mkdir(outputDir)
+
+    logger.warn(f"XPS files: {base_xpsfiles}")
+
+    # Save all files
+    logger.info(f"Saving all files ({number_of_files} in total)")
+    for file, xpsfile in zip(files, xpsfiles):
+        async with aiofiles.open(xpsfile, "wb") as out_file:
+            logger.info(f'Saving XPS file: "{xpsfile}"')
+            content = await file.read()  # async read
+            await out_file.write(content)  # async write
+
+    meanType = list_of_diameterchoices[meanType]
+
+    multiReporter = multireport.MultipleFilesReport(
+        xpsfiles, meanType, logScale, zerosLeft, zerosRight, {}, multiLabel
+    )
+
+    if multiLabel:
+        logger.info("Using multilabels")
+        multiReporter.setLabels(basenames_xps)
+
+    MultiSizeDistribution_output_file = os.path.join(
+        outputDir, outputName + "_distribution"
+    )
+    MultiFrequency_output_file = os.path.join(outputDir, outputName + "_frequency")
+
+    logger.info('Saving figures')
+    multiReporter.frequencyPlot(MultiFrequency_output_file)
+    multiReporter.sizeDistributionPlot(MultiSizeDistribution_output_file)
+
+    # clean all zip and xps
+    for xpsfile in xpsfiles:
+        logger.info(f'Removing "{xpsfile}"')
+        os.remove(xpsfile)
+
+    for f in os.listdir(current_folder):
+        if f.endswith(".zip") or f.endswith(".xps"):
+            filepath = os.path.join(current_folder, f)
+            logger.info(f"Removing {filepath}")
+            os.remove(filepath)
+
+    # zip folder
+    xps_zip = outputName + "_" + timestr
+    full_xps_zip = os.path.join(current_folder, xps_zip + ".zip")
+    shutil.make_archive(os.path.join(current_folder, xps_zip), "zip", outputDir)
+
+    # rm dir and file
+    shutil.rmtree(outputDir)
+
+    response = FileResponse(
+        path=full_xps_zip, filename=xps_zip + ".zip", headers={"basename": outputName}
+    )
+    return response
 
 
 if __name__ == "__main__":

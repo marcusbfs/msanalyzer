@@ -16,12 +16,11 @@ import pandas as pd
 from .MasterSizerInput import MasterSizerInput
 from .MasterSizerInputReader import MasterSizerInputReader
 
-from .RRBSizeDistributionModel import RRB
-from .SizeDistributionBaseModel import SizeDistributionBaseModel
-from .SizeDistributionModelsFactory import getPSDModelsList
+from .models import SizeDistributionBaseModel
+from .models import getPSDModelsList
 
 logger = logging.getLogger(__name__)
-__version__: str = "3.2.0"
+__version__: str = "3.3.0"
 __author__: str = "Marcus Bruno Fernandes Silva"
 __email__: str = "marcusbfs@gmail.com"
 
