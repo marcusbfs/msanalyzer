@@ -1,5 +1,6 @@
 import os
 import warnings
+import io
 
 warnings.filterwarnings("ignore", "(?s).*MATPLOTLIBDATA.*", category=UserWarning)
 import logging
@@ -17,6 +18,7 @@ class MultipleFilesReport:
     # constructor
     def __init__(
         self,
+        files_mem: List[io.BytesIO],
         files: List[str],
         meanType: msreport.DiameterMeanType,
         logScale: bool,
@@ -25,6 +27,7 @@ class MultipleFilesReport:
         custom_plot_dict: dict,
         show_labels: bool,
     ):
+        self.__files_mem: List[io.BytesIO] = files_mem
         self.__files: List[str] = files
         self.__number_of_files: int = len(self.__files)
         self.__meanType: msreport.DiameterMeanType = meanType
@@ -122,12 +125,12 @@ class MultipleFilesReport:
     # private methods
 
     def __create_reporters(self) -> None:
-        for f in self.__files:
+        for f_mem, f in zip(self.__files_mem, self.__files):
             logger.info('Setting up file "{}"'.format(f))
             reporter = msreport.MasterSizerReport()
             logger.info('Created reporter object for file "{}"'.format(f))
 
-            reporter.setXPSfile(f)
+            reporter.setXPSfile(f_mem, f)
             reporter.setDiameterMeanType(self.__meanType)
             reporter.cutFirstZeroPoints(self.__number_of_zero_first, tol=1e-8)
             reporter.cutLastZeroPoints(self.__number_of_zero_last, tol=1e-8)

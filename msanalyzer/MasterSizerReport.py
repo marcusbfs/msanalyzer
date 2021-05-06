@@ -2,6 +2,7 @@ from datetime import date
 from textwrap import wrap
 from enum import Enum, unique
 import os
+import io
 import warnings
 
 warnings.filterwarnings("ignore", "(?s).*MATPLOTLIBDATA.*", category=UserWarning)
@@ -14,7 +15,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from .MasterSizerInput import MasterSizerInput
-from .MasterSizerInputReader import MasterSizerInputReader
 
 from .models import SizeDistributionBaseModel
 from .models import getPSDModelsList
@@ -33,7 +33,7 @@ class DiameterMeanType(Enum):
 
 class MasterSizerReport:
     def __init__(
-        self, input_reader: MasterSizerInputReader = MasterSizerInput()
+        self, input_reader: MasterSizerInput = MasterSizerInput()
     ) -> None:
         self.__diameters_filename: str = ""
         self.__vol_in_per_filename: str = ""
@@ -45,7 +45,7 @@ class MasterSizerReport:
         self.__x_data_mean: np.array = None
         self.__cumulative_y_vals: np.array = None
         self.__diff_of_cumulative_y_vals: np.array = None
-        self.__ms_input: MasterSizerInputReader = input_reader
+        self.__ms_input: MasterSizerInput = input_reader
         self.__version: str = __version__
         self.__input_xps_file: str = ""
         self.__meantype: DiameterMeanType = DiameterMeanType.geometric
@@ -63,10 +63,10 @@ class MasterSizerReport:
         self.__log_scale = logscale
         logger.info("Log scale setted to {}".format(logscale))
 
-    def setXPSfile(self, xps_filename: str) -> None:
+    def setXPSfile(self, xps_mem : io.BytesIO, xps_filename : str) -> None:
         self.__input_xps_file = xps_filename
         logger.info('XPS file setted to "{}"'.format(xps_filename))
-        self.__ms_input.setFile(xps_filename)
+        self.__ms_input.setFile(xps_mem, xps_filename)
         self.__updateXY_data()
 
     def setXandY(self, x_vals: List[float], y_vals: List[float]) -> None:

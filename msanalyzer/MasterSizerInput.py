@@ -1,17 +1,16 @@
 import os
 import logging
+import io
 
 import numpy as np
 from typing import List
 
 import fitz
 
-from .MasterSizerInputReader import MasterSizerInputReader
-
 logger = logging.getLogger(__name__)
 
 
-class MasterSizerInput(MasterSizerInputReader):
+class MasterSizerInput:
     def __init__(self) -> None:
 
         self.__text: str = ""
@@ -27,19 +26,15 @@ class MasterSizerInput(MasterSizerInputReader):
         self.__values_per_table: int = 17
         self.__values_last_table: int = 15
 
-    def setFile(self, input_xps: str) -> None:
+    def setFile(self, xps_memory: io.BytesIO, filename: str = "") -> None:
 
-        if not os.path.exists(input_xps):
-            logger.critical('File "{}" does not exist'.format(input_xps))
-            print('File "' + input_xps + '" does not exist')
-            raise (FileNotFoundError)
-
-        doc = fitz.open(input_xps)
+        self.__filename = filename
+        doc = fitz.open(stream=xps_memory, filetype="xps")
         page = doc.loadPage(0)
         self.__text = page.getText()
         doc.close()
 
-        logger.info('Raw data loaded from "{}"'.format(input_xps))
+        logger.info("Raw data loaded from memory")
 
     def getx(self) -> List[float]:
         return self.__x_values
