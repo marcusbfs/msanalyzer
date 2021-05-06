@@ -16,6 +16,8 @@ from pydantic import BaseModel
 import aiofiles
 import uvicorn
 
+import matplotlib.pyplot as plt
+
 from . import MasterSizerReport as msreport
 from . import MultipleFilesReport as multireport
 
@@ -226,28 +228,27 @@ async def singleModeZip(
     outputName = basename_xps
     outputDir = os.path.join(current_folder, "outDir_" + timestr)
 
-    if not os.path.isdir(outputDir):
-        logger.info(f"Creating out")
-        os.mkdir(outputDir)
+    logger.info('Closing all figures')
+    plt.clf()
+    plt.close('all')
 
-    multiLabel = False
+    if not os.path.isdir(outputDir):
+        logger.info(f"Creating output dir: {outputDir}")
+        os.mkdir(outputDir)
 
     # save file
     async with aiofiles.open(xpsfile, "wb") as out_file:
+        logger.info(f'Saving XPS file: "{xpsfile}"')
         content = await file.read()  # async read
         await out_file.write(content)  # async write
 
     reporter: msreport.MasterSizerReport = msreport.MasterSizerReport()
-    meanType = list_of_diameterchoices[meanType]
-    number_of_zero_first = zerosLeft
-    number_of_zero_last = zerosRight
-    log_scale = logScale
 
     reporter.setXPSfile(xpsfile)
-    reporter.setDiameterMeanType(meanType)
-    reporter.cutFirstZeroPoints(number_of_zero_first, tol=1e-8)
-    reporter.cutLastZeroPoints(number_of_zero_last, tol=1e-8)
-    reporter.setLogScale(logscale=log_scale)
+    reporter.setDiameterMeanType(list_of_diameterchoices[meanType])
+    reporter.cutFirstZeroPoints(zerosLeft, tol=1e-8)
+    reporter.cutLastZeroPoints(zerosRight, tol=1e-8)
+    reporter.setLogScale(logscale=zerosRight)
 
     # calculate
     reporter.evaluateData()
