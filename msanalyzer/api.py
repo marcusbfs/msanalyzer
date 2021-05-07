@@ -124,7 +124,7 @@ async def singleModeZip(
     zerosRight: int = Form(1),
     logScale: bool = Form(True),
     multiLabel: bool = Form(True),
-) -> FileResponse:
+) -> StreamingResponse:
     logger.debug(
         f"singleModeZip called with args: {meanType=}, {zerosLeft=}, {zerosRight=}, {logScale=}, {multiLabel=}"
     )
@@ -176,26 +176,30 @@ async def singleModeZip(
 
     reporter.saveBestModelsRanking(outputDir, best_model_basename)
 
-    # clean all zip and xps
-    for f in os.listdir(current_folder):
-        if f.endswith(".zip"):
-            filepath = os.path.join(current_folder, f)
-            logger.info(f"Removing {filepath}")
-            os.remove(filepath)
-
     # zip folder
-    xps_zip = basename_xps + "_" + timestr
-    full_xps_zip = os.path.join(current_folder, xps_zip + ".zip")
-    shutil.make_archive(os.path.join(current_folder, xps_zip), "zip", outputDir)
+    logger.info("Creating zip in-memory")
+    in_memory = io.BytesIO()
+    zf = zipfile.ZipFile(in_memory, mode="w")
+
+    for f in os.listdir(outputDir):
+        ff = os.path.join(outputDir, f)
+        # logger.debug(f"Appending to zip: {ff}")
+        zf.write(ff, f, zipfile.ZIP_STORED)
+
+    zf.close()
+    in_memory.seek(0)
 
     # rm dir and file
     logger.info(f"Removing output dir: {outputDir}")
     shutil.rmtree(outputDir)
 
-    # logger.info("Reading zip into memory")
-
-    response = FileResponse(
-        path=full_xps_zip, filename=xps_zip + ".zip", headers={"basename": basename_xps}
+    response = StreamingResponse(
+        in_memory,
+        headers={
+            "basename": basename_xps,
+            "Content-Disposition": f"attachment;filename={basename_xps}.zip",
+        },
+        media_type="applicaton/zip",
     )
     return response
 
@@ -208,7 +212,7 @@ async def multiModeZip(
     zerosRight: int = Form(1),
     logScale: bool = Form(True),
     multiLabel: bool = Form(True),
-) -> FileResponse:
+) -> StreamingResponse:
     logger.debug(
         f"multiModeZip called with args: {meanType=}, {zerosLeft=}, {zerosRight=}, {logScale=}, {multiLabel=}"
     )
@@ -259,22 +263,30 @@ async def multiModeZip(
     multiReporter.frequencyPlot(MultiFrequency_output_file)
     multiReporter.sizeDistributionPlot(MultiSizeDistribution_output_file)
 
-    for f in os.listdir(current_folder):
-        if f.endswith(".zip"):
-            filepath = os.path.join(current_folder, f)
-            logger.info(f"Removing {filepath}")
-            os.remove(filepath)
-
     # zip folder
-    xps_zip = outputName + "_" + timestr
-    full_xps_zip = os.path.join(current_folder, xps_zip + ".zip")
-    shutil.make_archive(os.path.join(current_folder, xps_zip), "zip", outputDir)
+    logger.info("Creating zip in-memory")
+    in_memory = io.BytesIO()
+    zf = zipfile.ZipFile(in_memory, mode="w")
+
+    for f in os.listdir(outputDir):
+        ff = os.path.join(outputDir, f)
+        # logger.debug(f"Appending to zip: {ff}")
+        zf.write(ff, f, zipfile.ZIP_STORED)
+
+    zf.close()
+    in_memory.seek(0)
 
     # rm dir and file
+    logger.info(f"Removing output dir: {outputDir}")
     shutil.rmtree(outputDir)
 
-    response = FileResponse(
-        path=full_xps_zip, filename=xps_zip + ".zip", headers={"basename": outputName}
+    response = StreamingResponse(
+        in_memory,
+        headers={
+            "basename": outputName,
+            "Content-Disposition": f"attachment;filename={outputName}.zip",
+        },
+        media_type="applicaton/zip",
     )
     return response
 
