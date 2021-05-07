@@ -1,4 +1,5 @@
 import os
+import io
 import logging
 import argparse
 import time
@@ -11,11 +12,12 @@ logger = logging.getLogger("msanalyzer")
 from . import MasterSizerReport as msreport
 from . import MultipleFilesReport as multireport
 
-fig : plt.figure = None
+fig: plt.figure = None
 
-models_figs : dict = {}
+models_figs: dict = {}
 
-def main(_args : List[str] = None) -> None:
+
+def main(_args: List[str] = None) -> None:
 
     start_time = time.time()
 
@@ -175,17 +177,18 @@ def main(_args : List[str] = None) -> None:
     if not args.multiple_files:
         logger.info("Single file mode")
 
-        reporter : msreport.MasterSizerReport = msreport.MasterSizerReport()
+        reporter: msreport.MasterSizerReport = msreport.MasterSizerReport()
         logger.info("Created reporter object")
 
         xps_file = args.xps
 
-        reporter.setXPSfile(xps_file)
-        reporter.setDiameterMeanType(meanType)
-        reporter.cutFirstZeroPoints(number_of_zero_first, tol=1e-8)
-        reporter.cutLastZeroPoints(number_of_zero_last, tol=1e-8)
-        reporter.setLogScale(logscale=log_scale)
-        logger.info("Reporter object setted up")
+        with open(xps_file, "r") as xpsfile_mem:
+            reporter.setXPSfile(io.BytesIO(xpsfile_mem.read()), xps_file)
+            reporter.setDiameterMeanType(meanType)
+            reporter.cutFirstZeroPoints(number_of_zero_first, tol=1e-8)
+            reporter.cutLastZeroPoints(number_of_zero_last, tol=1e-8)
+            reporter.setLogScale(logscale=log_scale)
+            logger.info("Reporter object setted up")
 
         # calculate
         reporter.evaluateData()
@@ -216,7 +219,12 @@ def main(_args : List[str] = None) -> None:
         number_of_files = len(args.multiple_files)
         logger.info("Multiple files mode - {} files".format(number_of_files))
 
+        f_mem = []
+        for f in args.multiple_files:
+            f_mem.append(io.BytesIO(open(f, "rb").read()))
+
         multiReporter = multireport.MultipleFilesReport(
+            f_mem,
             args.multiple_files,
             meanType,
             log_scale,
@@ -237,6 +245,9 @@ def main(_args : List[str] = None) -> None:
 
         fig = multiReporter.sizeDistributionPlot(MultiSizeDistribution_output_file)
         multiReporter.frequencyPlot(MultiFrequency_output_file)
+
+        for f in f_mem:
+            f.close()
 
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))
 

@@ -32,9 +32,7 @@ class DiameterMeanType(Enum):
 
 
 class MasterSizerReport:
-    def __init__(
-        self, input_reader: MasterSizerInput = MasterSizerInput()
-    ) -> None:
+    def __init__(self, input_reader: MasterSizerInput = MasterSizerInput()) -> None:
         self.__diameters_filename: str = ""
         self.__vol_in_per_filename: str = ""
         self.__number_of_points: int = 0
@@ -63,7 +61,7 @@ class MasterSizerReport:
         self.__log_scale = logscale
         logger.info("Log scale setted to {}".format(logscale))
 
-    def setXPSfile(self, xps_mem : io.BytesIO, xps_filename : str) -> None:
+    def setXPSfile(self, xps_mem: io.BytesIO, xps_filename: str) -> None:
         self.__input_xps_file = xps_filename
         logger.info('XPS file setted to "{}"'.format(xps_filename))
         self.__ms_input.setFile(xps_mem, xps_filename)

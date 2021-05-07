@@ -7,7 +7,7 @@ import time
 import shutil
 import zipfile
 
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, TypedDict
 
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
@@ -44,46 +44,8 @@ DEFAULT_OPTIONS = {
     "logScale": True,
     "multiLabel": True,
 }
-CURRENT_SETTINGS = DEFAULT_OPTIONS
-
-CURRENT_OPTIONS = DEFAULT_OPTIONS
-
-
-def loadSettings(settings):
-    options = {}
-    if os.path.isfile(settings):
-        with open(settings, "r") as f:
-            options = json.loads(f.read())
-    else:
-        options = DEFAULT_OPTIONS
-        with open(settings, "w") as f:
-            json.dump(DEFAULT_OPTIONS, f)
-    return options
-
-
-def saveSettings(settings):
-    try:
-        with open(config_file, "w") as f:
-            json.dump(settings, f)
-        return settings
-    except:
-        # f = open(config_file)
-        # json.dump(DEFAULT_OPTIONS, f)
-        # f.close()
-        with open(config_file, "w") as f:
-            json.dump(DEFAULT_OPTIONS, f)
-        return DEFAULT_OPTIONS
-
-
-CURRENT_OPTIONS = loadSettings(config_file)
-
 
 app = FastAPI()
-
-# origins = [
-#     "http://localhost",
-#     "http://localhost:3000",
-# ]
 
 origins = [
     "*",
@@ -97,12 +59,6 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"],
 )
-
-
-list_of_diameterchoices = {
-    "geo": msreport.DiameterMeanType.geometric,
-    "ari": msreport.DiameterMeanType.arithmetic,
-}
 
 
 class selectFileTypes(BaseModel):
@@ -137,7 +93,7 @@ class MultiInput(BaseModel):
 
 
 @app.post("/getInputExample")
-def getInputExample():
+def getInputExample() -> FileResponse:
     input_example_file = os.path.join(parent_folder, "input_examples", "ms_input.xps")
     filename = "msanalyzer_input_example.xps"
     return FileResponse(
@@ -145,8 +101,14 @@ def getInputExample():
     )
 
 
+class DictAlive(TypedDict):
+    status: str
+    author: str
+    email: str
+
+
 @app.get("/")
-async def alive():
+async def alive() -> DictAlive:
     return {
         "status": "running",
         "author": "Marcus Bruno Fernandes Silva",
@@ -162,7 +124,7 @@ async def singleModeZip(
     zerosRight: int = Form(1),
     logScale: bool = Form(True),
     multiLabel: bool = Form(True),
-):
+) -> FileResponse:
     logger.debug(
         f"singleModeZip called with args: {meanType=}, {zerosLeft=}, {zerosRight=}, {logScale=}, {multiLabel=}"
     )
@@ -185,10 +147,14 @@ async def singleModeZip(
     reporter: msreport.MasterSizerReport = msreport.MasterSizerReport()
 
     reporter.setXPSfile(file.file._file, file.filename)
-    reporter.setDiameterMeanType(list_of_diameterchoices[meanType])
+    reporter.setDiameterMeanType(
+        msreport.DiameterMeanType.geometric
+        if meanType == "geo"
+        else msreport.DiameterMeanType.arithmetic
+    )
     reporter.cutFirstZeroPoints(zerosLeft, tol=1e-8)
     reporter.cutLastZeroPoints(zerosRight, tol=1e-8)
-    reporter.setLogScale(logscale=zerosRight)
+    reporter.setLogScale(logscale=logScale)
 
     # calculate
     reporter.evaluateData()
@@ -228,7 +194,6 @@ async def singleModeZip(
 
     # logger.info("Reading zip into memory")
 
-
     response = FileResponse(
         path=full_xps_zip, filename=xps_zip + ".zip", headers={"basename": basename_xps}
     )
@@ -243,7 +208,7 @@ async def multiModeZip(
     zerosRight: int = Form(1),
     logScale: bool = Form(True),
     multiLabel: bool = Form(True),
-):
+) -> FileResponse:
     logger.debug(
         f"multiModeZip called with args: {meanType=}, {zerosLeft=}, {zerosRight=}, {logScale=}, {multiLabel=}"
     )
@@ -266,12 +231,14 @@ async def multiModeZip(
 
     logger.warn(f"XPS files: {base_xpsfiles}")
 
-    meanType = list_of_diameterchoices[meanType]
-
     multiReporter = multireport.MultipleFilesReport(
         [f.file._file for f in files],
         basenames_xps,
-        meanType,
+        (
+            msreport.DiameterMeanType.geometric
+            if meanType == "geo"
+            else msreport.DiameterMeanType.arithmetic
+        ),
         logScale,
         zerosLeft,
         zerosRight,
@@ -314,5 +281,3 @@ async def multiModeZip(
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=2342, reload=False)
-    example_path = os.path.join(parent_folder, "input_examples", "ms_input.xps")
-    print(example_path)

@@ -16,7 +16,7 @@ class GGS(PSDBase.SizeDistributionBaseModel):
         self.model_name_str = "GGS"
         logger.info("{} object constructed".format(self.model_name_str))
 
-    def specificModel(self, d : float, *args : float) -> Any:
+    def specificModel(self, d: float, *args: float) -> Any:
         return np.power(d / args[0], args[1])
 
     def getInitialGuesses(self, x: np.ndarray, y: np.ndarray) -> List[float]:
