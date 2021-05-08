@@ -1,12 +1,14 @@
 import logging
 
 logger = logging.getLogger(__name__)
-from typing import List, Any
+from typing import List, Any, Union
 
 import numpy as np
 
 from . import SizeDistributionBaseModel as PSDBase
 from scipy.special import gamma
+
+ArrayOrFloat = PSDBase.ArrayOrFloat
 
 
 class RRB(PSDBase.SizeDistributionBaseModel):
@@ -17,8 +19,8 @@ class RRB(PSDBase.SizeDistributionBaseModel):
         self.model_name_str = "RRB"
         logger.info("{} object constructed".format(self.model_name_str))
 
-    def specificModel(self, d: float, *args: float) -> Any:
-        return 1.0 - np.exp(-np.power(d / args[0], args[1]))
+    def specificModel(self, d: ArrayOrFloat, *args: float) -> ArrayOrFloat:
+        return np.array(1.0 - np.exp(-np.power(d / args[0], args[1])))
 
     def getInitialGuesses(self, x: np.ndarray, y: np.ndarray) -> List[float]:
         return [self.getDn(x, y, 0.632, 100), 1.0]

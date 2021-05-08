@@ -1,7 +1,7 @@
 import logging
 
 logger = logging.getLogger(__name__)
-from typing import List, Any
+from typing import List, Any, Union
 
 import numpy as np
 
@@ -17,7 +17,7 @@ class Sigmoid(PSDBase.SizeDistributionBaseModel):
         self.model_name_str = "Sigmoid"
         logger.info("{} object constructed".format(self.model_name_str))
 
-    def specificModel(self, d: float, *args: float) -> Any:
+    def specificModel(self, d: Union[float, np.ndarray], *args: float) -> Any:
         k = args[0]
         m = args[1]
         return 1.0 / (1.0 + np.power(k / d, m))

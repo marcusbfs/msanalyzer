@@ -3,7 +3,7 @@ import logging
 import io
 
 import numpy as np
-from typing import List
+import numpy.typing as npt
 
 import fitz
 
@@ -18,8 +18,8 @@ class MasterSizerInput:
         self.__x_header: str = r"Size (µm)"
         self.__y_header: str = r"Volume In %"
 
-        self.__x_values: List[float] = []
-        self.__y_values: List[float] = []
+        self.__x_values: list[float] = []
+        self.__y_values: list[float] = []
 
         self.__n_tables: int = 6
 
@@ -36,11 +36,11 @@ class MasterSizerInput:
 
         logger.info("Raw data loaded from memory")
 
-    def getx(self) -> List[float]:
-        return self.__x_values
+    def getx(self) -> np.ndarray:
+        return np.array(self.__x_values)
 
-    def gety(self) -> List[float]:
-        return self.__y_values
+    def gety(self) -> np.ndarray:
+        return np.array(self.__y_values)
 
     def extractData(self) -> None:
         lines = self.__text.splitlines()
@@ -90,7 +90,7 @@ class MasterSizerInput:
             else:
                 i += 1
 
-        self.__x_values = np.array(self.__x_values)
+        self.__x_values = self.__x_values
         self.__y_values = np.array(self.__y_values) / 100.0
         if len(self.__x_values) != len(self.__y_values) + 1:
             logger.error("len of x and y vectors are mismatched")

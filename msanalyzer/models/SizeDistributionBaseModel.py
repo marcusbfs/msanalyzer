@@ -1,5 +1,5 @@
 import abc
-from typing import List
+from typing import List, Union
 
 import numpy as np
 import logging
@@ -7,6 +7,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 import scipy.optimize
+
+ArrayOrFloat = Union[float, np.ndarray]
 
 
 class SizeDistributionBaseModel(abc.ABC):
@@ -20,7 +22,7 @@ class SizeDistributionBaseModel(abc.ABC):
         self.model_name_str: str = ""
 
     @abc.abstractmethod
-    def specificModel(self, d: float, *args: float) -> float:
+    def specificModel(self, d: ArrayOrFloat, *args: float) -> ArrayOrFloat:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -43,7 +45,7 @@ class SizeDistributionBaseModel(abc.ABC):
     def getStdErrorMean(self) -> float:
         return self.__std_error_mean
 
-    def compute(self, x: np.ndarray) -> np.ndarray:
+    def compute(self, x: ArrayOrFloat) -> ArrayOrFloat:
         return self.specificModel(x, *self.model_par_values)
 
     def getModelName(self) -> str:
@@ -85,7 +87,7 @@ class SizeDistributionBaseModel(abc.ABC):
         logger.info("R-squared = {:.10f}".format(self.__r_squared))
 
         # Standard Error of the Regression
-        self.__std_error_mean = np.mean(np.abs(y - computed_y))
+        self.__std_error_mean = float(np.mean(np.abs(y - computed_y)))
         logger.info("S = {:.10f}".format(self.__std_error_mean))
 
         logger.info("Finished estimating {} parameters".format(self.getModelName()))

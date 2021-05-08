@@ -1,7 +1,7 @@
 import os
 import sys
 import pathlib
-import msanalyzer
+from . import msanalyzer
 import time
 import re
 import threading
@@ -28,9 +28,9 @@ class ConfigDict(TypedDict):
 
 import PySimpleGUI as sg
 
-import icons_gui
+from . import icons_gui
 
-from .SizeDistributionModelsFactory import available_models
+from .models.SizeDistributionModelsFactory import available_models
 
 script_folder = pathlib.Path(__file__).parent.absolute()
 config_file: str = os.path.join(script_folder, "config_msanalyzer.cfg")

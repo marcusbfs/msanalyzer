@@ -22,11 +22,13 @@ class LogNormal(PSDBase.SizeDistributionBaseModel):
         logger.info("{} object constructed".format(self.model_name_str))
         self.sqrt2: float = np.sqrt(2.0)
 
-    def specificModel(self, d: float, *args: float) -> Any:
+    def specificModel(
+        self, d: PSDBase.ArrayOrFloat, *args: float
+    ) -> PSDBase.ArrayOrFloat:
         D50 = args[0]
         delta = args[1]
         Z = np.log(d / D50) / (self.sqrt2 * np.log(delta))
-        return 0.5 * (1 + erf(Z))
+        return np.array(0.5 * (1 + erf(Z)))
 
     def getInitialGuesses(self, x: np.ndarray, y: np.ndarray) -> List[float]:
         D50 = self.getDn(x, y, 0.5, 100)

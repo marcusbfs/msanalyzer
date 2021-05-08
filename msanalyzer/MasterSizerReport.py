@@ -10,6 +10,7 @@ import logging
 
 from typing import List
 import numpy as np
+import numpy.typing as npt
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -36,13 +37,13 @@ class MasterSizerReport:
         self.__diameters_filename: str = ""
         self.__vol_in_per_filename: str = ""
         self.__number_of_points: int = 0
-        self.__x_data: np.array = None
-        self.__x_data_geomean: np.array = None
-        self.__x_data_aritmeticmean: np.array = None
-        self.__y_data: np.array = None
-        self.__x_data_mean: np.array = None
-        self.__cumulative_y_vals: np.array = None
-        self.__diff_of_cumulative_y_vals: np.array = None
+        self.__x_data: np.ndarray = np.array([])
+        self.__x_data_geomean: np.ndarray = np.array([])
+        self.__x_data_aritmeticmean: np.ndarray = np.array([])
+        self.__y_data: np.ndarray = np.array([])
+        self.__x_data_mean: np.ndarray = np.array([])
+        self.__cumulative_y_vals: np.ndarray = np.array([])
+        self.__diff_of_cumulative_y_vals: np.ndarray = np.array([])
         self.__ms_input: MasterSizerInput = input_reader
         self.__version: str = __version__
         self.__input_xps_file: str = ""
@@ -67,9 +68,9 @@ class MasterSizerReport:
         self.__ms_input.setFile(xps_mem, xps_filename)
         self.__updateXY_data()
 
-    def setXandY(self, x_vals: List[float], y_vals: List[float]) -> None:
-        self.__x_data = x_vals
-        self.__y_data = y_vals
+    def setXandY(self, x_vals: npt.ArrayLike, y_vals: npt.ArrayLike) -> None:
+        self.__x_data = np.array(x_vals)
+        self.__y_data = np.array(y_vals)
         assert len(self.__x_data) == len(self.__y_data) + 1
 
     def genCumulativeSizeDistribution(self) -> None:
@@ -88,7 +89,7 @@ class MasterSizerReport:
 
     def saveExcel(self, output_dir: str, base_filename: str) -> None:
         data = np.transpose(
-            [self.__x_data_mean, self.__y_data, self.__cumulative_y_vals]
+            np.array([self.__x_data_mean, self.__y_data, self.__cumulative_y_vals])
         )
         df = pd.DataFrame(data, columns=self.__headers)
         filename = os.path.join(output_dir, base_filename + ".xlsx")
@@ -195,7 +196,9 @@ class MasterSizerReport:
         )
         np.savetxt(
             output_file,
-            np.transpose([self.__x_data_mean, self.__y_data, self.__cumulative_y_vals]),
+            np.transpose(
+                np.array([self.__x_data_mean, self.__y_data, self.__cumulative_y_vals])
+            ),
             fmt="%15.10f",
             header=header,
         )
@@ -334,22 +337,22 @@ class MasterSizerReport:
     def getNumberOfPoints(self) -> int:
         return self.__number_of_points
 
-    def getGeometricMeanXvalues(self) -> np.array:
+    def getGeometricMeanXvalues(self) -> np.ndarray:
         return self.__x_data_geomean
 
-    def getAritmeticMeanXvalues(self) -> np.array:
+    def getAritmeticMeanXvalues(self) -> np.ndarray:
         return self.__x_data_geomean
 
-    def getCumulativeYvalues(self) -> np.array:
+    def getCumulativeYvalues(self) -> np.ndarray:
         return self.__cumulative_y_vals
 
-    def getDiffOfCumulativeYvalues(self) -> np.array:
+    def getDiffOfCumulativeYvalues(self) -> np.ndarray:
         return self.__diff_of_cumulative_y_vals
 
-    def getYvalues(self) -> np.array:
+    def getYvalues(self) -> np.ndarray:
         return self.__y_data
 
-    def getXmeanValues(self) -> np.array:
+    def getXmeanValues(self) -> np.ndarray:
         return self.__x_data_mean
 
     def getTxtFilesHeader(self) -> str:

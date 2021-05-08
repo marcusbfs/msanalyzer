@@ -182,7 +182,7 @@ def main(_args: List[str] = None) -> None:
 
         xps_file = args.xps
 
-        with open(xps_file, "r") as xpsfile_mem:
+        with open(xps_file, "rb") as xpsfile_mem:
             reporter.setXPSfile(io.BytesIO(xpsfile_mem.read()), xps_file)
             reporter.setDiameterMeanType(meanType)
             reporter.cutFirstZeroPoints(number_of_zero_first, tol=1e-8)
