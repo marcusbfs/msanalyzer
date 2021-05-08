@@ -11,8 +11,8 @@ import make_gui
 
 start = time.time()
 
-cur_folder = os.path.abspath('.')
-src_folder = os.path.join(os.path.abspath('..'), 'msanalyzer')
+cur_folder = os.path.abspath(".")
+src_folder = os.path.join(os.path.abspath(".."), "msanalyzer")
 
 # cli
 make_cli.main()

@@ -9,8 +9,8 @@ from typing import List
 
 logger = logging.getLogger("msanalyzer")
 
-from . import MasterSizerReport as msreport
-from . import MultipleFilesReport as multireport
+from msanalyzer import MasterSizerReport as msreport
+from msanalyzer import MultipleFilesReport as multireport
 
 fig: plt.figure = None
 
