@@ -23,7 +23,7 @@ let api_exe_path: string = path.join(
   path.dirname(app.getAppPath()),
   '..',
   'msanalyzer_api',
-  'api.exe'
+  'local_api.exe'
 );
 
 export default class AppUpdater {

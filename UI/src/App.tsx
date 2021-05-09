@@ -5,11 +5,8 @@ import Tab from '@material-ui/core/Tab';
 import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Container from '@material-ui/core/Container';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -36,17 +33,6 @@ import * as controller from './controller';
 
 const App = () => {
   const classes = useStyles();
-
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const theme = React.useMemo(
-    () =>
-      createMuiTheme({
-        palette: {
-          type: prefersDarkMode ? 'dark' : 'light',
-        },
-      }),
-    [prefersDarkMode]
-  );
 
   // States
   const dispatch = useDispatch();
@@ -82,7 +68,7 @@ const App = () => {
     path.dirname(app.getAppPath()),
     '..',
     'msanalyzer_api',
-    'api.exe'
+    'local_api.exe'
   );
 
   const exitPyProc = () => {
@@ -96,7 +82,7 @@ const App = () => {
   const callPythonServer = () => {
     let fs = require('fs');
     // initialize python server
-    if (fs.existsSync('../msanalyzer/api.py')) {
+    if (fs.existsSync('../msanalyzer/local_api.py')) {
       console.log('Dev mode');
     } else {
       console.log('Dist mode');
@@ -125,20 +111,20 @@ const App = () => {
 
   React.useEffect(() => {
     if (isServerOn) {
-      controller
-        .getConfig()
-        .then((options) => {
-          dispatch(
-            setMeanType(
-              options.meanType === 'geo' ? MeanType.geo : MeanType.ari
-            )
-          );
-          dispatch(setZerosRight(options.zerosRight));
-          dispatch(setZerosLeft(options.zerosLeft));
-        })
-        .catch((e) => {
-          console.log('Error: ' + e);
-        });
+      // controller
+      //   .getConfig()
+      //   .then((options) => {
+      //     dispatch(
+      //       setMeanType(
+      //         options.meanType === 'geo' ? MeanType.geo : MeanType.ari
+      //       )
+      //     );
+      //     dispatch(setZerosRight(options.zerosRight));
+      //     dispatch(setZerosLeft(options.zerosLeft));
+      //   })
+      //   .catch((e) => {
+      //     console.log('Error: ' + e);
+      //   });
     }
   }, []);
 
@@ -184,7 +170,11 @@ const App = () => {
     controller
       .singleModeCompute(xpsfiles[0], outName, outDir, options)
       .then()
+      .catch((e) => {
+        console.log('Error in single: ' + e);
+      })
       .finally(() => {
+        // useForceUpdate();
         dispatch(setIsSpinnerHidden(true));
         dispatch(setIsComputing(false));
       });
@@ -223,72 +213,69 @@ const App = () => {
 
   return (
     <React.Fragment>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <AppBar position="static" color="default" className={classes.appBar}>
-          <Tabs
-            value={tab}
-            onChange={(e, v) => {
-              setTab(v);
-            }}
-            variant="fullWidth"
-          >
-            <Tab label="Principal" />
-            <Tab label="Opções avançadas" />
-            <Tab label="Curvas" disabled={isXPSEmpty} />
-            <Tab label="Modelos" disabled={isXPSEmpty || !isSingleFile} />
-          </Tabs>
-        </AppBar>
+      <AppBar position="static" color="default" className={classes.appBar}>
+        <Tabs
+          value={tab}
+          onChange={(e, v) => {
+            setTab(v);
+          }}
+          variant="fullWidth"
+        >
+          <Tab label="Principal" />
+          <Tab label="Opções avançadas" />
+          <Tab label="Curvas" disabled={isXPSEmpty} />
+          <Tab label="Modelos" disabled={isXPSEmpty || !isSingleFile} />
+        </Tabs>
+      </AppBar>
 
-        <main>
-          {isServerOn ? (
-            <Container maxWidth="md" className={classes.mainTab}>
-              <Grid
-                container
-                direction="column"
-                justify="space-between"
-                alignItems="center"
-              >
-                <Grid item container>
-                  {tab === 0 && <MainTabView />}
-                  {tab === 1 && <AdvancedOptionsView />}
-                  {tab === 2 && <PlotsView />}
-                  {tab === 3 && <ModelsView />}
+      <main>
+        {isServerOn ? (
+          <Container maxWidth="md" className={classes.mainTab}>
+            <Grid
+              container
+              direction="column"
+              justify="space-between"
+              alignItems="center"
+            >
+              <Grid item container>
+                {tab === 0 && <MainTabView />}
+                {tab === 1 && <AdvancedOptionsView />}
+                {tab === 2 && <PlotsView />}
+                {tab === 3 && <ModelsView />}
+              </Grid>
+
+              <Grid item container className={classes.execContainer}>
+                <Grid item xs={12} className={classes.divider}>
+                  <Divider />
                 </Grid>
-
-                <Grid item container className={classes.execContainer}>
-                  <Grid item xs={12} className={classes.divider}>
-                    <Divider />
+                <Grid item container alignItems="flex-end">
+                  <Grid item xs={3}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleExec}
+                      disabled={isComputing || isXPSEmpty}
+                    >
+                      Executar
+                    </Button>
                   </Grid>
-                  <Grid item container alignItems="flex-end">
-                    <Grid item xs={3}>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleExec}
-                        disabled={isComputing || isXPSEmpty}
-                      >
-                        Executar
-                      </Button>
-                    </Grid>
-                    <Grid item container xs={9} justify="flex-end">
-                      {!isSpinnerHidden && (
-                        <Grid item>
-                          <CircularProgress color="secondary" />
-                        </Grid>
-                      )}
-                    </Grid>
+                  <Grid item container xs={9} justify="flex-end">
+                    {!isSpinnerHidden && (
+                      <Grid item>
+                        <CircularProgress color="secondary" />
+                      </Grid>
+                    )}
                   </Grid>
                 </Grid>
               </Grid>
-            </Container>
-          ) : (
-            <div>
-              <ServerOfflineView api_exe_path={api_exe_path} />
-            </div>
-          )}
-        </main>
-      </ThemeProvider>
+            </Grid>
+          </Container>
+        ) : (
+          <div>
+            <ServerOfflineView api_exe_path={api_exe_path} />
+          </div>
+        )}
+      </main>
     </React.Fragment>
   );
 };

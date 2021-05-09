@@ -32,6 +32,7 @@ const MainTabView = () => {
   const dirnames = useSelector((state: RootState) => state.app.dirnames);
   const outName = useSelector((state: RootState) => state.app.outName);
   const isLogScale = useSelector((state: RootState) => state.app.isLogScale);
+  const isComputing = useSelector((state: RootState) => state.app.isComputing);
 
   const dispatch = useDispatch();
 
@@ -71,6 +72,7 @@ const MainTabView = () => {
                 variant="contained"
                 color="primary"
                 onClick={handleSetXPSFiles}
+                disabled={isComputing}
               >
                 Selecionar
               </Button>

@@ -23,6 +23,7 @@ interface AppStateType {
   isSingleFile: boolean;
   isServerOn: boolean;
   isXPSEmpty: boolean;
+  updatePlot: boolean;
 }
 
 const initialState = {
@@ -43,6 +44,7 @@ const initialState = {
   isComputing: false,
   isSingleFile: true,
   isXPSEmpty: true,
+  updatePlot: false,
 } as AppStateType;
 
 const appSlice = createSlice({
@@ -97,6 +99,9 @@ const appSlice = createSlice({
     setIsServerOn(state: AppStateType, action: PayloadAction<boolean>) {
       state.isServerOn = action.payload;
     },
+    setUpdatePlot(state: AppStateType, action: PayloadAction<boolean>) {
+      state.updatePlot = action.payload;
+    },
     setIsSingleFile(state: AppStateType, action: PayloadAction<boolean>) {
       state.isSingleFile = action.payload;
     },
@@ -121,5 +126,6 @@ export const {
   setIsSingleFile,
   setSingleSVGfile,
   setIsXPSEmpty,
+  setUpdatePlot,
 } = appSlice.actions;
 export default appSlice.reducer;

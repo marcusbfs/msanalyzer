@@ -37,14 +37,14 @@ const AdvancedOptionsView = () => {
   // functions
 
   const handleSaveClicked = () => {
-    // const options: controller.CommonOptions = {
-    //   meanType: meanType === MeanType.geo ? 'geo' : 'ari',
-    //   zerosLeft: zerosLeft,
-    //   zerosRight: zerosRight,
-    //   logScale: true,
-    //   multiLabel: multiLabel,
-    // };
-    // controller.setConfig(options);
+    const options: controller.CommonOptions = {
+      meanType: meanType === MeanType.geo ? 'geo' : 'ari',
+      zerosLeft: zerosLeft,
+      zerosRight: zerosRight,
+      logScale: true,
+      multiLabel: multiLabel,
+    };
+    controller.setConfig(options);
   };
 
   return (
@@ -145,6 +145,7 @@ const AdvancedOptionsView = () => {
               color="secondary"
               startIcon={<SaveIcon />}
               onClick={handleSaveClicked}
+              disabled={true}
             >
               Salvar configurações atuais
             </Button>

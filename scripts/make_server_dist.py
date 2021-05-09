@@ -53,7 +53,7 @@ def buildPyInstaller():
     if os.path.isdir(ui_folder):
         print("Copying to " + ui_folder)
         shutil.copytree(
-            os.path.join(dist_folder, "api"),
+            os.path.join(dist_folder, "local_api"),
             os.path.join(ui_folder, "msanalyzer_api"),
             dirs_exist_ok=True,
         )

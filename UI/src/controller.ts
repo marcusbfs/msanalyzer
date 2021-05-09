@@ -69,7 +69,16 @@ export async function singleModeCompute(
     '&outputDir=' +
     encodeURIComponent(outputDir);
 
-  return fetch(url, { method: 'post', body: JSON.stringify(options) })
+  const headers = {
+    accept: 'application/json',
+    'Content-Type': 'application/json',
+  };
+
+  return fetch(url, {
+    method: 'post',
+    body: JSON.stringify(options),
+    headers: headers,
+  })
     .then((r) => {
       return r.json();
     })
