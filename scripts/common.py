@@ -3,7 +3,7 @@ import os
 repo_dir = os.path.abspath("..")
 python_exe = os.path.join(repo_dir, "msanalyzer_venv", "Scripts", "python.exe")
 dist_folder = os.path.join(repo_dir, "scripts", "dist")
-main_py = os.path.join(repo_dir,  "local_api.py")
+main_py = os.path.join(repo_dir, "local_api.py")
 # mpl data
 matplotlibrc = os.path.join(repo_dir, "scripts", "matplotlibrc")
 mpl_data_dir = os.path.join(

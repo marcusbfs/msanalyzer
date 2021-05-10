@@ -91,7 +91,9 @@ class MultiInput(BaseModel):
     outDir: str
     outName: str
 
+
 # web API =============================================================================
+
 
 @app.post("/getInputExample")
 def getInputExample() -> FileResponse:
@@ -291,8 +293,8 @@ async def multiModeZip(
     )
     return response
 
-# end of web API ====================================================================
 
+# end of web API ====================================================================
 
 
 if __name__ == "__main__":

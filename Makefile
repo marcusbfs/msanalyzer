@@ -5,7 +5,7 @@ dev:
 	uvicorn msanalyzer.api:app --reload --port 2342
 
 local:
-	uvicorn msanalyzer.local_api:app --reload --port 2342
+	uvicorn local_api:app --reload --port 2342
 
 all:
 	$(python) msanalyzer\msanalyzer_gui.py
