@@ -6,6 +6,7 @@ import logging
 import time
 import shutil
 import zipfile
+import base64
 
 from typing import Optional, List, Tuple, TypedDict
 
@@ -44,6 +45,8 @@ DEFAULT_OPTIONS = {
     "logScale": True,
     "multiLabel": True,
 }
+
+MODELS = ["RRB", "GGS", "Sigmoid", "Log-normal"]
 
 app = FastAPI()
 
@@ -127,7 +130,7 @@ async def singleModeZip(
     zerosRight: int = Form(1),
     logScale: bool = Form(True),
     multiLabel: bool = Form(True),
-) -> StreamingResponse:
+):
     logger.debug(
         f"singleModeZip called with args: {meanType=}, {zerosLeft=}, {zerosRight=}, {logScale=}, {multiLabel=}"
     )
@@ -192,18 +195,31 @@ async def singleModeZip(
     zf.close()
     in_memory.seek(0)
 
+    response = {}
+
+    with open(os.path.join(outputDir, curves + ".svg"), "rb") as img:
+        logger.debug("Storing curves as json -> base64")
+        response["curves"] = base64.b64encode(img.read())
+
+    response["models"] = []
+
+    for model in MODELS:
+        svg_file = os.path.join(outputDir, model + "_" + PSD_model + ".svg")
+        d = {}
+        d['key'] = model
+        with open(svg_file, "rb") as img:
+            d['data'] = base64.b64encode(img.read())
+        response["models"].append(d)
+
     # rm dir and file
     logger.info(f"Removing output dir: {outputDir}")
     shutil.rmtree(outputDir)
 
-    response = StreamingResponse(
-        in_memory,
-        headers={
-            "basename": basename_xps,
-            "Content-Disposition": f"attachment;filename={basename_xps}.zip",
-        },
-        media_type="applicaton/zip",
-    )
+    logger.debug("Storing zip as json")
+    response["zip"] = base64.b64encode(in_memory.getbuffer())
+    response["basename"] = basename_xps
+
+    in_memory.close()
     return response
 
 
@@ -215,7 +231,7 @@ async def multiModeZip(
     zerosRight: int = Form(1),
     logScale: bool = Form(True),
     multiLabel: bool = Form(True),
-) -> StreamingResponse:
+):
     logger.debug(
         f"multiModeZip called with args: {meanType=}, {zerosLeft=}, {zerosRight=}, {logScale=}, {multiLabel=}"
     )
@@ -279,18 +295,29 @@ async def multiModeZip(
     zf.close()
     in_memory.seek(0)
 
+    response = {}
+
+    with open(
+        os.path.join(outputDir, MultiSizeDistribution_output_file + ".svg"), "rb"
+    ) as img:
+        logger.debug("Storing dist curves as json -> base64")
+        response["curves_dist"] = base64.b64encode(img.read())
+
+    with open(
+        os.path.join(outputDir, MultiFrequency_output_file + ".svg"), "rb"
+    ) as img:
+        logger.debug("Storing freq curves as json -> base64")
+        response["curves_freq"] = base64.b64encode(img.read())
+
     # rm dir and file
     logger.info(f"Removing output dir: {outputDir}")
     shutil.rmtree(outputDir)
 
-    response = StreamingResponse(
-        in_memory,
-        headers={
-            "basename": outputName,
-            "Content-Disposition": f"attachment;filename={outputName}.zip",
-        },
-        media_type="applicaton/zip",
-    )
+    logger.debug("Storing zip as json")
+    response["zip"] = base64.b64encode(in_memory.getbuffer())
+    response["basename"] = outputName
+
+    in_memory.close()
     return response
 
 
