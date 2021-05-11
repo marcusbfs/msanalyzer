@@ -1,15 +1,12 @@
 import io
+import logging
 import os
-import json
-import pathlib
-from typing import Optional, List, Tuple
+from typing import List
 
 from pydantic import BaseModel
 
 from . import MasterSizerReport as msreport
 from . import MultipleFilesReport as multireport
-
-import logging
 
 logging.getLogger("matplotlib.font_manager").disabled = True
 
@@ -65,8 +62,8 @@ async def singleModeCompute_helper(
     excel_data = outputName + "_curve_data"
     best_model_basename = outputName + "_best_models_ranking"
 
-    fig = reporter.saveFig(outputDir, curves)
-    models_figs = reporter.saveModelsFig(outputDir, PSD_model)
+    reporter.saveFig(outputDir, curves)
+    reporter.saveModelsFig(outputDir, PSD_model)
     reporter.saveData(outputDir, curves_data)
     reporter.saveModelsData(outputDir, PSD_data)
     reporter.saveExcel(outputDir, excel_data)
@@ -75,7 +72,7 @@ async def singleModeCompute_helper(
 
 
 async def multiModeCompute_helper(multiInput: MultiInput, options: CommonOptions):
-    number_of_files = len(multiInput.xpsfiles)
+    len(multiInput.xpsfiles)
 
     meanType = list_of_diameterchoices[options.meanType]
 

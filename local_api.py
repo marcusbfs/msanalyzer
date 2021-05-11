@@ -1,21 +1,16 @@
-import io
-import os
-import json
-import pathlib
 import logging
+import os
+import pathlib
 from tkinter import Tk
-from typing import Optional, List, Tuple
 from tkinter.filedialog import askdirectory, askopenfilenames
+from typing import List, Optional, Tuple
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 from msanalyzer import MasterSizerReport as msreport
-from msanalyzer import MultipleFilesReport as multireport
 from msanalyzer import local_api_helper as LAH
-
 
 logging.getLogger("matplotlib.font_manager").disabled = True
 

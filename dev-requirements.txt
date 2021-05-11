@@ -1,4 +1,0 @@
--r win-requirements.txt
-pyinstaller
-mypy
-black

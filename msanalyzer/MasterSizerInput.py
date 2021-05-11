@@ -1,11 +1,8 @@
-import os
-import logging
 import io
-
-import numpy as np
-import numpy.typing as npt
+import logging
 
 import fitz
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -47,8 +44,6 @@ class MasterSizerInput:
         n_of_lines = len(lines)
 
         logger.info("Parsing raw data loaded")
-
-        table_count = 1
 
         self.__x_values = []
         self.__y_values = []

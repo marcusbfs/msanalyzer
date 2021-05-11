@@ -1,12 +1,11 @@
+import io
 import os
 import warnings
-import io
 
 warnings.filterwarnings("ignore", "(?s).*MATPLOTLIBDATA.*", category=UserWarning)
 import logging
-
 from typing import List
-import matplotlib
+
 import matplotlib.pyplot as plt
 
 from . import MasterSizerReport as msreport

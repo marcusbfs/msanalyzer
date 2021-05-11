@@ -1,29 +1,22 @@
-import io
-import os
-import json
-import pathlib
-import logging
-import time
-import shutil
-import zipfile
 import base64
-
-from typing import Optional, List, Tuple, TypedDict
-
-from fastapi import FastAPI, File, UploadFile, Form
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, StreamingResponse
-
-from pydantic import BaseModel
-import aiofiles
-import uvicorn
+import io
+import logging
+import os
+import pathlib
+import shutil
+import time
+import zipfile
+from typing import List, Optional, Tuple, TypedDict
 
 import matplotlib.pyplot as plt
+import uvicorn
+from fastapi import FastAPI, File, Form, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
 
 from . import MasterSizerReport as msreport
 from . import MultipleFilesReport as multireport
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -138,7 +131,7 @@ async def singleModeZip(
     timestr = time.strftime("%Y%m%d-%H%M%S") + "-" + str(time.time()).replace(".", "")
     basename_xps = os.path.splitext(file.filename)[0]
     base_xpsfile = basename_xps + "_" + timestr + "_.xps"
-    xpsfile = os.path.join(current_folder, base_xpsfile)
+    os.path.join(current_folder, base_xpsfile)
     outputName = basename_xps
     outputDir = os.path.join(current_folder, "outDir_" + timestr)
 
@@ -174,8 +167,8 @@ async def singleModeZip(
     excel_data = outputName + "_curve_data"
     best_model_basename = outputName + "_best_models_ranking"
 
-    fig = reporter.saveFig(outputDir, curves)
-    models_figs = reporter.saveModelsFig(outputDir, PSD_model)
+    reporter.saveFig(outputDir, curves)
+    reporter.saveModelsFig(outputDir, PSD_model)
     reporter.saveData(outputDir, curves_data)
     reporter.saveModelsData(outputDir, PSD_data)
     reporter.saveExcel(outputDir, excel_data)
@@ -206,9 +199,9 @@ async def singleModeZip(
     for model in MODELS:
         svg_file = os.path.join(outputDir, model + "_" + PSD_model + ".svg")
         d = {}
-        d['key'] = model
+        d["key"] = model
         with open(svg_file, "rb") as img:
-            d['data'] = base64.b64encode(img.read())
+            d["data"] = base64.b64encode(img.read())
         response["models"].append(d)
 
     # rm dir and file
@@ -235,12 +228,12 @@ async def multiModeZip(
     logger.debug(
         f"multiModeZip called with args: {meanType=}, {zerosLeft=}, {zerosRight=}, {logScale=}, {multiLabel=}"
     )
-    number_of_files = len(files)
+    len(files)
 
     timestr = time.strftime("%Y%m%d-%H%M%S") + "-" + str(time.time()).replace(".", "")
     basenames_xps = [os.path.splitext(f.filename)[0] for f in files]
     base_xpsfiles = [b + "_" + timestr + "_.xps" for b in basenames_xps]
-    xpsfiles = [os.path.join(current_folder, b) for b in base_xpsfiles]
+    [os.path.join(current_folder, b) for b in base_xpsfiles]
     outputName = "multiplos_arquivos"
     outputDir = os.path.join(current_folder, "outDir_" + timestr)
 

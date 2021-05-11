@@ -1,4 +1,0 @@
--r win-requirements.txt
-gunicorn
-httptools
-uvloop
