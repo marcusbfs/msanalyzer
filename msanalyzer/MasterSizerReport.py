@@ -21,7 +21,7 @@ from .models import SizeDistributionBaseModel
 from .models import getPSDModelsList
 
 logger = logging.getLogger(__name__)
-__version__: str = "3.3.0"
+__version__: str = "3.4.0"
 __author__: str = "Marcus Bruno Fernandes Silva"
 __email__: str = "marcusbfs@gmail.com"
 
