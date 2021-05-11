@@ -1,27 +1,25 @@
 import os
 import subprocess
-import shutil
 import time
-import sys
 
-from common import *
+import common as C
 
 
 def main():
 
-    start = time.time()
+    time.time()
 
-    os.chdir(src_folder)
+    os.chdir(C.src_folder)
 
-    if not os.path.isfile(matplotlibrc):
-        raise RuntimeError(f'Could not find: "{matplotlibrc}"')
+    if not C.matplotlibrc.is_file():
+        raise RuntimeError(f'Could not find: "{C.matplotlibrc}"')
 
     # cli
-    cmd = cmd_common + ["-c", main_py]
+    cmd = C.cmd_common + ["-c", str(C.main_py)]
     cli_start_time = time.time()
     subprocess.call(cmd, shell=True)
-    shutil_copy_verbose(
-        matplotlibrc, os.path.join(dist_folder, os.path.splitext(main_py)[0])
+    C.shutil_copy_verbose(
+        C.matplotlibrc, C.dist_folder / C.main_py.name.replace(C.main_py.suffix, "")
     )
     cli_time = time.time() - cli_start_time
     print(f"\nCLI build time: {int(cli_time//60)} min {int(cli_time%60)} sec")

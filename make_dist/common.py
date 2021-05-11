@@ -1,32 +1,30 @@
-import os
-import subprocess
 import shutil
-import time
 import sys
+from pathlib import Path
 
 
-def shutil_copy_verbose(src: str, dst: str) -> None:
+def shutil_copy_verbose(src: Path, dst: Path) -> None:
     print(f'Copying "{src}" to "{dst}"')
     shutil.copy(src, dst)
 
 
-cur_folder = os.path.abspath(".")
-repo_folder = os.path.abspath(os.path.join(cur_folder, ".."))
-src_folder = os.path.join(os.path.abspath(".."), "msanalyzer")
+cur_folder = Path(__file__).parent.absolute()
+repo_folder = cur_folder.parent.absolute()
+src_folder = repo_folder / "msanalyzer"
 
 python_exe = sys.executable
-main_py = os.path.join(repo_folder, "msanalyzer-cli.py")
+main_py: Path = repo_folder / "msanalyzer-cli.py"
 
-main_gui_py = "msanalyzer_gui.py"
+main_gui_py: Path = "msanalyzer_gui.py"
 hidden_matplotlib = [
     "matplotlib.backends.backend_svg",
     "matplotlib.backends.backend_tkagg",
 ]
-matplotlibrc = os.path.join(src_folder, "matplotlibrc")
-dist_folder = os.path.join(cur_folder, "dist")
-build_folder = os.path.join(cur_folder, "build")
+matplotlibrc: Path = src_folder / "matplotlibrc"
+dist_folder: Path = cur_folder / "dist"
+build_folder: Path = cur_folder / "build"
 
-cmd_common = [
+cmd_common: list[str] = [
     python_exe,
     "-m",
     "PyInstaller",
@@ -34,9 +32,9 @@ cmd_common = [
     "-D",
     "-y",
     "--distpath",
-    dist_folder,
+    str(dist_folder),
     "--workpath",
-    build_folder,
+    str(build_folder),
 ]
 
 for hm in hidden_matplotlib:
