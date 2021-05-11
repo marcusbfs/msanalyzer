@@ -6,7 +6,7 @@ authors = ["Marcus <marcusbfs@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "3.9"
+python = "3.9.5"
 aiofiles="0.6.0"
 fastapi="0.64.0"
 matplotlib="3.4.1"
