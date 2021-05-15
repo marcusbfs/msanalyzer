@@ -4,9 +4,9 @@ python=D:\Applications\msanalyzer\msanalyzer_venv\Scripts\python.exe
 .PHONY = fmt
 
 fmt:
-	autoflake -i --remove-unused-variables --remove-all-unused-imports cli.py 
-	isort cli.py msanalyzer make_dist scripts
-	black cli.py msanalyzer make_dist scripts
+	# autoflake -i --remove-unused-variables --remove-all-unused-imports cli.py 
+	isort msanalyzer make_dist scripts
+	black msanalyzer make_dist scripts
 
 dev:
 	uvicorn msanalyzer.api:app --reload --port 2342

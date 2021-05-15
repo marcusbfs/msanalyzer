@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 
-from msanalyzer import MasterSizerReport as msreport
-from msanalyzer import MultipleFilesReport as multireport
+from . import MasterSizerReport as msreport
+from . import MultipleFilesReport as multireport
 
 logger = logging.getLogger("msanalyzer")
 
@@ -264,6 +264,3 @@ def main(_args: List[str] = None) -> None:
         spinner.ok("Done!")
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))
 
-
-if __name__ == "__main__":
-    main()

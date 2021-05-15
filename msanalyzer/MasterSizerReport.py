@@ -14,12 +14,12 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
+from . import __version__
 from .MasterSizerInput import MasterSizerInput
 from .models.SizeDistributionBaseModel import SizeDistributionBaseModel
 from .models.SizeDistributionModelsFactory import getPSDModelsList
 
 logger = logging.getLogger(__name__)
-__version__: str = "3.5.1"
 __author__: str = "Marcus Bruno Fernandes Silva"
 __email__: str = "marcusbfs@gmail.com"
 
