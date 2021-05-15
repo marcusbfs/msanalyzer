@@ -15,7 +15,8 @@ import numpy.typing as npt
 import pandas as pd
 
 from .MasterSizerInput import MasterSizerInput
-from .models import SizeDistributionBaseModel, getPSDModelsList
+from .models.SizeDistributionBaseModel import SizeDistributionBaseModel
+from .models.SizeDistributionModelsFactory import getPSDModelsList
 
 logger = logging.getLogger(__name__)
 __version__: str = "3.5.0"

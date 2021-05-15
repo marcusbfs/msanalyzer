@@ -3,10 +3,10 @@ import logging
 from typing import List, Union
 
 import numpy as np
+import scipy.optimize
 
 logger = logging.getLogger(__name__)
 
-import scipy.optimize
 
 ArrayOrFloat = Union[float, np.ndarray]
 
