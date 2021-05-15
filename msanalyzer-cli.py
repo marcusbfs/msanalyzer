@@ -8,6 +8,7 @@ from typing import List
 
 import matplotlib.pyplot as plt
 from yaspin import yaspin
+from yaspin.spinners import Spinners
 
 from msanalyzer import MasterSizerReport as msreport
 from msanalyzer import MultipleFilesReport as multireport
@@ -154,6 +155,12 @@ def main(_args: List[str] = None) -> None:
 
     args = parser.parse_args(args=_args)
 
+    level = logging.INFO if args.info else logging.WARNING
+
+    spinner = yaspin(Spinners.dots, text="Processing", color="green", timer=True)
+    if not args.info:
+        spinner.start()
+
     meanType = list_of_diameterchoices[args.meantype[0]]
     output_dir = args.output_dir
     output_basename = args.output_basename
@@ -161,7 +168,6 @@ def main(_args: List[str] = None) -> None:
     number_of_zero_last = int(args.last_zeros[0])
     log_scale = args.log_scale
     custom_plot_args = args.custom_plot_args[0]
-    level = logging.INFO if args.info else logging.WARNING
 
     # end of args parser
 
@@ -178,6 +184,7 @@ def main(_args: List[str] = None) -> None:
 
     # calculate results - one file only input
     if not args.multiple_files:
+
         logger.info("Single file mode")
 
         reporter: msreport.MasterSizerReport = msreport.MasterSizerReport()
@@ -194,12 +201,8 @@ def main(_args: List[str] = None) -> None:
             logger.info("Reporter object setted up")
 
         # calculate
-        spinner = yaspin()
-        if not args.info:
-            spinner.start()
+
         reporter.evaluateData()
-        if not args.info:
-            spinner.stop()
         logger.info("Data evaluated")
         reporter.evaluateModels()
         logger.info("Models evaluated")
@@ -257,6 +260,8 @@ def main(_args: List[str] = None) -> None:
         for f in f_mem:
             f.close()
 
+    if not args.info:
+        spinner.ok("Done!")
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))
 
 
