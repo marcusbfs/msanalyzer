@@ -7,11 +7,13 @@ import time
 from typing import List
 
 import matplotlib.pyplot as plt
-
-logger = logging.getLogger("msanalyzer")
+from yaspin import yaspin
 
 from msanalyzer import MasterSizerReport as msreport
 from msanalyzer import MultipleFilesReport as multireport
+
+logger = logging.getLogger("msanalyzer")
+
 
 fig: plt.figure = None
 
@@ -192,7 +194,12 @@ def main(_args: List[str] = None) -> None:
             logger.info("Reporter object setted up")
 
         # calculate
+        spinner = yaspin()
+        if not args.info:
+            spinner.start()
         reporter.evaluateData()
+        if not args.info:
+            spinner.stop()
         logger.info("Data evaluated")
         reporter.evaluateModels()
         logger.info("Models evaluated")
