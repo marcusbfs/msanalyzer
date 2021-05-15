@@ -263,4 +263,3 @@ def main(_args: List[str] = None) -> None:
     if not args.info:
         spinner.ok("Done!")
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))
-
