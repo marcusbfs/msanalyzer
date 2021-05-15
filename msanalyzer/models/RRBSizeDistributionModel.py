@@ -1,12 +1,12 @@
 import logging
 
 logger = logging.getLogger(__name__)
-from typing import List, Any, Union
+from typing import Any, List, Union
 
 import numpy as np
+from scipy.special import gamma
 
 from . import SizeDistributionBaseModel as PSDBase
-from scipy.special import gamma
 
 ArrayOrFloat = PSDBase.ArrayOrFloat
 

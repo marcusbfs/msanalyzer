@@ -1,8 +1,8 @@
 import abc
+import logging
 from typing import List, Union
 
 import numpy as np
-import logging
 
 logger = logging.getLogger(__name__)
 

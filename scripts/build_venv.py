@@ -1,7 +1,7 @@
 import os
-import sys
-import subprocess
 import pathlib
+import subprocess
+import sys
 import time
 
 start_time = time.time()

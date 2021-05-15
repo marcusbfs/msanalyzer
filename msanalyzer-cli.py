@@ -1,11 +1,12 @@
-import os
-import io
-import logging
 import argparse
-import time
+import io
 import json
-import matplotlib.pyplot as plt
+import logging
+import os
+import time
 from typing import List
+
+import matplotlib.pyplot as plt
 
 logger = logging.getLogger("msanalyzer")
 

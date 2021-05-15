@@ -1,10 +1,10 @@
 import os
+import shutil
 import subprocess
 import time
-import shutil
 
-from make_server_dist import buildPyInstaller
 from common import *
+from make_server_dist import buildPyInstaller
 
 start_time = time.time()
 

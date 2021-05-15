@@ -1,11 +1,13 @@
 import logging
-
-logger = logging.getLogger(__name__)
-from typing import List, Any
+import warnings
+from typing import Any, List
 
 import numpy as np
 
 from . import SizeDistributionBaseModel as PSDBase
+
+warnings.filterwarnings("ignore")
+logger = logging.getLogger(__name__)
 
 
 class GGS(PSDBase.SizeDistributionBaseModel):

@@ -1,11 +1,10 @@
 import logging
 
 logger = logging.getLogger(__name__)
-from typing import List
+from typing import Any, List
 
 import numpy as np
 from scipy.special import erf
-from typing import List, Any
 
 from . import SizeDistributionBaseModel as PSDBase
 

@@ -1,21 +1,20 @@
-import os
-import sys
-import pathlib
-from . import msanalyzer
-import time
-import re
-import threading
 import json
+import os
+import pathlib
+import re
+import sys
+import threading
+import time
 import tkinter
 from tkinter import font
+from typing import List, Tuple, TypedDict
 
-from typing import List, TypedDict, Tuple
-
-from matplotlib.ticker import NullFormatter  # useful for `logit` scale
-import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.ticker import NullFormatter  # useful for `logit` scale
+
+from . import msanalyzer
 
 matplotlib.use("TkAgg")
 
@@ -29,7 +28,6 @@ class ConfigDict(TypedDict):
 import PySimpleGUI as sg
 
 from . import icons_gui
-
 from .models.SizeDistributionModelsFactory import available_models
 
 script_folder = pathlib.Path(__file__).parent.absolute()
