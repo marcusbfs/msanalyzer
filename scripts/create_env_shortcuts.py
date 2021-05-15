@@ -10,7 +10,7 @@ pythonw_exe = os.path.join(repo_dir, env_name, "Scripts", "pythonw.exe")
 if (not os.path.isfile(python_exe)) or (not os.path.isfile(pythonw_exe)):
     raise RuntimeError(f"Please, set up the virtual env first!")
 
-main_py = os.path.join(repo_dir, "msanalyzer-cli.py")
+main_py = os.path.join(repo_dir, "cli.py")
 main_gui_py = os.path.join(src_dir, "msanalyzer_gui.py")
 
 if not os.path.isfile(main_py):

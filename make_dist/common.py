@@ -13,7 +13,7 @@ repo_folder = cur_folder.parent.absolute()
 src_folder = repo_folder / "msanalyzer"
 
 python_exe = sys.executable
-main_py: Path = repo_folder / "msanalyzer-cli.py"
+main_py: Path = repo_folder / "cli.py"
 
 main_gui_py: Path = "msanalyzer_gui.py"
 hidden_matplotlib = [
