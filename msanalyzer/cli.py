@@ -113,10 +113,10 @@ def main(_args: List[str] = None) -> None:
 
     parser.add_argument(
         "-s",
-        "--log-scale",
+        "--no-log-scale",
         dest="log_scale",
         default=False,
-        help="plot using log scale",
+        help="plot without using log scale",
         action="store_true",
     )
 
@@ -171,7 +171,7 @@ def main(_args: List[str] = None) -> None:
     output_basename = args.output_basename
     number_of_zero_first = int(args.first_zeros[0])
     number_of_zero_last = int(args.last_zeros[0])
-    log_scale = args.log_scale
+    log_scale = not args.log_scale
     custom_plot_args = args.custom_plot_args[0]
 
     # end of args parser
