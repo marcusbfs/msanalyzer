@@ -7,8 +7,7 @@ import time
 from typing import List
 
 import matplotlib.pyplot as plt
-from yaspin import yaspin
-from yaspin.spinners import Spinners
+from rich.console import Console
 
 from . import MasterSizerReport as msreport
 from . import MultipleFilesReport as multireport
@@ -19,6 +18,8 @@ logger = logging.getLogger("msanalyzer")
 fig: plt.figure = None
 
 models_figs: dict = {}
+
+console = Console()
 
 
 def main(_args: List[str] = None) -> None:
@@ -157,7 +158,7 @@ def main(_args: List[str] = None) -> None:
 
     level = logging.INFO if args.info else logging.WARNING
 
-    spinner = yaspin(Spinners.dots, text="Processing", color="green", timer=True)
+    spinner = console.status("Processing...")
     if not args.info:
         spinner.start()
 
@@ -261,5 +262,7 @@ def main(_args: List[str] = None) -> None:
             f.close()
 
     if not args.info:
-        spinner.ok("Done!")
+        spinner.stop()
+        console.print("[green]Done!")
+
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))
