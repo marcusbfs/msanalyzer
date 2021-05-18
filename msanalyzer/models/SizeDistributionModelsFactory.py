@@ -4,6 +4,7 @@ logger = logging.getLogger(__name__)
 from typing import List
 
 from . import SizeDistributionBaseModel as PSDBase
+from .GaudinMeloy import GaudinMeloy
 from .GGSSizeDistributionModel import GGS
 from .LogNormalSizeDistributionModel import LogNormal
 from .RRBSizeDistributionModel import RRB
