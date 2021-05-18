@@ -39,6 +39,9 @@ class SizeDistributionBaseModel(abc.ABC):
 
     # =================== base class ======================================
 
+    def getExpression(self) -> str:
+        return self.model_expression_str
+
     def getRsquared(self) -> float:
         return self.__r_squared
 
@@ -146,6 +149,15 @@ class SizeDistributionBaseModel(abc.ABC):
 
     def __repr__(self) -> str:
         return self.getModelName()
+
+    def getParametersStr(self) -> List[str]:
+        return self.model_par_str
+
+    def getParametersValues(self) -> List[float]:
+        return self.model_par_values
+
+    def getParametersStdDev(self) -> List[float]:
+        return self.model_par_values_std_dev
 
     def getDnFromCompute(self, n: float) -> float:
         xn = n

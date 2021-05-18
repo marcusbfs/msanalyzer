@@ -9,6 +9,7 @@ from typing import List
 import matplotlib.pyplot as plt
 from rich.console import Console
 from rich.progress import Progress
+from rich.table import Table
 
 from . import MasterSizerReport as msreport
 from . import MultipleFilesReport as multireport
@@ -183,15 +184,17 @@ def main(_args: List[str] = None) -> None:
     # calculate results - one file only input
     if not args.multiple_files:
 
-        progress = Progress(console=console)
-        task = progress.add_task("Single mode", total=9)
-        progress.start()
-
         logger.info("Single file mode")
+        progress = Progress(console=console, transient=True)
 
         reporter: msreport.MasterSizerReport = msreport.MasterSizerReport()
+        n_of_models = reporter.getNumberOfModels()
         logger.info("Created reporter object")
-        progress.advance(task, 1)
+
+        task = progress.add_task("Single mode", total=n_of_models)
+
+        progress.start()
+        callback_fun = lambda: progress.advance(task, 1)
 
         xps_file = args.xps
 
@@ -202,16 +205,13 @@ def main(_args: List[str] = None) -> None:
             reporter.cutLastZeroPoints(number_of_zero_last, tol=1e-8)
             reporter.setLogScale(logscale=log_scale)
             logger.info("Reporter object setted up")
-            progress.advance(task, 1)
 
         # calculate
 
         reporter.evaluateData()
         logger.info("Data evaluated")
-        progress.advance(task, 1)
-        reporter.evaluateModels()
+        models = reporter.evaluateModels()
         logger.info("Models evaluated")
-        progress.advance(task, 1)
 
         # name of outputfiles
         curves = output_basename + "curves"
@@ -222,20 +222,54 @@ def main(_args: List[str] = None) -> None:
         best_model_basename = "best_models_ranking"
 
         fig = reporter.saveFig(output_dir, curves)
-        models_figs = reporter.saveModelsFig(output_dir, PSD_model)
-        progress.advance(task, 1)
+        models_figs = reporter.saveModelsFig(
+            output_dir, PSD_model, callback=callback_fun
+        )
         reporter.saveData(output_dir, curves_data)
-        progress.advance(task, 1)
         reporter.saveModelsData(output_dir, PSD_data)
-        progress.advance(task, 1)
         reporter.saveExcel(output_dir, excel_data)
         logger.info("Results saved")
-        progress.advance(task, 1)
 
         logger.info("Analyzing best model")
         reporter.saveBestModelsRanking(output_dir, best_model_basename)
-        progress.advance(task, 1)
         progress.stop()
+
+        my_header_style = "red bold"
+        diameters = (10, 25, 50, 75, 90)
+
+        table = Table(header_style="red bold")
+
+        table.add_column("Model")
+        table.add_column("Parameters", justify="right")
+
+        for d in diameters:
+            table.add_column(f"D{d}", justify="right")
+
+        table.add_column("Mean error", justify="right")
+        table.add_column("r^2", justify="right")
+
+        for model in models["models"]:
+            row = []
+            row.append(model["name"])
+
+            par = ""
+
+            n_par = len(model["parameters"])
+            for i in range(n_par):
+                p = model["parameters"][i]
+                par += f'{p["repr"]}: {p["value"]:.4f} +- {p["stddev"]:.4f}{os.linesep if i==n_par-1 else ""}'
+
+            row.append(par)
+
+            for d in diameters:
+                row.append(f'{model[f"D{d}"]:.2f}')
+
+            row.append(f'{100.*model["s"]:.3f}%')
+            row.append(f'{model["r2"]:.4f}')
+
+            table.add_row(*row, end_section=True)
+
+        console.print(table)
 
     # calculate results - multiple files input
     else:
@@ -281,8 +315,5 @@ def main(_args: List[str] = None) -> None:
 
         progress.advance(task, 1)
         progress.stop()
-
-    if not args.info:
-        console.print("[green]Done!")
 
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))

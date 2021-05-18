@@ -6,7 +6,8 @@ from enum import Enum, unique
 
 warnings.filterwarnings("ignore", "(?s).*MATPLOTLIBDATA.*", category=UserWarning)
 import logging
-from typing import List
+from collections.abc import Callable
+from typing import Any, Dict, List
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -140,7 +141,9 @@ class MasterSizerReport:
         return fig
         # end of plot
 
-    def saveModelsFig(self, output_dir: str, base_filename: str) -> dict:
+    def saveModelsFig(
+        self, output_dir: str, base_filename: str, callback: Callable[[], None] = None
+    ) -> dict:
 
         models_figs = {}
 
@@ -182,6 +185,10 @@ class MasterSizerReport:
 
             models_figs[model.getModelName()] = fig
             # end of plot
+
+            # call callback - maybe to update a progress bar
+            if callback is not None:
+                callback()
 
         return models_figs
 
@@ -226,18 +233,6 @@ class MasterSizerReport:
 
     def saveBestModelsRanking(self, output_dir: str, base_filename: str) -> None:
         output_file = os.path.join(output_dir, base_filename + ".txt")
-        logger.info(
-            "Searching best R-squared (highest value) and best S (lowest value) models"
-        )
-
-        ranking_models_S_based = sorted(
-            self.__models, key=lambda x: x.getStdErrorMean()
-        )
-        logger.info("Ranking based on S: {}".format(ranking_models_S_based))
-        ranking_models_r2_based = sorted(
-            self.__models, key=lambda x: x.getRsquared(), reverse=True
-        )
-        logger.info("Ranking based on R-squared: {}".format(ranking_models_r2_based))
 
         file_content = self.getTxtFilesHeader()
         file_content += "Best models\n"
@@ -248,7 +243,7 @@ class MasterSizerReport:
         )
 
         i = 1
-        for model in ranking_models_S_based:
+        for model in self.ranking_models_S_based:
             file_content += "  #{:02d} - {}: S = {:.7f}\n".format(
                 i, model.getModelName(), model.getStdErrorMean()
             )
@@ -260,7 +255,7 @@ class MasterSizerReport:
         )
 
         i = 1
-        for model in ranking_models_r2_based:
+        for model in self.ranking_models_r2_based:
             file_content += "  #{:02d} - {}: R-squared = {:.7f}\n".format(
                 i, model.getModelName(), model.getRsquared()
             )
@@ -283,11 +278,63 @@ class MasterSizerReport:
 
         self.genCumulativeSizeDistribution()
 
-    def evaluateModels(self) -> None:
+    def getNumberOfModels(self) -> int:
+        return len(self.__models)
+
+    def evaluateModels(self, callback: Callable[[], None] = None) -> Dict[str, Any]:
+
+        ret: Dict[str, Any] = {"models": []}
 
         self.genDiffCumulativeSizeDistribution()
+
         for model in self.__models:
             model.evaluate(self.__x_data_mean, self.__cumulative_y_vals)
+            if callback is not None:
+                callback()
+
+        logger.info(
+            "Searching best R-squared (highest value) and best S (lowest value) models"
+        )
+
+        self.ranking_models_S_based: List[SizeDistributionBaseModel] = sorted(
+            self.__models, key=lambda x: x.getStdErrorMean()
+        )
+        logger.info("Ranking based on S: {}".format(self.ranking_models_S_based))
+        self.ranking_models_r2_based: List[SizeDistributionBaseModel] = sorted(
+            self.__models, key=lambda x: x.getRsquared(), reverse=True
+        )
+        logger.info(
+            "Ranking based on R-squared: {}".format(self.ranking_models_r2_based)
+        )
+
+        for model in self.ranking_models_S_based:
+            ret_model = {}
+            ret_model["name"] = model.getModelName()
+            ret_model["parameters"] = []
+            par_str = model.getParametersStr()
+            par_val = model.getParametersValues()
+            par_stddev = model.getParametersStdDev()
+            ret_model["expr"] = model.getExpression()
+            for i in range(len(par_str)):
+                par = {}
+                par["repr"] = par_str[i]
+                par["value"] = par_val[i]
+                par["stddev"] = par_stddev[i]
+                ret_model["parameters"].append(par)
+
+            ret_model["r2"] = model.getRsquared()
+            ret_model["s"] = model.getStdErrorMean()
+
+            for n in (10, 25, 50, 75, 90):
+                ret_model["D" + str(n)] = model.getDnFromCompute(n / 100.0)
+
+            ret["models"].append(ret_model)
+
+        ret["best"] = {}
+        ret["best"]["s"] = self.ranking_models_S_based[0].getModelName()
+        ret["best"]["r2"] = self.ranking_models_r2_based[0].getModelName()
+
+        return ret
 
     def cutLastNPoints(self, number_of_points: int) -> None:
         self.__x_data = self.__x_data[:-number_of_points].copy()
