@@ -200,6 +200,7 @@ def main(_args: List[str] = None) -> None:
             "[",
             TimeElapsedColumn(),
             "]",
+            "[dim]{task.fields[extra]}",
             console=console,
         )
 
@@ -207,13 +208,14 @@ def main(_args: List[str] = None) -> None:
         n_of_models = reporter.getNumberOfModels()
         logger.info("Created reporter object")
 
-        task = progress.add_task("Single mode", total=n_of_models)
+        task = progress.add_task("Single mode", total=n_of_models, extra="")
 
         progress.start()
         callback_fun = lambda: progress.advance(task, 1)
 
         xps_file = args.xps
 
+        progress.update(task, extra=f"reading {os.path.basename(xps_file)}")
         with open(xps_file, "rb") as xpsfile_mem:
             reporter.setXPSfile(io.BytesIO(xpsfile_mem.read()), xps_file)
             reporter.setDiameterMeanType(meanType)
@@ -221,13 +223,16 @@ def main(_args: List[str] = None) -> None:
             reporter.cutLastZeroPoints(number_of_zero_last, tol=1e-8)
             reporter.setLogScale(logscale=log_scale)
             logger.info("Reporter object setted up")
+            time.sleep(0.2)
 
         # calculate
 
+        progress.update(task, extra=f"evaluating models")
         reporter.evaluateData()
         logger.info("Data evaluated")
         models = reporter.evaluateModels()
         logger.info("Models evaluated")
+        time.sleep(0.2)
 
         # name of outputfiles
         curves = output_basename + "curves"
@@ -237,6 +242,7 @@ def main(_args: List[str] = None) -> None:
         excel_data = output_basename + "curve_data"
         best_model_basename = "best_models_ranking"
 
+        progress.update(task, extra=f"generating plots")
         fig = reporter.saveFig(output_dir, curves)
         models_figs = reporter.saveModelsFig(
             output_dir, PSD_model, callback=callback_fun
@@ -247,7 +253,10 @@ def main(_args: List[str] = None) -> None:
         logger.info("Results saved")
 
         logger.info("Analyzing best model")
+        progress.update(task, extra=f"analyzing best model")
         reporter.saveBestModelsRanking(output_dir, best_model_basename)
+
+        progress.update(task, extra="")
         progress.stop()
 
         diameters = (10, 25, 50, 75, 90)
@@ -299,10 +308,12 @@ def main(_args: List[str] = None) -> None:
             "[",
             TimeElapsedColumn(),
             "]",
+            "{task.fields[extra]}",
             console=console,
         )
 
-        task = progress.add_task("Multi mode", total=2)
+        number_of_files = len(args.multiple_files)
+        task = progress.add_task("Multi mode", total=2 + number_of_files, extra="")
         progress.start()
 
         number_of_files = len(args.multiple_files)
@@ -310,7 +321,12 @@ def main(_args: List[str] = None) -> None:
 
         f_mem = []
         for f in args.multiple_files:
+            extra_field = f"[dim]reading {os.path.basename(f)}"
+            progress.update(task, extra=extra_field)
             f_mem.append(io.BytesIO(open(f, "rb").read()))
+            time.sleep(0.25)
+            progress.advance(task, 1)
+        progress.update(task, extra="")
 
         multiReporter = multireport.MultipleFilesReport(
             f_mem,
@@ -332,14 +348,17 @@ def main(_args: List[str] = None) -> None:
         )
         MultiFrequency_output_file = os.path.join(output_dir, "MultiFrequency")
 
+        progress.update(task, extra="[dim]size distribution plot")
         fig = multiReporter.sizeDistributionPlot(MultiSizeDistribution_output_file)
         progress.advance(task, 1)
+        progress.update(task, extra="[dim]frequency plot")
         multiReporter.frequencyPlot(MultiFrequency_output_file)
         progress.advance(task, 1)
 
         for f in f_mem:
             f.close()
 
+        progress.update(task, extra="")
         progress.stop()
         console.print("[bold green]Done!")
 
