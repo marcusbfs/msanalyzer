@@ -257,7 +257,9 @@ def main(_args: List[str] = None) -> None:
             n_par = len(model["parameters"])
             for i in range(n_par):
                 p = model["parameters"][i]
-                par += f'{p["repr"]}: {p["value"]:.4f} +- {p["stddev"]:.4f}{os.linesep if i==n_par-1 else ""}'
+                par += f'{p["repr"]}: {p["value"]:.4f} +- {p["stddev"]:.4f}' + (
+                    "\n" if i != n_par - 1 else ""
+                )
 
             row.append(par)
 
