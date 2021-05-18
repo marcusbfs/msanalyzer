@@ -290,7 +290,18 @@ def main(_args: List[str] = None) -> None:
 
     # calculate results - multiple files input
     else:
-        progress = Progress(console=console)
+        progress = Progress(
+            SpinnerColumn(),
+            "[progress.description]{task.description}",
+            BarColumn(),
+            "[progress.percentage]{task.percentage:>3.0f}%",
+            TimeRemainingColumn(),
+            "[",
+            TimeElapsedColumn(),
+            "]",
+            console=console,
+        )
+
         task = progress.add_task("Multi mode", total=2)
         progress.start()
 
