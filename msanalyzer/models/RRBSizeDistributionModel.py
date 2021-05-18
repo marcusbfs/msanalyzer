@@ -1,7 +1,7 @@
 import logging
 
 logger = logging.getLogger(__name__)
-from typing import Any, List, Union
+from typing import List
 
 import numpy as np
 from scipy.special import gamma

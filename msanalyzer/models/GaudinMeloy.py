@@ -1,7 +1,7 @@
 import logging
 
 logger = logging.getLogger(__name__)
-from typing import Any, List, Union
+from typing import List
 
 import numpy as np
 
@@ -26,7 +26,7 @@ class GaudinMeloy(PSDBase.SizeDistributionBaseModel):
 
     def getSauterDiameterValue(self) -> float:
         Dprime: float = self.model_par_values[0]
-        n = self.model_par_values[1]
+        self.model_par_values[1]
         return 0.0
 
     def getSauterDiameterExpression(self) -> str:

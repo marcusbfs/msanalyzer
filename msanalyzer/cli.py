@@ -185,7 +185,7 @@ def main(_args: List[str] = None) -> None:
     if not args.multiple_files:
 
         logger.info("Single file mode")
-        progress = Progress(console=console, transient=True)
+        progress = Progress(console=console)
 
         reporter: msreport.MasterSizerReport = msreport.MasterSizerReport()
         n_of_models = reporter.getNumberOfModels()
@@ -234,7 +234,6 @@ def main(_args: List[str] = None) -> None:
         reporter.saveBestModelsRanking(output_dir, best_model_basename)
         progress.stop()
 
-        my_header_style = "red bold"
         diameters = (10, 25, 50, 75, 90)
 
         table = Table(header_style="red bold")
@@ -276,7 +275,7 @@ def main(_args: List[str] = None) -> None:
     # calculate results - multiple files input
     else:
         progress = Progress(console=console)
-        task = progress.add_task("Multi mode", total=4)
+        task = progress.add_task("Multi mode", total=2)
         progress.start()
 
         number_of_files = len(args.multiple_files)
@@ -285,7 +284,6 @@ def main(_args: List[str] = None) -> None:
         f_mem = []
         for f in args.multiple_files:
             f_mem.append(io.BytesIO(open(f, "rb").read()))
-        progress.advance(task, 1)
 
         multiReporter = multireport.MultipleFilesReport(
             f_mem,
@@ -298,7 +296,6 @@ def main(_args: List[str] = None) -> None:
             not args.multiple_no_labels,
         )
         logger.info("Created multiple files reporter object")
-        progress.advance(task, 1)
 
         if args.multiple_labels and len(args.multiple_labels) > 1:
             multiReporter.setLabels(args.multiple_labels)
@@ -309,13 +306,14 @@ def main(_args: List[str] = None) -> None:
         MultiFrequency_output_file = os.path.join(output_dir, "MultiFrequency")
 
         fig = multiReporter.sizeDistributionPlot(MultiSizeDistribution_output_file)
+        progress.advance(task, 1)
         multiReporter.frequencyPlot(MultiFrequency_output_file)
         progress.advance(task, 1)
 
         for f in f_mem:
             f.close()
 
-        progress.advance(task, 1)
         progress.stop()
+        console.print("[bold green]Done!")
 
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))
