@@ -8,7 +8,13 @@ from typing import List
 
 import matplotlib.pyplot as plt
 from rich.console import Console
-from rich.progress import Progress
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+)
 from rich.table import Table
 
 from . import MasterSizerReport as msreport
@@ -185,7 +191,17 @@ def main(_args: List[str] = None) -> None:
     if not args.multiple_files:
 
         logger.info("Single file mode")
-        progress = Progress(console=console)
+        progress = Progress(
+            SpinnerColumn(),
+            "[progress.description]{task.description}",
+            BarColumn(),
+            "[progress.percentage]{task.percentage:>3.0f}%",
+            TimeRemainingColumn(),
+            "[",
+            TimeElapsedColumn(),
+            "]",
+            console=console,
+        )
 
         reporter: msreport.MasterSizerReport = msreport.MasterSizerReport()
         n_of_models = reporter.getNumberOfModels()
