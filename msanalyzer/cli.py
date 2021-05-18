@@ -8,6 +8,7 @@ from typing import List
 
 import matplotlib.pyplot as plt
 from rich.console import Console
+from rich.progress import Progress
 
 from . import MasterSizerReport as msreport
 from . import MultipleFilesReport as multireport
@@ -186,6 +187,10 @@ def main(_args: List[str] = None) -> None:
     # calculate results - one file only input
     if not args.multiple_files:
 
+        progress = Progress(console=console)
+        progress.start()
+        task = progress.add_task('Single mode...')
+
         logger.info("Single file mode")
 
         reporter: msreport.MasterSizerReport = msreport.MasterSizerReport()
@@ -225,6 +230,7 @@ def main(_args: List[str] = None) -> None:
 
         logger.info("Analyzing best model")
         reporter.saveBestModelsRanking(output_dir, best_model_basename)
+        progress.stop()
 
     # calculate results - multiple files input
     else:
