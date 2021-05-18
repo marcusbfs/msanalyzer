@@ -159,10 +159,6 @@ def main(_args: List[str] = None) -> None:
 
     level = logging.INFO if args.info else logging.WARNING
 
-    spinner = console.status("Processing...")
-    if not args.info:
-        spinner.start()
-
     meanType = list_of_diameterchoices[args.meantype[0]]
     output_dir = args.output_dir
     output_basename = args.output_basename
@@ -188,13 +184,14 @@ def main(_args: List[str] = None) -> None:
     if not args.multiple_files:
 
         progress = Progress(console=console)
+        task = progress.add_task("Single mode", total=9)
         progress.start()
-        task = progress.add_task('Single mode...')
 
         logger.info("Single file mode")
 
         reporter: msreport.MasterSizerReport = msreport.MasterSizerReport()
         logger.info("Created reporter object")
+        progress.advance(task, 1)
 
         xps_file = args.xps
 
@@ -205,13 +202,16 @@ def main(_args: List[str] = None) -> None:
             reporter.cutLastZeroPoints(number_of_zero_last, tol=1e-8)
             reporter.setLogScale(logscale=log_scale)
             logger.info("Reporter object setted up")
+            progress.advance(task, 1)
 
         # calculate
 
         reporter.evaluateData()
         logger.info("Data evaluated")
+        progress.advance(task, 1)
         reporter.evaluateModels()
         logger.info("Models evaluated")
+        progress.advance(task, 1)
 
         # name of outputfiles
         curves = output_basename + "curves"
@@ -223,23 +223,33 @@ def main(_args: List[str] = None) -> None:
 
         fig = reporter.saveFig(output_dir, curves)
         models_figs = reporter.saveModelsFig(output_dir, PSD_model)
+        progress.advance(task, 1)
         reporter.saveData(output_dir, curves_data)
+        progress.advance(task, 1)
         reporter.saveModelsData(output_dir, PSD_data)
+        progress.advance(task, 1)
         reporter.saveExcel(output_dir, excel_data)
         logger.info("Results saved")
+        progress.advance(task, 1)
 
         logger.info("Analyzing best model")
         reporter.saveBestModelsRanking(output_dir, best_model_basename)
+        progress.advance(task, 1)
         progress.stop()
 
     # calculate results - multiple files input
     else:
+        progress = Progress(console=console)
+        task = progress.add_task("Multi mode", total=4)
+        progress.start()
+
         number_of_files = len(args.multiple_files)
         logger.info("Multiple files mode - {} files".format(number_of_files))
 
         f_mem = []
         for f in args.multiple_files:
             f_mem.append(io.BytesIO(open(f, "rb").read()))
+        progress.advance(task, 1)
 
         multiReporter = multireport.MultipleFilesReport(
             f_mem,
@@ -252,6 +262,7 @@ def main(_args: List[str] = None) -> None:
             not args.multiple_no_labels,
         )
         logger.info("Created multiple files reporter object")
+        progress.advance(task, 1)
 
         if args.multiple_labels and len(args.multiple_labels) > 1:
             multiReporter.setLabels(args.multiple_labels)
@@ -263,12 +274,15 @@ def main(_args: List[str] = None) -> None:
 
         fig = multiReporter.sizeDistributionPlot(MultiSizeDistribution_output_file)
         multiReporter.frequencyPlot(MultiFrequency_output_file)
+        progress.advance(task, 1)
 
         for f in f_mem:
             f.close()
 
+        progress.advance(task, 1)
+        progress.stop()
+
     if not args.info:
-        spinner.stop()
         console.print("[green]Done!")
 
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))
