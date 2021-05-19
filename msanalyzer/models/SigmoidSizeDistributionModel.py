@@ -12,8 +12,8 @@ from . import SizeDistributionBaseModel as PSDBase
 class Sigmoid(PSDBase.SizeDistributionBaseModel):
     def __init__(self) -> None:
         super().__init__()
-        self.model_par_str = ["k", "m"]
-        self.model_expression_str = "X(d) = 1 / (1 + (k/d)^m)"
+        self.model_par_str = ["D50", "m"]
+        self.model_expression_str = "X(d) = 1 / (1 + (D50/d)^m)"
         self.model_name_str = "Sigmoid"
         logger.info("{} object constructed".format(self.model_name_str))
 

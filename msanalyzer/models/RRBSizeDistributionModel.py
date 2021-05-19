@@ -14,8 +14,8 @@ ArrayOrFloat = PSDBase.ArrayOrFloat
 class RRB(PSDBase.SizeDistributionBaseModel):
     def __init__(self) -> None:
         super().__init__()
-        self.model_par_str = ["D'", "n"]
-        self.model_expression_str = "X(d) = 1 - exp(-(d/D')^n)"
+        self.model_par_str = ["D63", "n"]
+        self.model_expression_str = "X(d) = 1 - exp(-(d/D63)^n)"
         self.model_name_str = "RRB"
         logger.info("{} object constructed".format(self.model_name_str))
 
@@ -33,4 +33,4 @@ class RRB(PSDBase.SizeDistributionBaseModel):
         return 0.0
 
     def getSauterDiameterExpression(self) -> str:
-        return "dps = D'/gamma(1 - 1/n) for n > 1"
+        return "dps = D63/gamma(1 - 1/n) for n > 1"

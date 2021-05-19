@@ -13,8 +13,8 @@ ArrayOrFloat = PSDBase.ArrayOrFloat
 class GaudinMeloy(PSDBase.SizeDistributionBaseModel):
     def __init__(self) -> None:
         super().__init__()
-        self.model_par_str = ["D'", "n"]
-        self.model_expression_str = "X(d) = 1 - [1 - (d/D')]^n"
+        self.model_par_str = ["Dmax", "n"]
+        self.model_expression_str = "X(d) = 1 - [1 - (d/Dmax)]^n"
         self.model_name_str = "Gaudin-Meloy"
         logger.info("{} object constructed".format(self.model_name_str))
 

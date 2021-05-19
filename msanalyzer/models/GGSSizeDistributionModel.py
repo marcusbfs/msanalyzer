@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 class GGS(PSDBase.SizeDistributionBaseModel):
     def __init__(self) -> None:
         super().__init__()
-        self.model_par_str = ["k", "m"]
-        self.model_expression_str = "X(d) = (d/k)^m"
+        self.model_par_str = ["Dmax", "m"]
+        self.model_expression_str = "X(d) = (d/Dmax)^m"
         self.model_name_str = "GGS"
         logger.info("{} object constructed".format(self.model_name_str))
 
