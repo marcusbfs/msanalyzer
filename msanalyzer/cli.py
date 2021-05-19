@@ -8,14 +8,9 @@ from typing import List
 
 import matplotlib.pyplot as plt
 from rich.console import Console
-from rich.progress import (
-    BarColumn,
-    Progress,
-    SpinnerColumn,
-    TimeElapsedColumn,
-    TimeRemainingColumn,
-)
+from rich.progress import BarColumn, Progress, ProgressColumn, SpinnerColumn, Task
 from rich.table import Table
+from rich.text import Text
 
 from . import MasterSizerReport as msreport
 from . import MultipleFilesReport as multireport
@@ -28,6 +23,22 @@ fig: plt.figure = None
 models_figs: dict = {}
 
 console = Console()
+
+
+class customTimeElapsedColumn(ProgressColumn):
+    def render(self, task: Task) -> Text:
+        elapsed = task.finished_time if task.finished else task.elapsed
+        if elapsed is None:
+            return Text(" ", style="progress.elapsed")
+        return Text(f"{elapsed:4.1f}s", style="progress.elapsed")
+
+
+class customTimeRemainingColumn(ProgressColumn):
+    def render(self, task: Task) -> Text:
+        remaining = task.time_remaining
+        if remaining is None:
+            return Text("  ", style="progress.remaining")
+        return Text(f"{remaining:4.1f}s", style="progress.elapsed")
 
 
 def main(_args: List[str] = None) -> None:
@@ -196,10 +207,9 @@ def main(_args: List[str] = None) -> None:
             "[progress.description]{task.description}",
             BarColumn(),
             "[progress.percentage]{task.percentage:>3.0f}%",
-            TimeRemainingColumn(),
-            "[",
-            TimeElapsedColumn(),
-            "]",
+            "(",
+            customTimeElapsedColumn(),
+            ")",
             "[dim]{task.fields[extra]}",
             console=console,
         )
@@ -304,10 +314,9 @@ def main(_args: List[str] = None) -> None:
             "[progress.description]{task.description}",
             BarColumn(),
             "[progress.percentage]{task.percentage:>3.0f}%",
-            TimeRemainingColumn(),
-            "[",
-            TimeElapsedColumn(),
-            "]",
+            "(",
+            customTimeElapsedColumn(),
+            ")",
             "{task.fields[extra]}",
             console=console,
         )
@@ -350,9 +359,11 @@ def main(_args: List[str] = None) -> None:
 
         progress.update(task, extra="[dim]size distribution plot")
         fig = multiReporter.sizeDistributionPlot(MultiSizeDistribution_output_file)
+        time.sleep(0.2)
         progress.advance(task, 1)
         progress.update(task, extra="[dim]frequency plot")
         multiReporter.frequencyPlot(MultiFrequency_output_file)
+        time.sleep(0.2)
         progress.advance(task, 1)
 
         for f in f_mem:
