@@ -21,7 +21,7 @@ uvicorn="0.13.4"
 gunicorn={version="*", markers = "sys_platform == 'linux'"}
 httptools={version="*", markers = "sys_platform == 'linux'"}
 uvloop={version="*", markers = "sys_platform == 'linux'"}
-rich = "^10.2.1"
+rich = "^10.2.2"
 pydantic = "^1.8.2"
 
 [tool.poetry.dev-dependencies]
