@@ -230,7 +230,7 @@ def main(_args: List[str] = None) -> None:
         progress.update(task, extra=f"evaluating models")
         reporter.evaluateData()
         logger.info("Data evaluated")
-        models = reporter.evaluateModels()
+        models: msreport.ModelsData = reporter.evaluateModels()
         logger.info("Models evaluated")
         time.sleep(0.2)
 
@@ -272,26 +272,26 @@ def main(_args: List[str] = None) -> None:
         table.add_column("Mean error", justify="right")
         table.add_column("r^2", justify="right")
 
-        for model in models["models"]:
+        for model in models.models:
             row = []
-            row.append(model["name"])
+            row.append(model.name)
 
             par = ""
 
-            n_par = len(model["parameters"])
+            n_par = len(model.parameters)
             for i in range(n_par):
-                p = model["parameters"][i]
-                par += f'{p["repr"]}: {p["value"]:.4f} +- {p["stddev"]:.4f}' + (
+                p = model.parameters[i]
+                par += f"{p.repr}: {p.value:.4f} +- {p.stddev:.4f}" + (
                     "\n" if i != n_par - 1 else ""
                 )
 
             row.append(par)
 
             for d in diameters:
-                row.append(f'{model[f"D{d}"]:.2f}')
+                row.append(f'{model.D[f"D{d}"]:.2f}')
 
-            row.append(f'{100.*model["s"]:.3f}%')
-            row.append(f'{model["r2"]:.4f}')
+            row.append(f"{100.*model.s:.3f}%")
+            row.append(f"{model.r2:.4f}")
 
             table.add_row(*row, end_section=True)
 

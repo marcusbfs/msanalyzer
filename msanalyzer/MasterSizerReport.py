@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+from pydantic import BaseModel
 
 from . import __version__
 from .MasterSizerInput import MasterSizerInput
@@ -23,6 +24,31 @@ from .models.SizeDistributionModelsFactory import getPSDModelsList
 logger = logging.getLogger(__name__)
 __author__: str = "Marcus Bruno Fernandes Silva"
 __email__: str = "marcusbfs@gmail.com"
+
+
+class ParametersData(BaseModel):
+    repr: str
+    value: float
+    stddev: float
+
+
+class ModelData(BaseModel):
+    name: str
+    expr: str
+    parameters: List[ParametersData]
+    r2: float
+    s: float
+    D: Dict[str, float]
+
+
+class BestData(BaseModel):
+    s: str
+    r2: str
+
+
+class ModelsData(BaseModel):
+    models: List[ModelData]
+    best: BestData
 
 
 @unique
@@ -281,9 +307,7 @@ class MasterSizerReport:
     def getNumberOfModels(self) -> int:
         return len(self.__models)
 
-    def evaluateModels(self, callback: Callable[[], None] = None) -> Dict[str, Any]:
-
-        ret: Dict[str, Any] = {"models": []}
+    def evaluateModels(self, callback: Callable[[], None] = None) -> ModelsData:
 
         self.genDiffCumulativeSizeDistribution()
 
@@ -307,34 +331,42 @@ class MasterSizerReport:
             "Ranking based on R-squared: {}".format(self.ranking_models_r2_based)
         )
 
+        ret: Dict[str, Any] = {"models": []}
+
+        models = ModelsData(models=[], best=BestData(s="", r2=""))
+
         for model in self.ranking_models_S_based:
-            ret_model = {}
-            ret_model["name"] = model.getModelName()
-            ret_model["parameters"] = []
             par_str = model.getParametersStr()
             par_val = model.getParametersValues()
             par_stddev = model.getParametersStdDev()
-            ret_model["expr"] = model.getExpression()
-            for i in range(len(par_str)):
-                par = {}
-                par["repr"] = par_str[i]
-                par["value"] = par_val[i]
-                par["stddev"] = par_stddev[i]
-                ret_model["parameters"].append(par)
 
-            ret_model["r2"] = model.getRsquared()
-            ret_model["s"] = model.getStdErrorMean()
+            m = ModelData(
+                name=model.getModelName(),
+                expr=model.getExpression(),
+                parameters=[],
+                r2=model.getRsquared(),
+                s=model.getStdErrorMean(),
+                D={},
+            )
+
+            for i in range(len(par_str)):
+                par = ParametersData(
+                    repr=par_str[i], value=par_val[i], stddev=par_stddev[i]
+                )
+                m.parameters.append(par)
 
             for n in (10, 25, 50, 75, 90):
-                ret_model["D" + str(n)] = model.getDnFromCompute(n / 100.0)
+                m.D["D" + str(n)] = model.getDnFromCompute(n / 100.0)
 
-            ret["models"].append(ret_model)
+            models.models.append(m)
 
-        ret["best"] = {}
-        ret["best"]["s"] = self.ranking_models_S_based[0].getModelName()
-        ret["best"]["r2"] = self.ranking_models_r2_based[0].getModelName()
+        best = BestData(
+            s=self.ranking_models_S_based[0].getModelName(),
+            r2=self.ranking_models_r2_based[0].getModelName(),
+        )
+        models.best = best
 
-        return ret
+        return models
 
     def cutLastNPoints(self, number_of_points: int) -> None:
         self.__x_data = self.__x_data[:-number_of_points].copy()
