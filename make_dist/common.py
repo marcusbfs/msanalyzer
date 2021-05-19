@@ -13,13 +13,15 @@ repo_folder = cur_folder.parent.absolute()
 src_folder = repo_folder / "msanalyzer"
 
 python_exe = sys.executable
-main_py: Path = repo_folder / "cli.py"
+main_py: Path = cur_folder / "msanalyzer-cli.py"
 
-main_gui_py: Path = "msanalyzer_gui.py"
+main_gui_py: Path = Path("msanalyzer_gui.py")
 hidden_matplotlib = [
     "matplotlib.backends.backend_svg",
     "matplotlib.backends.backend_tkagg",
 ]
+hidden_imports = ["msanalyzer"] + hidden_matplotlib
+
 matplotlibrc: Path = src_folder / "matplotlibrc"
 dist_folder: Path = cur_folder / "dist"
 build_folder: Path = cur_folder / "build"
@@ -37,6 +39,6 @@ cmd_common: list[str] = [
     str(build_folder),
 ]
 
-for hm in hidden_matplotlib:
+for hm in hidden_imports:
     cmd_common.append("--hidden-import")
     cmd_common.append(hm)
