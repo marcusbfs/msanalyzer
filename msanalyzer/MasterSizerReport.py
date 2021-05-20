@@ -13,7 +13,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
-import pandas as pd
+import openpyxl
 from pydantic import BaseModel
 
 from . import __version__
@@ -113,12 +113,32 @@ class MasterSizerReport:
     # saving files
 
     def saveExcel(self, output_dir: str, base_filename: str) -> None:
-        data = np.transpose(
-            np.array([self.__x_data_mean, self.__y_data, self.__cumulative_y_vals])
-        )
-        df = pd.DataFrame(data, columns=self.__headers)
+
         filename = os.path.join(output_dir, base_filename + ".xlsx")
-        df.to_excel(filename, index=False)
+
+        wb = openpyxl.Workbook()
+        ws1: openpyxl.Workbook = wb.active
+
+        for i, header in enumerate(self.__headers):
+            column_width = len(header) + 1
+            ws1.cell(row=1, column=i + 1, value=header).font = openpyxl.styles.Font(
+                bold=True
+            )
+
+            ws1.cell(row=1, column=i + 1).alignment = openpyxl.styles.Alignment(
+                horizontal="right"
+            )
+
+            ws1.column_dimensions[
+                openpyxl.utils.get_column_letter(i + 1)
+            ].width = column_width
+
+        for i in range(len(self.__x_data_mean)):
+            ws1.cell(row=i + 2, column=1, value=self.__x_data_mean[i])
+            ws1.cell(row=i + 2, column=2, value=self.__y_data[i])
+            ws1.cell(row=i + 2, column=3, value=self.__cumulative_y_vals[i])
+
+        wb.save(filename=filename)
         logger.info('Exported data to excel file: "{}"'.format(filename))
         return
 
