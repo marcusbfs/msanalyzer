@@ -5,7 +5,7 @@ import time
 import common as C
 
 
-def main():
+def main() -> None:
 
     time.time()
 
@@ -15,7 +15,7 @@ def main():
         raise RuntimeError(f'Could not find: "{C.matplotlibrc}"')
 
     # cli
-    cmd = C.cmd_common + ["-c", str(C.main_py)]
+    cmd = C.cmd_common + ["-c", str(C.main_py), "--name", "msanalyzer"]
     cli_start_time = time.time()
     subprocess.call(cmd, shell=True)
     C.shutil_copy_verbose(
