@@ -1,7 +1,7 @@
 python=D:\Applications\msanalyzer\msanalyzer_venv\Scripts\python.exe
 
 
-.PHONY = fmt
+.PHONY : fmt
 
 fmt:
 	autoflake -r -i --remove-unused-variables --remove-all-unused-imports msanalyzer

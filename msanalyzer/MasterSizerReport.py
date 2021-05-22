@@ -7,6 +7,7 @@ from enum import Enum, unique
 warnings.filterwarnings("ignore", "(?s).*MATPLOTLIBDATA.*", category=UserWarning)
 import logging
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import Any, Dict, List
 
 import matplotlib
@@ -14,7 +15,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
 import openpyxl
-from pydantic import BaseModel
 
 from . import __version__
 from .MasterSizerInput import MasterSizerInput
@@ -26,13 +26,15 @@ __author__: str = "Marcus Bruno Fernandes Silva"
 __email__: str = "marcusbfs@gmail.com"
 
 
-class ParametersData(BaseModel):
+@dataclass
+class ParametersData:
     repr: str
     value: float
     stddev: float
 
 
-class ModelData(BaseModel):
+@dataclass
+class ModelData:
     name: str
     expr: str
     parameters: List[ParametersData]
@@ -41,12 +43,14 @@ class ModelData(BaseModel):
     D: Dict[str, float]
 
 
-class BestData(BaseModel):
+@dataclass
+class BestData:
     s: str
     r2: str
 
 
-class ModelsData(BaseModel):
+@dataclass
+class ModelsData:
     models: List[ModelData]
     best: BestData
 
