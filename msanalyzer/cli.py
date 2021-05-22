@@ -3,6 +3,7 @@ import io
 import json
 import logging
 import os
+import sys
 import time
 from typing import List
 
@@ -41,7 +42,7 @@ class customTimeRemainingColumn(ProgressColumn):
         return Text(f"{remaining:4.1f}s", style="progress.elapsed")
 
 
-def main(_args: List[str] = None) -> None:
+def _real_main(_args: List[str] = None) -> None:
 
     start_time = time.time()
 
@@ -374,3 +375,14 @@ def main(_args: List[str] = None) -> None:
         console.print("[bold green]Done!")
 
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))
+
+
+def main(_args: List[str] = None) -> None:
+    try:
+        _real_main(_args=_args)
+    except Exception as e:
+        console.print("[bold red]An error ocurred!")
+        console.print("Please, check if the [bold green]XPS[/] file is correct.")
+        if "--info" in sys.argv:
+            console.print("[bold blue]Error message:")
+            console.print(e)
