@@ -117,7 +117,6 @@ class MasterSizerReport:
     # saving files
 
     def saveExcel(self, output_dir: str, base_filename: str) -> None:
-
         filename = os.path.join(output_dir, base_filename + ".xlsx")
 
         wb = openpyxl.Workbook()
@@ -141,6 +140,48 @@ class MasterSizerReport:
             ws1.cell(row=i + 2, column=1, value=self.__x_data_mean[i])
             ws1.cell(row=i + 2, column=2, value=self.__y_data[i])
             ws1.cell(row=i + 2, column=3, value=self.__cumulative_y_vals[i])
+
+        last_row: int = len(self.__x_data_mean) + 1
+
+        # Charts
+
+        xvalues = openpyxl.chart.Reference(ws1, min_col=1, min_row=2, max_row=last_row)
+
+        def _genChart(
+            y_title: str,
+            y_col: int,
+            title: str,
+            y_scale_bound_to_one: bool = False,
+        ) -> openpyxl.chart.ScatterChart:
+            chart = openpyxl.chart.ScatterChart()
+            chart.style = 13
+            chart.title = y_title
+            chart.x_axis.title = "Diameter [microns]"
+            chart.y_axis.title = ""
+
+            chart.legend = None
+
+            if y_scale_bound_to_one:
+                # chart.x_axis.scaling.min = 0
+                # chart.x_axis.scaling.max = 11
+
+                chart.y_axis.scaling.min = 0
+                chart.y_axis.scaling.max = 1.1
+
+            values = openpyxl.chart.Reference(
+                ws1, min_col=y_col, min_row=2, max_row=last_row
+            )
+            series = openpyxl.chart.Series(values, xvalues, title_from_data=True)
+            chart.append(series)
+            return chart
+
+        chart1 = _genChart("Volume fraction [-]", 2, "")
+        ws1.add_chart(chart1, "E2")
+
+        chart2 = _genChart(
+            "Cumulative volume fraction[-]", 3, "", y_scale_bound_to_one=True
+        )
+        ws1.add_chart(chart2, "E17")
 
         wb.save(filename=filename)
         logger.info('Exported data to excel file: "{}"'.format(filename))
