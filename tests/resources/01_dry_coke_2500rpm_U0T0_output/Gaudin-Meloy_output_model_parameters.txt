@@ -1,0 +1,35 @@
++----------------------------------------------------------------------------------------------+
+| msanalyzer 3.7.8                                                                             |
+|                                                                                              |
+| Author: Marcus Bruno Fernandes Silva                                                         |
+| email: marcusbfs@gmail.com                                                                   |
+|                                                                                              |
+| file analyzed: "D:\Desktop\workspace\msanalyzer\input_examples\01_dry_coke_2500rpm_U0T0.xps" |
+| Date: 28-May-2021                                                                            |
++----------------------------------------------------------------------------------------------+
+
+Gaudin-Meloy model
+==================
+
+X(d) = 1 - [1 - (d/Dmax)]^n
+
+Parameters: 
+            Dmax = 4386.5110258671    std. dev. = 4647.1924744730
+            n = 49.4614317176    std. dev. = 52.9346094921
+
+Sauter diameter expression: non-available
+Sauter diameter mean: dps = 0.0000000000
+
+D05 = 4.5466127455
+D10 = 9.3340033904
+D25 = 25.4391713933
+D50 = 70.2474767460
+D75 = 121.2372446384
+D90 = 199.5255699961
+D95 = 257.7923080551
+
+Standard error of the regression (S) = 0.0099047728
+NOTE: S must be <= 2.5 to produce a sufficiently narrow 95% prediction interval.
+
+R-squared = 0.9990816083
+NOTE: R-squared is not trustworthy for nonlinear regression

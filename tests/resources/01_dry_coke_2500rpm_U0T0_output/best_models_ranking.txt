@@ -1,0 +1,28 @@
++----------------------------------------------------------------------------------------------+
+| msanalyzer 3.7.8                                                                             |
+|                                                                                              |
+| Author: Marcus Bruno Fernandes Silva                                                         |
+| email: marcusbfs@gmail.com                                                                   |
+|                                                                                              |
+| file analyzed: "D:\Desktop\workspace\msanalyzer\input_examples\01_dry_coke_2500rpm_U0T0.xps" |
+| Date: 28-May-2021                                                                            |
++----------------------------------------------------------------------------------------------+
+
+Best models
+===========
+
+Ranking based on S (standard error mean). Lowest value is better.
+
+  #01 - Gaudin-Meloy: S = 0.0099048
+  #02 - RRB: S = 0.0099654
+  #03 - Sigmoid: S = 0.0206130
+  #04 - Log-normal: S = 0.0209400
+  #05 - GGS: S = 0.0775309
+
+Ranking based on R-squared (not trustworthy). Highest value is better.
+
+  #01 - RRB: R-squared = 0.9990910
+  #02 - Gaudin-Meloy: R-squared = 0.9990816
+  #03 - Log-normal: R-squared = 0.9949635
+  #04 - Sigmoid: R-squared = 0.9943663
+  #05 - GGS: R-squared = 0.9412942

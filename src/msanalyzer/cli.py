@@ -5,7 +5,7 @@ import logging
 import os
 import sys
 import time
-from typing import List
+from typing import List, Optional
 
 import matplotlib.pyplot as plt
 from rich.console import Console
@@ -21,9 +21,16 @@ logger = logging.getLogger("msanalyzer")
 
 fig: plt.figure = None
 
-models_figs: dict = {}
+models_figs: dict = {}  # type: ignore
 
 console = Console()
+
+list_of_diameterchoices = {
+    "geo": msreport.DiameterMeanType.geometric,
+    "ari": msreport.DiameterMeanType.arithmetic,
+}
+
+choices_keys = list(list_of_diameterchoices.keys())
 
 
 class customTimeElapsedColumn(ProgressColumn):
@@ -42,12 +49,7 @@ class customTimeRemainingColumn(ProgressColumn):
         return Text(f"{remaining:4.1f}s", style="progress.elapsed")
 
 
-def _real_main(_args: List[str] = None) -> None:
-
-    start_time = time.time()
-
-    global models_figs
-
+def get_args(_args: Optional[List[str]] = None) -> argparse.Namespace:
     version_message = (
         "MasterSizerReport "
         + msreport.MasterSizerReport.getVersion()
@@ -68,13 +70,6 @@ def _real_main(_args: List[str] = None) -> None:
     parser = argparse.ArgumentParser(
         description=desc, formatter_class=argparse.RawTextHelpFormatter
     )
-
-    list_of_diameterchoices = {
-        "geo": msreport.DiameterMeanType.geometric,
-        "ari": msreport.DiameterMeanType.arithmetic,
-    }
-
-    choices_keys = list(list_of_diameterchoices.keys())
 
     # CLI options/flags
     parser.add_argument("xps", nargs="?", default="ms_input.xps", help="XPS file")
@@ -174,7 +169,16 @@ def _real_main(_args: List[str] = None) -> None:
 
     parser.add_argument("-v", "--version", action="version", version=version_message)
 
-    args = parser.parse_args(args=_args)
+    return parser.parse_args(args=_args)
+
+
+def _real_main(_args: Optional[List[str]] = None) -> None:
+
+    start_time = time.time()
+
+    global models_figs
+
+    args = get_args(_args)
 
     level = logging.INFO if args.info else logging.WARNING
 
@@ -377,7 +381,7 @@ def _real_main(_args: List[str] = None) -> None:
     logger.info("Program finished in {:.3f} seconds".format(time.time() - start_time))
 
 
-def main(_args: List[str] = None) -> None:
+def main(_args: Optional[List[str]] = None) -> None:
     try:
         _real_main(_args=_args)
     except Exception as e:

@@ -1,0 +1,35 @@
++----------------------------------------------------------------------------------------------+
+| msanalyzer 3.7.8                                                                             |
+|                                                                                              |
+| Author: Marcus Bruno Fernandes Silva                                                         |
+| email: marcusbfs@gmail.com                                                                   |
+|                                                                                              |
+| file analyzed: "D:\Desktop\workspace\msanalyzer\input_examples\01_dry_coke_2500rpm_U0T0.xps" |
+| Date: 28-May-2021                                                                            |
++----------------------------------------------------------------------------------------------+
+
+Sigmoid model
+=============
+
+X(d) = 1 / (1 + (D50/d)^m)
+
+Parameters: 
+            D50 = 55.1145582026    std. dev. = 1.0663121761
+            m = 1.4411213043    std. dev. = 0.0360475082
+
+Sauter diameter expression: Not available
+Sauter diameter mean: dps = 18.8166511107
+
+D05 = 7.1438766562
+D10 = 11.9981290436
+D25 = 25.7152013700
+D50 = 63.3490630343
+D75 = 118.1252474817
+D90 = 253.1740169505
+D95 = 425.2053432659
+
+Standard error of the regression (S) = 0.0206129925
+NOTE: S must be <= 2.5 to produce a sufficiently narrow 95% prediction interval.
+
+R-squared = 0.9943662626
+NOTE: R-squared is not trustworthy for nonlinear regression

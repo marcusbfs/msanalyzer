@@ -1,0 +1,35 @@
++----------------------------------------------------------------------------------------------+
+| msanalyzer 3.7.8                                                                             |
+|                                                                                              |
+| Author: Marcus Bruno Fernandes Silva                                                         |
+| email: marcusbfs@gmail.com                                                                   |
+|                                                                                              |
+| file analyzed: "D:\Desktop\workspace\msanalyzer\input_examples\01_dry_coke_2500rpm_U0T0.xps" |
+| Date: 28-May-2021                                                                            |
++----------------------------------------------------------------------------------------------+
+
+RRB model
+=========
+
+X(d) = 1 - exp(-(d/D63)^n)
+
+Parameters: 
+            D63 = 87.5171224616    std. dev. = 0.6983426178
+            n = 1.0113310817    std. dev. = 0.0096541619
+
+Sauter diameter expression: dps = D63/gamma(1 - 1/n) for n > 1
+Sauter diameter mean: dps = 0.9868135763
+
+D05 = 4.6409433537
+D10 = 9.4562938247
+D25 = 25.5310242460
+D50 = 70.0594967470
+D75 = 120.8812994490
+D90 = 199.6413086226
+D95 = 258.9746339704
+
+Standard error of the regression (S) = 0.0099653865
+NOTE: S must be <= 2.5 to produce a sufficiently narrow 95% prediction interval.
+
+R-squared = 0.9990909617
+NOTE: R-squared is not trustworthy for nonlinear regression

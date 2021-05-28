@@ -1,0 +1,35 @@
++----------------------------------------------------------------------------------------------+
+| msanalyzer 3.7.8                                                                             |
+|                                                                                              |
+| Author: Marcus Bruno Fernandes Silva                                                         |
+| email: marcusbfs@gmail.com                                                                   |
+|                                                                                              |
+| file analyzed: "D:\Desktop\workspace\msanalyzer\input_examples\01_dry_coke_2500rpm_U0T0.xps" |
+| Date: 28-May-2021                                                                            |
++----------------------------------------------------------------------------------------------+
+
+GGS model
+=========
+
+X(d) = (d/Dmax)^m
+
+Parameters: 
+            Dmax = 334.3633283627    std. dev. = 18.0124020744
+            m = 0.4855749417    std. dev. = 0.0234964692
+
+Sauter diameter expression: dps = k*(m - 1)/m for m> 1
+Sauter diameter mean: dps = 0.0000000000
+
+D05 = 0.6996145048
+D10 = nan
+D25 = 19.2454317175
+D50 = 97.6152876198
+D75 = 184.8919545024
+D90 = 269.1441888417
+D95 = 300.8446639735
+
+Standard error of the regression (S) = 0.0775309167
+NOTE: S must be <= 2.5 to produce a sufficiently narrow 95% prediction interval.
+
+R-squared = 0.9412942266
+NOTE: R-squared is not trustworthy for nonlinear regression
