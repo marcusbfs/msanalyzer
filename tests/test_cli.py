@@ -6,12 +6,19 @@ import pytest
 
 from . import CURRENT_DIR, RESOURCES_DIR, get_file_content_from_line
 
-BASENAME_dryc = "01_dry_coke_2500rpm_U0T0"
+BASENAME_dryc_01 = "01_dry_coke_2500rpm_U0T0"
+file_dryc_01: Path = RESOURCES_DIR / (BASENAME_dryc_01 + ".xps")
+outdir_01: Path = CURRENT_DIR / (BASENAME_dryc_01 + "_out_test")
+expected_outdir_01: Path = RESOURCES_DIR / (BASENAME_dryc_01 + "_output")
 
-file_dryc: Path = RESOURCES_DIR / (BASENAME_dryc + ".xps")
+BASENAME_dryc_02 = "02_dry_coke_2500rpm_U10T180"
+file_dryc_02: Path = RESOURCES_DIR / (BASENAME_dryc_02 + ".xps")
 
-outdir: Path = CURRENT_DIR / (BASENAME_dryc + "_out_test")
-expected_outdir: Path = RESOURCES_DIR / (BASENAME_dryc + "_output")
+outdir_02: Path = CURRENT_DIR / (BASENAME_dryc_02 + "_out_test")
+expected_outdir_02: Path = RESOURCES_DIR / (BASENAME_dryc_02 + "_output")
+
+dir_multi_01_02: Path = CURRENT_DIR / "multi_01_02_dryc_output_outtest"
+dir_expected_multi_01_02: Path = RESOURCES_DIR / "multi_01_02_dryc_output"
 
 
 headers_line_ignore = 10
@@ -19,17 +26,41 @@ headers_line_ignore = 10
 
 @pytest.fixture(scope="session", autouse=True)
 def create_out_dir_for_01dryc() -> None:  # type: ignore
-    if not outdir.is_dir():
-        shutil.rmtree(outdir, ignore_errors=True)
+    if not outdir_01.is_dir():
+        shutil.rmtree(outdir_01, ignore_errors=True)
 
-    cmd = ["msanalyzer", str(file_dryc), "--output_dir", str(outdir)]
+    cmd = ["msanalyzer", str(file_dryc_01), "--output_dir", str(outdir_01)]
     output = subprocess.call(cmd, shell=True)
-    assert outdir.is_dir()
+    assert outdir_01.is_dir()
 
     yield
 
-    shutil.rmtree(outdir, ignore_errors=True)
-    assert not outdir.is_dir()
+    shutil.rmtree(outdir_01, ignore_errors=True)
+    assert not outdir_01.is_dir()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def create_out_dir_for_multi_01_02() -> None:  # type: ignore
+    if not dir_multi_01_02.is_dir():
+        shutil.rmtree(dir_multi_01_02, ignore_errors=True)
+
+    cmd = [
+        "msanalyzer",
+        "-M",
+        str(file_dryc_01),
+        "-M",
+        str(file_dryc_02),
+        "--output_dir",
+        str(dir_multi_01_02),
+    ]
+
+    output = subprocess.call(cmd, shell=True)
+    assert dir_multi_01_02.is_dir()
+
+    yield
+
+    shutil.rmtree(dir_multi_01_02, ignore_errors=True)
+    assert not dir_multi_01_02.is_dir()
 
 
 @pytest.mark.parametrize(
@@ -67,11 +98,20 @@ def create_out_dir_for_01dryc() -> None:  # type: ignore
 )
 def test_single_file_full_output(filename: str, lines_to_ignore: int) -> None:
 
-    assert Path(outdir / filename).is_file()
+    assert Path(outdir_01 / filename).is_file()
 
-    content_actual = get_file_content_from_line(outdir / filename, lines_to_ignore)
+    content_actual = get_file_content_from_line(outdir_01 / filename, lines_to_ignore)
     content_expected = get_file_content_from_line(
-        expected_outdir / filename, lines_to_ignore
+        expected_outdir_01 / filename, lines_to_ignore
     )
 
     assert content_actual == content_expected
+
+
+def test_multiles_full_output() -> None:
+    expected_svgs = [
+        f for f in dir_expected_multi_01_02.iterdir() if f.suffix.lower() == ".svg"
+    ]
+    computed_svgs = [f for f in dir_multi_01_02.iterdir() if f.suffix.lower() == ".svg"]
+
+    assert len(expected_svgs) == len(computed_svgs)
