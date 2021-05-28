@@ -26,7 +26,7 @@ nox.options.sessions = (
 
 all_test = ["tests"]
 all_src = ["src"]
-all_scripts = ["noxfile.py"]
+all_scripts = ["noxfile.py", "scripts"]
 all_code = all_src + all_scripts + all_test
 
 

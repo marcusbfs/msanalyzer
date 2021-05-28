@@ -9,18 +9,14 @@ def shutil_copy_verbose(src: Path, dst: Path) -> None:
 
 
 cur_folder = Path(__file__).parent.absolute()
-repo_folder = cur_folder.parent.absolute()
-src_folder = repo_folder / "msanalyzer"
+repo_folder = cur_folder.parent.parent.absolute()
+src_folder = repo_folder / "src" / "msanalyzer"
 
 python_exe = sys.executable
 main_py: Path = cur_folder / "msanalyzer_cli.py"
 
 main_gui_py: Path = Path("msanalyzer_gui.py")
-hidden_matplotlib = [
-    "matplotlib.backends.backend_svg",
-    "matplotlib.backends.backend_tkagg",
-]
-hidden_imports = ["msanalyzer"] + hidden_matplotlib
+hidden_imports = ["msanalyzer"]
 
 matplotlibrc: Path = src_folder / "matplotlibrc"
 dist_folder: Path = cur_folder / "dist"
@@ -28,6 +24,7 @@ build_folder: Path = cur_folder / "build"
 
 cmd_common: list[str] = [
     python_exe,
+    "-O",
     "-m",
     "PyInstaller",
     "--clean",
