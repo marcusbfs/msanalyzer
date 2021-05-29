@@ -1,6 +1,7 @@
 import shutil
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from msanalyzer import cli
@@ -8,8 +9,8 @@ from msanalyzer import cli
 from . import (
     CURRENT_DIR,
     RESOURCES_DIR,
+    extract_numbers_from_str,
     get_file_content_from_line,
-    ignore_decimals_in_str,
 )
 
 BASENAME_dryc_01 = "01_dry_coke_2500rpm_U0T0"
@@ -124,9 +125,10 @@ def test_single_file_full_output_geometric_mean(
         expected_outdir_01_geo / filename, lines_to_ignore
     )
 
-    assert ignore_decimals_in_str(content_actual) == ignore_decimals_in_str(
-        content_expected
-    )
+    actual_numbers = np.array(extract_numbers_from_str(content_actual))
+    expected_numbers = np.array(extract_numbers_from_str(content_expected))
+
+    assert np.allclose(actual_numbers, expected_numbers)
 
 
 @pytest.mark.parametrize(
@@ -138,7 +140,6 @@ def test_single_file_full_output_geometric_mean(
         ("RRB_output_model_parameters.txt", headers_line_ignore),
         ("Sigmoid_output_model_parameters.txt", headers_line_ignore),
         ("Log-normal_output_model_parameters.txt", headers_line_ignore),
-        ("Gaudin-Meloy_output_model_parameters.txt", headers_line_ignore),
     ],
 )
 def test_single_file_full_output_arithmetic_mean(
@@ -154,9 +155,10 @@ def test_single_file_full_output_arithmetic_mean(
         expected_outdir_01_ari / filename, lines_to_ignore
     )
 
-    assert ignore_decimals_in_str(content_actual) == ignore_decimals_in_str(
-        content_expected
-    )
+    actual_numbers = np.array(extract_numbers_from_str(content_actual))
+    expected_numbers = np.array(extract_numbers_from_str(content_expected))
+
+    assert np.allclose(actual_numbers, expected_numbers)
 
 
 def test_multiles_full_output() -> None:
