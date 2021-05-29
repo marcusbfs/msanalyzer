@@ -16,6 +16,6 @@ def get_file_content_from_line(file: Path, line: int) -> str:
     return content
 
 
-def ignore_decimals_in_str(content: str, up_to: int = 2) -> str:
+def ignore_decimals_in_str(content: str, up_to: int = 5) -> str:
     re_pattern = r"(\d+\.\d{" + str(up_to) + r"})\d*"
     return re.sub(re_pattern, r"\1", content)
