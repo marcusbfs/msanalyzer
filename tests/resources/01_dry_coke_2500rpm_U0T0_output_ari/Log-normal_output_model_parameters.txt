@@ -1,0 +1,35 @@
++----------------------------------------------------------------------------------------------+
+| msanalyzer 3.7.8                                                                             |
+|                                                                                              |
+| Author: Marcus Bruno Fernandes Silva                                                         |
+| email: marcusbfs@gmail.com                                                                   |
+|                                                                                              |
+| file analyzed: "D:\Desktop\workspace\msanalyzer\input_examples\01_dry_coke_2500rpm_U0T0.xps" |
+| Date: 29-May-2021                                                                            |
++----------------------------------------------------------------------------------------------+
+
+Log-normal model
+================
+
+X(d) = 0.5*[1 + erf(Z)]; Z = ln(d/Dm) / [(sqrt(2) * ln(delta) ) ]
+
+Parameters: 
+            Dm = 54.8031253788    std. dev. = 1.0009882879
+            delta = 3.2286799278    std. dev. = 0.0843045396
+
+Sauter diameter expression: dps = Dm*exp(-0.5 * ln(delta)^2)
+Sauter diameter mean: dps = 27.5738880870
+
+D05 = 7.9713837951
+D10 = 12.2029139549
+D25 = 24.8584007861
+D50 = 63.4994689040
+D75 = 120.8196205830
+D90 = 246.1201121624
+D95 = 376.7705367690
+
+Standard error of the regression (S) = 0.0209400423
+NOTE: S must be <= 2.5 to produce a sufficiently narrow 95% prediction interval.
+
+R-squared = 0.9949634602
+NOTE: R-squared is not trustworthy for nonlinear regression

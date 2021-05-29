@@ -1,17 +1,25 @@
 import shutil
 from pathlib import Path
-from typing import List
 
 import pytest
 
 from msanalyzer import cli
 
-from . import CURRENT_DIR, RESOURCES_DIR, get_file_content_from_line
+from . import (
+    CURRENT_DIR,
+    RESOURCES_DIR,
+    get_file_content_from_line,
+    ignore_decimals_in_str,
+)
 
 BASENAME_dryc_01 = "01_dry_coke_2500rpm_U0T0"
 file_dryc_01: Path = RESOURCES_DIR / (BASENAME_dryc_01 + ".xps")
-outdir_01: Path = CURRENT_DIR / (BASENAME_dryc_01 + "_out_test")
-expected_outdir_01: Path = RESOURCES_DIR / (BASENAME_dryc_01 + "_output")
+
+outdir_01_geo: Path = CURRENT_DIR / (BASENAME_dryc_01 + "_out_test_geo")
+expected_outdir_01_geo: Path = RESOURCES_DIR / (BASENAME_dryc_01 + "_output_geo")
+
+outdir_01_ari: Path = CURRENT_DIR / (BASENAME_dryc_01 + "_out_test_ari")
+expected_outdir_01_ari: Path = RESOURCES_DIR / (BASENAME_dryc_01 + "_output_ari")
 
 BASENAME_dryc_02 = "02_dry_coke_2500rpm_U10T180"
 file_dryc_02: Path = RESOURCES_DIR / (BASENAME_dryc_02 + ".xps")
@@ -27,18 +35,45 @@ headers_line_ignore = 10
 
 
 @pytest.fixture(scope="session", autouse=True)
-def create_out_dir_for_01dryc() -> None:  # type: ignore
-    if not outdir_01.is_dir():
-        shutil.rmtree(outdir_01, ignore_errors=True)
+def create_out_dir_for_01dryc_geometric_mean() -> None:  # type: ignore
+    if not outdir_01_geo.is_dir():
+        shutil.rmtree(outdir_01_geo, ignore_errors=True)
 
-    cmd = [str(file_dryc_01), "--output_dir", str(outdir_01)]
+    cmd = [
+        str(file_dryc_01),
+        "--output_dir",
+        str(outdir_01_geo),
+        "--diameter_mean",
+        "geo",
+    ]
     cli.main(cmd)
-    assert outdir_01.is_dir()
+    assert outdir_01_geo.is_dir()
 
     yield
 
-    shutil.rmtree(outdir_01, ignore_errors=True)
-    assert not outdir_01.is_dir()
+    shutil.rmtree(outdir_01_geo, ignore_errors=True)
+    assert not outdir_01_geo.is_dir()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def create_out_dir_for_01dryc_arithmetic_mean() -> None:  # type: ignore
+    if not outdir_01_ari.is_dir():
+        shutil.rmtree(outdir_01_ari, ignore_errors=True)
+
+    cmd = [
+        str(file_dryc_01),
+        "--output_dir",
+        str(outdir_01_ari),
+        "--diameter_mean",
+        "ari",
+    ]
+    cli.main(cmd)
+    assert outdir_01_ari.is_dir()
+
+    yield
+
+    shutil.rmtree(outdir_01_ari, ignore_errors=True)
+    assert not outdir_01_ari.is_dir()
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -65,31 +100,63 @@ def create_out_dir_for_multi_01_02() -> None:  # type: ignore
 
 
 @pytest.mark.parametrize(
-    "filename, lines_to_ignore, ignore",
+    "filename, lines_to_ignore",
     [
-        ("output_curves_data.txt", headers_line_ignore, []),
-        ("best_models_ranking.txt", headers_line_ignore, []),
-        ("GGS_output_model_parameters.txt", headers_line_ignore, []),
-        ("RRB_output_model_parameters.txt", headers_line_ignore, []),
-        ("Sigmoid_output_model_parameters.txt", headers_line_ignore, []),
-        ("Log-normal_output_model_parameters.txt", headers_line_ignore, [17]),
-        ("Gaudin-Meloy_output_model_parameters.txt", headers_line_ignore, [17]),
+        ("output_curves_data.txt", headers_line_ignore),
+        ("best_models_ranking.txt", headers_line_ignore),
+        ("GGS_output_model_parameters.txt", headers_line_ignore),
+        ("RRB_output_model_parameters.txt", headers_line_ignore),
+        ("Sigmoid_output_model_parameters.txt", headers_line_ignore),
+        ("Log-normal_output_model_parameters.txt", headers_line_ignore),
+        ("Gaudin-Meloy_output_model_parameters.txt", headers_line_ignore),
     ],
 )
-def test_single_file_full_output(
-    filename: str, lines_to_ignore: int, ignore: List[int]
+def test_single_file_full_output_geometric_mean(
+    filename: str, lines_to_ignore: int
 ) -> None:
 
-    assert Path(outdir_01 / filename).is_file()
+    assert Path(outdir_01_geo / filename).is_file()
 
     content_actual = get_file_content_from_line(
-        outdir_01 / filename, lines_to_ignore, ignore_lines=ignore
+        outdir_01_geo / filename, lines_to_ignore
     )
     content_expected = get_file_content_from_line(
-        expected_outdir_01 / filename, lines_to_ignore, ignore_lines=ignore
+        expected_outdir_01_geo / filename, lines_to_ignore
     )
 
-    assert content_actual == content_expected
+    assert ignore_decimals_in_str(content_actual) == ignore_decimals_in_str(
+        content_expected
+    )
+
+
+@pytest.mark.parametrize(
+    "filename, lines_to_ignore",
+    [
+        ("output_curves_data.txt", headers_line_ignore),
+        ("best_models_ranking.txt", headers_line_ignore),
+        ("GGS_output_model_parameters.txt", headers_line_ignore),
+        ("RRB_output_model_parameters.txt", headers_line_ignore),
+        ("Sigmoid_output_model_parameters.txt", headers_line_ignore),
+        ("Log-normal_output_model_parameters.txt", headers_line_ignore),
+        ("Gaudin-Meloy_output_model_parameters.txt", headers_line_ignore),
+    ],
+)
+def test_single_file_full_output_arithmetic_mean(
+    filename: str, lines_to_ignore: int
+) -> None:
+
+    assert Path(outdir_01_ari / filename).is_file()
+
+    content_actual = get_file_content_from_line(
+        outdir_01_ari / filename, lines_to_ignore
+    )
+    content_expected = get_file_content_from_line(
+        expected_outdir_01_ari / filename, lines_to_ignore
+    )
+
+    assert ignore_decimals_in_str(content_actual) == ignore_decimals_in_str(
+        content_expected
+    )
 
 
 def test_multiles_full_output() -> None:
