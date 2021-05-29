@@ -1,5 +1,6 @@
 import shutil
 from pathlib import Path
+from typing import List
 
 import pytest
 
@@ -64,45 +65,28 @@ def create_out_dir_for_multi_01_02() -> None:  # type: ignore
 
 
 @pytest.mark.parametrize(
-    "filename, lines_to_ignore",
+    "filename, lines_to_ignore, ignore",
     [
-        (
-            "output_curves_data.txt",
-            headers_line_ignore,
-        ),
-        (
-            "best_models_ranking.txt",
-            headers_line_ignore,
-        ),
-        (
-            "GGS_output_model_parameters.txt",
-            headers_line_ignore,
-        ),
-        (
-            "RRB_output_model_parameters.txt",
-            headers_line_ignore,
-        ),
-        (
-            "Sigmoid_output_model_parameters.txt",
-            headers_line_ignore,
-        ),
-        (
-            "Log-normal_output_model_parameters.txt",
-            headers_line_ignore,
-        ),
-        (
-            "Gaudin-Meloy_output_model_parameters.txt",
-            headers_line_ignore,
-        ),
+        ("output_curves_data.txt", headers_line_ignore, []),
+        ("best_models_ranking.txt", headers_line_ignore, []),
+        ("GGS_output_model_parameters.txt", headers_line_ignore, []),
+        ("RRB_output_model_parameters.txt", headers_line_ignore, []),
+        ("Sigmoid_output_model_parameters.txt", headers_line_ignore, []),
+        ("Log-normal_output_model_parameters.txt", headers_line_ignore, [17]),
+        ("Gaudin-Meloy_output_model_parameters.txt", headers_line_ignore, [17]),
     ],
 )
-def test_single_file_full_output(filename: str, lines_to_ignore: int) -> None:
+def test_single_file_full_output(
+    filename: str, lines_to_ignore: int, ignore: List[int]
+) -> None:
 
     assert Path(outdir_01 / filename).is_file()
 
-    content_actual = get_file_content_from_line(outdir_01 / filename, lines_to_ignore)
+    content_actual = get_file_content_from_line(
+        outdir_01 / filename, lines_to_ignore, ignore_lines=ignore
+    )
     content_expected = get_file_content_from_line(
-        expected_outdir_01 / filename, lines_to_ignore
+        expected_outdir_01 / filename, lines_to_ignore, ignore_lines=ignore
     )
 
     assert content_actual == content_expected
