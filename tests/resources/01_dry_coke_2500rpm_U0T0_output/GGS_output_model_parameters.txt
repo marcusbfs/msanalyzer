@@ -14,7 +14,7 @@ GGS model
 X(d) = (d/Dmax)^m
 
 Parameters: 
-            Dmax = 334.3633283627    std. dev. = 18.0124020744
+            Dmax = 334.3633280791    std. dev. = 18.0124020971
             m = 0.4855749417    std. dev. = 0.0234964692
 
 Sauter diameter expression: dps = k*(m - 1)/m for m> 1
