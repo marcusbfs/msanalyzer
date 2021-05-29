@@ -1,8 +1,9 @@
 import shutil
-import subprocess
 from pathlib import Path
 
 import pytest
+
+from msanalyzer import cli
 
 from . import CURRENT_DIR, RESOURCES_DIR, get_file_content_from_line
 
@@ -29,8 +30,8 @@ def create_out_dir_for_01dryc() -> None:  # type: ignore
     if not outdir_01.is_dir():
         shutil.rmtree(outdir_01, ignore_errors=True)
 
-    cmd = ["msanalyzer", str(file_dryc_01), "--output_dir", str(outdir_01)]
-    output = subprocess.call(cmd, shell=True)
+    cmd = [str(file_dryc_01), "--output_dir", str(outdir_01)]
+    cli.main(cmd)
     assert outdir_01.is_dir()
 
     yield
@@ -45,7 +46,6 @@ def create_out_dir_for_multi_01_02() -> None:  # type: ignore
         shutil.rmtree(dir_multi_01_02, ignore_errors=True)
 
     cmd = [
-        "msanalyzer",
         "-M",
         str(file_dryc_01),
         "-M",
@@ -54,7 +54,7 @@ def create_out_dir_for_multi_01_02() -> None:  # type: ignore
         str(dir_multi_01_02),
     ]
 
-    output = subprocess.call(cmd, shell=True)
+    cli.main(_args=cmd)
     assert dir_multi_01_02.is_dir()
 
     yield
