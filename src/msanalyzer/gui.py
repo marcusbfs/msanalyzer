@@ -56,7 +56,7 @@ def main() -> None:
         try:
             with open(settings_file, "r") as f:
                 settings = json.load(f)
-        except Exception as e:
+        except Exception:
             print("Creating default config file...")
             settings = default_settings
             save_settings(settings_file, settings)
