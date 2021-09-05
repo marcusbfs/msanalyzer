@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import time
+from pathlib import Path
 from typing import List, Optional
 
 import matplotlib.pyplot as plt
@@ -13,6 +14,7 @@ from rich.progress import BarColumn, Progress, ProgressColumn, SpinnerColumn, Ta
 from rich.table import Table
 from rich.text import Text
 
+from . import FeedCurve
 from . import MasterSizerReport as msreport
 from . import MultipleFilesReport as multireport
 
@@ -32,6 +34,16 @@ list_of_diameterchoices = {
 
 choices_keys = list(list_of_diameterchoices.keys())
 
+version_message = (
+    "MasterSizerReport "
+    + msreport.MasterSizerReport.getVersion()
+    + os.linesep
+    + os.linesep
+    + "Author: {}".format(msreport.__author__)
+    + os.linesep
+    + "email: {}".format(msreport.__email__)
+)
+
 
 class customTimeElapsedColumn(ProgressColumn):
     def render(self, task: Task) -> Text:
@@ -50,16 +62,6 @@ class customTimeRemainingColumn(ProgressColumn):
 
 
 def get_args(_args: Optional[List[str]] = None) -> argparse.Namespace:
-    version_message = (
-        "MasterSizerReport "
-        + msreport.MasterSizerReport.getVersion()
-        + os.linesep
-        + os.linesep
-        + "Author: {}".format(msreport.__author__)
-        + os.linesep
-        + "email: {}".format(msreport.__email__)
-    )
-
     desc = (
         version_message
         + os.linesep
@@ -71,9 +73,55 @@ def get_args(_args: Optional[List[str]] = None) -> argparse.Namespace:
         description=desc, formatter_class=argparse.RawTextHelpFormatter
     )
 
+    parser = add_common_args(parser)
+
     # CLI options/flags
     parser.add_argument("xps", nargs="?", default="ms_input.xps", help="XPS file")
 
+    parser.add_argument(
+        "-M",
+        "--multiple-files",
+        dest="multiple_files",
+        nargs="+",
+        help="plot multiple data",
+    )
+
+    parser.add_argument(
+        "--multi-labels",
+        dest="multiple_labels",
+        nargs="+",
+        help="multiple data plot labels",
+    )
+
+    parser.add_argument(
+        "--multi-no-labels",
+        dest="multiple_no_labels",
+        default=False,
+        help="do not plot labels on multiple plots",
+        action="store_true",
+    )
+
+    parser.add_argument(
+        "--custom-plot-args",
+        dest="custom_plot_args",
+        nargs=1,
+        help="custom matplotlib args",
+        default=[{}],
+        type=json.loads,
+    )
+
+    parser.add_argument(
+        "--feed",
+        dest="feed",
+        default=False,
+        action="store_true",
+        help="Generates feed data from under and over files",
+    )
+
+    return parser.parse_args(args=_args)
+
+
+def add_common_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument(
         "-o",
         "--output_basename",
@@ -89,7 +137,6 @@ def get_args(_args: Optional[List[str]] = None) -> argparse.Namespace:
         dest="output_dir",
         help="name of output directory",
     )
-
     parser.add_argument(
         "-m",
         "--diameter_mean",
@@ -128,38 +175,6 @@ def get_args(_args: Optional[List[str]] = None) -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "-M",
-        "--multiple-files",
-        dest="multiple_files",
-        nargs="+",
-        help="plot multiple data",
-    )
-
-    parser.add_argument(
-        "--multi-labels",
-        dest="multiple_labels",
-        nargs="+",
-        help="multiple data plot labels",
-    )
-
-    parser.add_argument(
-        "--multi-no-labels",
-        dest="multiple_no_labels",
-        default=False,
-        help="do not plot labels on multiple plots",
-        action="store_true",
-    )
-
-    parser.add_argument(
-        "--custom-plot-args",
-        dest="custom_plot_args",
-        nargs=1,
-        help="custom matplotlib args",
-        default=[{}],
-        type=json.loads,
-    )
-
-    parser.add_argument(
         "--info",
         dest="info",
         default=False,
@@ -168,13 +183,101 @@ def get_args(_args: Optional[List[str]] = None) -> argparse.Namespace:
     )
 
     parser.add_argument("-v", "--version", action="version", version=version_message)
+    return parser
 
-    return parser.parse_args(args=_args)
+
+def feed_parser(args: Optional[List[str]] = None) -> argparse.Namespace:
+
+    parser = argparse.ArgumentParser(
+        description="Generates feed data from under and over files",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+
+    # parser.add_argument("--feed", help="unused option", action="store_true")
+    parser.add_argument("--under", type=str, help="under data file", required=True)
+    parser.add_argument("--over", type=str, help="over data file", required=True)
+    parser.add_argument(
+        "--uw", type=float, help="under mass flow [kg/s]", required=True
+    )
+    parser.add_argument("--ow", type=float, help="over mass flow[kg/s]", required=True)
+    parser.add_argument("--fw", type=float, help="feed mass flow[kg/s]", required=True)
+
+    parser = add_common_args(parser)
+
+    return parser.parse_args(args=args)
+
+
+def feed_subcommand(args: argparse.Namespace) -> None:
+
+    # set logging level
+
+    level = logging.INFO if args.info else logging.WARNING
+    logging.basicConfig(level=level, format="%(asctime)s - %(name)s: %(message)s")
+
+    under_file = Path(args.under)
+    over_file = Path(args.over)
+    output_dir = args.output_dir
+    output_basename = args.output_basename
+
+    config = FeedCurve.Config(
+        mean_type=list_of_diameterchoices[args.meantype[0]],
+        first_zeros=int(args.first_zeros[0]),
+        last_zeros=int(args.last_zeros[0]),
+        log_scale=not args.log_scale,
+        under_mass_flow=float(args.uw),
+        over_mass_flow=float(args.ow),
+        feed_mass_flow=float(args.fw),
+    )
+
+    # calculate
+    feed = FeedCurve.FeedFromUnderAndOver(under_file, over_file, config)
+    feed_reporter = feed.get_feed_reporter()
+
+    feed_reporter.evaluateData()
+    logger.info("Data evaluated")
+    models: msreport.ModelsData = feed_reporter.evaluateModels()
+    logger.info("Models evaluated")
+    time.sleep(0.2)
+
+    # name of outputfiles
+    output_basename + "curves"
+    curves_data = output_basename + "curves_data.txt"
+    PSD_model = output_basename + "model"
+    PSD_data = output_basename + "model_parameters"
+    excel_data = output_basename + "curve_data"
+    best_model_basename = "best_models_ranking"
+
+    feed_reporter.saveModelsFig(output_dir, PSD_model)
+
+    feed_reporter.saveData(output_dir, curves_data)
+    feed_reporter.saveModelsData(output_dir, PSD_data)
+    feed_reporter.saveExcel(output_dir, excel_data)
+
+    logger.info("Results saved")
+
+    logger.info("Analyzing best model")
+    feed_reporter.saveBestModelsRanking(output_dir, best_model_basename)
+
+    print("done! results saved in directory '{}'".format(str(output_dir)))
+    return
 
 
 def _real_main(_args: Optional[List[str]] = None) -> None:
 
     start_time = time.time()
+
+    if _args is None:
+        _args = sys.argv[1:]
+
+    # If feed subcommand, treat it soon
+    if _args and ("feed" in _args or "--feed" in _args):
+        # Remove args
+        t_args = []
+        for a in _args:
+            if not "feed" in a:
+                t_args.append(a)
+        feed_subcommand(feed_parser(t_args))
+        return
 
     global models_figs
 

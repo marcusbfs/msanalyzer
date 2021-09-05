@@ -487,6 +487,9 @@ class MasterSizerReport:
     def getAritmeticMeanXvalues(self) -> np.ndarray:
         return self.__x_data_geomean
 
+    def getRawXvalues(self) -> np.ndarray:
+        return self.__x_data
+
     def getCumulativeYvalues(self) -> np.ndarray:
         return self.__cumulative_y_vals
 
