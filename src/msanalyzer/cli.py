@@ -208,7 +208,6 @@ def feed_parser(args: Optional[List[str]] = None) -> argparse.Namespace:
 
 
 def feed_subcommand(args: argparse.Namespace) -> None:
-
     # set logging level
 
     level = logging.INFO if args.info else logging.WARNING
@@ -232,12 +231,6 @@ def feed_subcommand(args: argparse.Namespace) -> None:
     # calculate
     feed = FeedCurve.FeedFromUnderAndOver(under_file, over_file, config)
     feed_reporter = feed.get_feed_reporter()
-
-    feed_reporter.evaluateData()
-    logger.info("Data evaluated")
-    models: msreport.ModelsData = feed_reporter.evaluateModels()
-    logger.info("Models evaluated")
-    time.sleep(0.2)
 
     # name of outputfiles
     output_basename + "curves"

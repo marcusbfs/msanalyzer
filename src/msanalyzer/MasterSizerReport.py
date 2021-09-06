@@ -102,6 +102,7 @@ class MasterSizerReport:
     def setXandY(self, x_vals: npt.ArrayLike, y_vals: npt.ArrayLike) -> None:
         self.__x_data = np.array(x_vals)
         self.__y_data = np.array(y_vals)
+        self.__number_of_points = len(self.__y_data)
         assert len(self.__x_data) == len(self.__y_data) + 1
 
     def genCumulativeSizeDistribution(self) -> None:

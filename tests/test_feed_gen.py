@@ -36,9 +36,6 @@ def test_s() -> None:
     )
 
     a = FeedCurve.FeedFromUnderAndOver(file_dryc_01, file_dryc_02, config)
-    fr = a.get_feed_reporter()
-
-    fr.evaluateData()
-    fr.evaluateModels()
+    a.get_feed_reporter()
 
     assert True
