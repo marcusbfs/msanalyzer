@@ -437,18 +437,26 @@ class MasterSizerReport:
         return models
 
     def cutLastNPoints(self, number_of_points: int) -> None:
-        self.__x_data = self.__x_data[:-number_of_points].copy()
-        self.__y_data = self.__y_data[:-number_of_points].copy()
-        self.__number_of_points = len(self.__y_data)
-        logger.info("Cutted the last {} null points".format(number_of_points))
-        logger.info("New length of x: {}".format(len(self.__x_data)))
+        if number_of_points > 0:
+            self.__x_data = self.__x_data[:-number_of_points].copy()
+            self.__y_data = self.__y_data[:-number_of_points].copy()
+            self.__number_of_points = len(self.__y_data)
+            logger.info("Cutted the last {} null points".format(number_of_points))
+            logger.info("New length of x: {}".format(len(self.__x_data)))
+        else:
+            logger.info("No points ned to be cutted")
+            logger.info("length of x: {}".format(len(self.__x_data)))
 
     def cutFirstNPoints(self, number_of_points: int) -> None:
-        self.__x_data = self.__x_data[number_of_points:].copy()
-        self.__y_data = self.__y_data[number_of_points:].copy()
-        self.__number_of_points = len(self.__y_data)
-        logger.info("Cutted the first {} null points".format(number_of_points))
-        logger.info("New length of x: {}".format(len(self.__x_data)))
+        if number_of_points > 0:
+            self.__x_data = self.__x_data[number_of_points:].copy()
+            self.__y_data = self.__y_data[number_of_points:].copy()
+            self.__number_of_points = len(self.__y_data)
+            logger.info("Cutted the first {} null points".format(number_of_points))
+            logger.info("New length of x: {}".format(len(self.__x_data)))
+        else:
+            logger.info("No points ned to be cutted")
+            logger.info("length of x: {}".format(len(self.__x_data)))
 
     def cutLastZeroPoints(
         self, number_of_lefting_zeros: int, tol: float = 1e-10
