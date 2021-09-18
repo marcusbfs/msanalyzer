@@ -334,7 +334,6 @@ def _real_main(_args: Optional[List[str]] = None) -> None:
             reporter.cutLastZeroPoints(number_of_zero_last, tol=1e-8)
             reporter.setLogScale(logscale=log_scale)
             logger.info("Reporter object setted up")
-            time.sleep(0.2)
 
         # calculate
 
@@ -343,7 +342,6 @@ def _real_main(_args: Optional[List[str]] = None) -> None:
         logger.info("Data evaluated")
         models: msreport.ModelsData = reporter.evaluateModels()
         logger.info("Models evaluated")
-        time.sleep(0.2)
 
         # name of outputfiles
         curves = output_basename + "curves"
@@ -434,7 +432,6 @@ def _real_main(_args: Optional[List[str]] = None) -> None:
             extra_field = f"[dim]reading {os.path.basename(f)}"
             progress.update(task, extra=extra_field)
             f_mem.append(io.BytesIO(open(f, "rb").read()))
-            time.sleep(0.25)
             progress.advance(task, 1)
         progress.update(task, extra="")
 
@@ -460,11 +457,9 @@ def _real_main(_args: Optional[List[str]] = None) -> None:
 
         progress.update(task, extra="[dim]size distribution plot")
         fig = multiReporter.sizeDistributionPlot(MultiSizeDistribution_output_file)
-        time.sleep(0.2)
         progress.advance(task, 1)
         progress.update(task, extra="[dim]frequency plot")
         multiReporter.frequencyPlot(MultiFrequency_output_file)
-        time.sleep(0.2)
         progress.advance(task, 1)
 
         for f in f_mem:
