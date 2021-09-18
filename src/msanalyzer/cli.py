@@ -13,6 +13,7 @@ from rich.console import Console
 from rich.progress import BarColumn, Progress, ProgressColumn, SpinnerColumn, Task
 from rich.table import Table
 from rich.text import Text
+import numpy as np
 
 from . import FeedCurve
 from . import MasterSizerReport as msreport
@@ -20,8 +21,7 @@ from . import MultipleFilesReport as multireport
 
 logger = logging.getLogger("msanalyzer")
 
-
-fig: plt.figure = None
+fig = 0
 
 models_figs: dict = {}  # type: ignore
 
@@ -118,6 +118,14 @@ def get_args(_args: Optional[List[str]] = None) -> argparse.Namespace:
         help="Generates feed data from under and over files",
     )
 
+    parser.add_argument(
+        "--d50",
+        dest="d50",
+        default=False,
+        action="store_true",
+        help="Computes d50 from under and over files",
+    )
+
     return parser.parse_args(args=_args)
 
 
@@ -186,25 +194,133 @@ def add_common_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     return parser
 
 
-def feed_parser(args: Optional[List[str]] = None) -> argparse.Namespace:
+def feed_common_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
 
+    # parser.add_argument("--feed", help="unused option", action="store_true")
+    parser.add_argument(
+        "-u", "--under", dest="under", type=str, help="under data file", required=True
+    )
+    parser.add_argument(
+        "-e", "--over", dest="over", type=str, help="over data file", required=True
+    )
+    parser.add_argument(
+        "-U",
+        "--uw",
+        dest="uw",
+        type=float,
+        help="under mass flow [kg/s]",
+        required=True,
+    )
+    parser.add_argument(
+        "-O", "--ow", dest="ow", type=float, help="over mass flow[kg/s]", required=True
+    )
+    # parser.add_argument(
+    #     "-F", "--fw", dest="fw", type=float, help="feed mass flow[kg/s]", required=True
+    # )
+
+    parser = add_common_args(parser)
+
+    return parser
+
+
+def feed_parser(args: Optional[List[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generates feed data from under and over files",
         formatter_class=argparse.RawTextHelpFormatter,
     )
+    parser = feed_common_parser(parser)
+    return parser.parse_args(args)
 
-    # parser.add_argument("--feed", help="unused option", action="store_true")
-    parser.add_argument("--under", type=str, help="under data file", required=True)
-    parser.add_argument("--over", type=str, help="over data file", required=True)
-    parser.add_argument(
-        "--uw", type=float, help="under mass flow [kg/s]", required=True
+
+def d50_parser(args: Optional[List[str]] = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Computes d50 from under and over files",
+        formatter_class=argparse.RawTextHelpFormatter,
     )
-    parser.add_argument("--ow", type=float, help="over mass flow[kg/s]", required=True)
-    parser.add_argument("--fw", type=float, help="feed mass flow[kg/s]", required=True)
+    parser = feed_common_parser(parser)
+    parser.add_argument(
+        "-E",
+        "--efficiency",
+        dest="efficiency",
+        type=float,
+        help="efficiency to be used in calculations",
+        required=True,
+    )
+    return parser.parse_args(args)
 
-    parser = add_common_args(parser)
 
-    return parser.parse_args(args=args)
+def calculate_d50_command(args: argparse.Namespace) -> None:
+    level = logging.INFO if args.info else logging.WARNING
+    logging.basicConfig(level=level, format="%(asctime)s - %(name)s: %(message)s")
+
+    under_file = Path(args.under)
+    over_file = Path(args.over)
+    args.output_dir
+
+    args.output_basename
+
+    efficiency: float = args.efficiency
+
+    config = FeedCurve.Config(
+        mean_type=list_of_diameterchoices[args.meantype[0]],
+        first_zeros=int(args.first_zeros[0]),
+        last_zeros=int(args.last_zeros[0]),
+        log_scale=not args.log_scale,
+        under_mass_flow=float(args.uw),
+        over_mass_flow=float(args.ow),
+        feed_mass_flow=float(args.uw + args.ow),
+    )
+
+    # calculate
+    feed = FeedCurve.FeedFromUnderAndOver(under_file, over_file, config)
+    feed_reporter = feed.get_feed_reporter()
+
+    # Get rrb parameters
+    logging.info("Getting feed RRB parameters")
+    df, nf = feed_reporter.getRRBParameters()
+    logging.info(f"Feed: d = {df}; n = {nf}")
+
+    logging.info("Getting under report")
+    under_reporter = feed.get_under_reporter()
+    du, nu = under_reporter.getRRBParameters()
+
+    # hard coding feed info
+    df = 87.5
+    nf = 1.011
+
+    print("Feed RRB:", df, nf)
+    print("Under RRB:", du, nu)
+
+    def G_fun(d: float) -> float:
+        under_term = np.power(d / du, nu)
+        feed_term = np.power(d / df, nf)
+
+        u = under_term * nu * np.exp(-under_term)
+        f = feed_term * nf * np.exp(-feed_term)
+
+        return efficiency * u / f
+
+    ds = np.linspace(0.01, 150, 1000)
+    gs = G_fun(ds) * 100
+
+    fig, ax = plt.subplots()
+
+    ax.set_ylabel("Efficiência de classificação [%]")
+    ax.set_xlabel("Tamanho [microns]")
+
+    ax.grid()
+
+    if config.log_scale:
+        msreport.MasterSizerReport.formatLogScaleXaxis(ax)
+    ax.set_xlabel("log - Tamanho [microns]")
+
+    ax.plot(
+        ds,
+        gs,
+        linestyle="--",
+    )
+
+    plt.show()
 
 
 def feed_subcommand(args: argparse.Namespace) -> None:
@@ -225,7 +341,7 @@ def feed_subcommand(args: argparse.Namespace) -> None:
         log_scale=not args.log_scale,
         under_mass_flow=float(args.uw),
         over_mass_flow=float(args.ow),
-        feed_mass_flow=float(args.fw),
+        feed_mass_flow=float(args.uw + args.ow),
     )
 
     # calculate
@@ -264,12 +380,22 @@ def _real_main(_args: Optional[List[str]] = None) -> None:
 
     # If feed subcommand, treat it soon
     if _args and ("feed" in _args or "--feed" in _args):
-        # Remove args
+        # Remove --feed arg
         t_args = []
         for a in _args:
             if not "feed" in a:
                 t_args.append(a)
         feed_subcommand(feed_parser(t_args))
+        return
+
+    # Same for --d50 subcommand
+    if _args and ("d50" in _args or "--d50" in _args):
+        # Remove --d50 arg
+        t_args = []
+        for a in _args:
+            if not "d50" in a:
+                t_args.append(a)
+        calculate_d50_command(d50_parser(t_args))
         return
 
     global models_figs

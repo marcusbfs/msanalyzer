@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore", "(?s).*MATPLOTLIBDATA.*", category=UserWarning
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -489,6 +489,16 @@ class MasterSizerReport:
     # Getters
     def getNumberOfPoints(self) -> int:
         return self.__number_of_points
+
+    def getRRBParameters(self) -> Tuple[float, float]:
+        for model in self.__models:
+            model_name = model.getModelName()
+            if model_name.lower() == "rrb":
+                pars = model.getParametersValues()
+                print(pars)
+                return (pars[0], pars[1])
+
+        raise RuntimeError("RRB parameters not found")
 
     def getGeometricMeanXvalues(self) -> np.ndarray:
         return self.__x_data_geomean

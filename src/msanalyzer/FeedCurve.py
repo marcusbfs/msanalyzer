@@ -85,4 +85,19 @@ class FeedFromUnderAndOver:
         )
 
     def get_feed_reporter(self) -> MasterSizerReport:
+        logger.info("Feed reporter requested")
         return self._feed_reporter
+
+    def get_under_reporter(self) -> MasterSizerReport:
+
+        logger.info("Under reporter requested")
+
+        self._under_reporter.cutFirstZeroPoints(self._config.first_zeros, tol=1e-8)
+        self._under_reporter.cutLastZeroPoints(self._config.last_zeros, tol=1e-8)
+
+        logger.info("calculating data")
+        self._under_reporter.evaluateData()
+        logger.info("calculating models")
+        self._under_reporter.evaluateModels()
+
+        return self._under_reporter
