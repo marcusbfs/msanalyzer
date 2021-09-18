@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 from typing import List
 
-__version__ = "3.7.8"
+__version__ = "3.8.0"
 
 CURRENT_DIR: Path = Path(__file__).parent
 RESOURCES_DIR: Path = CURRENT_DIR / "resources"

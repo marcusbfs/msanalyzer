@@ -14,7 +14,7 @@ packages = [
 ]
 readme = "readme.md"
 repository = "https://github.com/marcusbfs/msanalyzer"
-version = "3.7.8"
+version = "3.8.0"
 
 [tool.poetry.dependencies]
 PyMuPDF = "1.18.13"
