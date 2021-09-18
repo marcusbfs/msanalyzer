@@ -196,8 +196,8 @@ class MasterSizerReport:
         # plot
         fig, ax1 = plt.subplots()
         ax2 = plt.twinx()
-        ax1.set_ylabel(u"volume fraction (dX) [-]")
-        ax2.set_ylabel(u"cumulative distribution (X) [-]")
+        ax1.set_ylabel("volume fraction (dX) [-]")
+        ax2.set_ylabel("cumulative distribution (X) [-]")
         ax2.grid()
 
         ax1_color = "#1f77b4"
@@ -224,10 +224,10 @@ class MasterSizerReport:
         )
 
         if self.__log_scale:
-            ax1.set_xlabel(u"log scale - diameter [$\mu m$]")
+            ax1.set_xlabel("log scale - diameter [$\mu m$]")
             self.__format_LogScale_Xaxis(ax1)
         else:
-            ax1.set_xlabel(u"diameter [$\mu m$]")
+            ax1.set_xlabel("diameter [$\mu m$]")
 
         filename = os.path.join(output_dir, base_filename + ".svg")
         plt.savefig(filename, dpi=1200)
@@ -245,7 +245,7 @@ class MasterSizerReport:
             # plot
             fig, ax = plt.subplots()
 
-            ax.set_ylabel(u"Cumulative distribution (X) [-]")
+            ax.set_ylabel("Cumulative distribution (X) [-]")
             ax.grid()
 
             ax.plot(
@@ -266,10 +266,10 @@ class MasterSizerReport:
             ax.legend()
 
             if self.__log_scale:
-                ax.set_xlabel(u"log scale - diameter [$\mu m$]")
+                ax.set_xlabel("log scale - diameter [$\mu m$]")
                 self.__format_LogScale_Xaxis(ax)
             else:
-                ax.set_xlabel(u"diameter [$\mu m$]")
+                ax.set_xlabel("diameter [$\mu m$]")
 
             filename = os.path.join(
                 output_dir, model.getModelName() + "_" + base_filename + ".svg"
@@ -562,7 +562,7 @@ class MasterSizerReport:
         from matplotlib.ticker import ScalarFormatter
 
         xaxis.set_xscale("log")
-        xaxis.set_xlabel(u"log scale - diameter [$\mu m$]")
+        xaxis.set_xlabel("log scale - diameter [$\mu m$]")
         for axis in [xaxis.xaxis, xaxis.yaxis]:
             axis.set_major_formatter(ScalarFormatter())
         return

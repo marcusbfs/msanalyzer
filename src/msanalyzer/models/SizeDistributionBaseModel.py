@@ -57,8 +57,8 @@ class SizeDistributionBaseModel(abc.ABC):
     def evaluate(self, x: np.ndarray, y: np.ndarray) -> None:
         logger.info("Evaluating {} parameters".format(self.getModelName()))
 
-        logger_initial_guesses = "Initial guesses are "
         self.model_par_values = self.getInitialGuesses(x, y)
+        logger_initial_guesses = "Initial guesses are "
         for symb, val in zip(self.model_par_str, self.model_par_values):
             logger_initial_guesses += "{} = {:.7f}; ".format(symb, val)
         logger.info(logger_initial_guesses)
