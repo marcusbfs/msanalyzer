@@ -13,7 +13,6 @@ Best models
 
 Ranking based on S (standard error mean). Lowest value is better.
 
-  #01 - Gaudin-Meloy: S = 0.0099048
   #02 - RRB: S = 0.0099654
   #03 - Sigmoid: S = 0.0206130
   #04 - Log-normal: S = 0.0209400
@@ -22,7 +21,6 @@ Ranking based on S (standard error mean). Lowest value is better.
 Ranking based on R-squared (not trustworthy). Highest value is better.
 
   #01 - RRB: R-squared = 0.9990910
-  #02 - Gaudin-Meloy: R-squared = 0.9990816
   #03 - Log-normal: R-squared = 0.9949635
   #04 - Sigmoid: R-squared = 0.9943663
   #05 - GGS: R-squared = 0.9412942

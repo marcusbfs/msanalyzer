@@ -12,7 +12,7 @@ from .SigmoidSizeDistributionModel import Sigmoid
 
 
 def getPSDModelsList() -> List[PSDBase.SizeDistributionBaseModel]:
-    return [RRB(), GGS(), LogNormal(), Sigmoid(), GaudinMeloy()]
+    return [RRB(), GGS(), LogNormal(), Sigmoid()]
 
 
 m: PSDBase.SizeDistributionBaseModel

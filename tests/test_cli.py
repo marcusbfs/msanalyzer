@@ -109,7 +109,7 @@ def create_out_dir_for_multi_01_02() -> None:  # type: ignore
         ("RRB_output_model_parameters.txt", headers_line_ignore),
         ("Sigmoid_output_model_parameters.txt", headers_line_ignore),
         ("Log-normal_output_model_parameters.txt", headers_line_ignore),
-        ("Gaudin-Meloy_output_model_parameters.txt", headers_line_ignore),
+        # ("Gaudin-Meloy_output_model_parameters.txt", headers_line_ignore),
     ],
 )
 def test_single_file_full_output_geometric_mean(
