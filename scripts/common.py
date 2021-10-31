@@ -1,11 +1,13 @@
 import os
+from pathlib import Path
 
-repo_dir = os.path.abspath("..")
+scripts_dir = Path(__file__).parent.absolute()
+repo_dir = scripts_dir.parent.absolute()
 python_exe = os.path.join(repo_dir, "msanalyzer_venv", "Scripts", "python.exe")
-dist_folder = os.path.join(repo_dir, "scripts", "dist")
+dist_folder = scripts_dir / "dist"
 main_py = os.path.join(repo_dir, "local_api.py")
 # mpl data
-matplotlibrc = os.path.join(repo_dir, "scripts", "matplotlibrc")
+matplotlibrc = scripts_dir / "matplotlibrc"
 mpl_data_dir = os.path.join(
     repo_dir, "msanalyzer_venv", "Lib", "site-packages", "matplotlib", "mpl-data"
 )
